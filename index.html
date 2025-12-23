@@ -3,288 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 數位旅行手札 V5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>福岡行旅 2026 | 和風木質誌 V10</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #FF8C94;
-            --accent: #2D3047;
-            --map-blue: #4285F4;
-            --food-orange: #FF9800;
-            --check-green: #4CAF50;
-            --money-purple: #9C27B0;
-            --sos-red: #F44336;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --wood-dark: #5D4037; 
+            --wood-light: #EFEBE9; 
+            --paper: #FAF9F6; 
+            --accent-green: #8D9977; 
+            --accent-red: #B06B6B; 
+            --accent-blue: #78909C; 
+            --border: #D7CCC8;
+            --shadow: 0 4px 12px rgba(93, 64, 55, 0.08);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Poppins', 'Noto Sans TC', sans-serif;
-            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;
-            color: var(--accent);
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--wood-light);
+            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+            color: var(--wood-dark);
+            margin: 0; padding: 0;
+            line-height: 1.8;
             padding-bottom: 50px;
         }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        .container { max-width: 850px; margin: 0 auto; padding: 15px; }
-
-        /* 頂部狀態欄 */
-        .status-header { text-align: center; margin-bottom: 15px; color: white; }
-        .countdown-bar {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 8px;
-            display: flex;
-            justify-content: space-around;
-            font-size: 0.75rem;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
+        /* 標頭區 */
+        header {
+            max-width: 900px; margin: 0 auto; padding: 30px 20px;
+            text-align: center;
         }
+        h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; margin-bottom: 5px; letter-spacing: 3px; }
+        #weather-info { font-size: 0.85rem; color: #8D8273; }
 
-        /* 導覽列 */
+        /* V5 分頁導覽列 */
         .main-nav {
-            display: flex; background: rgba(255,255,255,0.3);
-            padding: 5px; border-radius: 20px; margin-bottom: 20px;
-            backdrop-filter: blur(10px);
+            max-width: 800px; margin: 0 auto 20px;
+            display: flex; background: rgba(215, 204, 200, 0.3);
+            padding: 5px; border-radius: 8px; border: 1px solid var(--border);
             overflow-x: auto; scrollbar-width: none;
         }
-        .main-tab {
-            flex: 1; min-width: 70px; text-align: center; padding: 10px; border-radius: 15px;
-            cursor: pointer; font-weight: 700; color: #fff; transition: 0.3s; font-size: 0.85rem;
+        .nav-tab {
+            flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px;
+            cursor: pointer; font-weight: 500; color: var(--wood-dark); transition: 0.3s;
+            font-family: 'Noto Serif TC', serif; font-size: 0.9rem;
         }
-        .main-tab.active { background: #fff; color: var(--primary); box-shadow: var(--shadow); }
+        .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
 
+        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
         .content-section { display: none; animation: fadeIn 0.4s ease; }
         .content-section.active { display: block; }
 
-        .info-card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: var(--shadow); margin-bottom: 15px; }
+        /* 行程天數導航 */
+        .day-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 25px; scrollbar-width: none; }
+        .day-tab {
+            cursor: pointer; padding: 6px 15px; background: var(--paper);
+            border: 1px solid var(--border); border-radius: 4px; white-space: nowrap;
+            font-size: 0.8rem; color: #8D8273;
+        }
+        .day-tab.active { background: var(--wood-dark); color: white; }
+
+        /* 時間軸排版 */
+        .timeline-item { display: grid; grid-template-columns: 70px 1fr; margin-bottom: 30px; }
+        .time { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; }
+        .content { 
+            padding-left: 20px; border-left: 1px solid var(--border); position: relative; 
+        }
+        .content::before {
+            content: ''; position: absolute; left: -4px; top: 10px;
+            width: 7px; height: 7px; background: var(--border); border-radius: 50%;
+        }
+
+        /* 標籤 */
+        .tag { font-size: 0.65rem; padding: 2px 8px; margin-right: 5px; border-radius: 2px; border: 1px solid; vertical-align: middle; }
+        .tag-trans { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .tag-food { border-color: var(--accent-red); color: var(--accent-red); }
+        .tag-spot { border-color: var(--accent-green); color: var(--accent-green); }
+
+        /* 公積金與表格 */
+        .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
+        .fund-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; margin-bottom: 10px; }
+        .input-wood { width: 100%; padding: 8px; border: 1px solid var(--border); background: transparent; font-size: 0.9rem; border-radius: 4px; }
         
-        /* 公積金樣式 */
-        .fund-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .fund-summary { font-size: 1.2rem; font-weight: 700; color: var(--money-purple); }
-        .table-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; margin-bottom: 8px; align-items: center; }
-        .table-input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.9rem; }
-        .delete-icon { color: #ccc; cursor: pointer; text-align: center; font-weight: bold; }
+        .btn-wood { 
+            width: 100%; padding: 10px; background: var(--wood-dark); color: white; border: none; 
+            border-radius: 4px; cursor: pointer; font-family: 'Noto Serif TC', serif; margin-top: 10px;
+        }
 
-        /* 行程與清單樣式 */
-        .day-pane { display: none; }
-        .day-pane.active { display: block; }
-        .days-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; scrollbar-width: none; }
-        .day-btn { background: rgba(255,255,255,0.5); border: none; padding: 10px 18px; border-radius: 50px; cursor: pointer; white-space: nowrap; font-weight: 600; }
-        .day-btn.active { background: var(--primary); color: #fff; }
-        .timeline-item { display: flex; margin-bottom: 15px; border-left: 2px solid #eee; padding-left: 15px; position: relative; }
-        .timeline-item::before { content: ''; position: absolute; left: -7px; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; }
-        .time-text { font-weight: 700; color: var(--primary); min-width: 60px; margin-right: 10px; }
-        .content-text { font-weight: 600; flex-grow: 1; }
+        .map-link { font-size: 0.8rem; color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid; }
 
-        .btn { padding: 10px 15px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; text-align: center; }
-        .btn-primary { background: var(--primary); color: #fff; width: 100%; }
-        .btn-add-fund { background: #f3e5f5; color: var(--money-purple); width: 100%; margin-top: 5px; }
-        .sos-btn { background: var(--sos-red); color: white; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 10px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
+<header>
+    <h1>福岡行旅 2026</h1>
+    <div id="weather-info">取得天氣中...</div>
+</header>
+
+<div class="main-nav">
+    <div class="nav-tab active" onclick="switchMain('itinerary')">📅 行程</div>
+    <div class="nav-tab" onclick="switchMain('money')">💰 公積金</div>
+    <div class="nav-tab" onclick="switchMain('food')">🍴 美食</div>
+    <div class="nav-tab" onclick="switchMain('check')">✅ 清單</div>
+    <div class="nav-tab" onclick="switchMain('tools')">🔧 工具</div>
+</div>
+
 <div class="container">
-    <header class="status-header">
-        <h2 style="letter-spacing: 2px;">FUKUOKA 2026</h2>
-        <div class="countdown-bar">
-            <div>🛫 出發：<span id="go-countdown">--</span></div>
-            <div>🛬 回國：<span id="back-countdown">--</span></div>
-        </div>
-    </header>
-
-    <nav class="main-nav">
-        <div class="main-tab active" onclick="switchMain('itinerary')">📅 行程</div>
-        <div class="main-tab" onclick="switchMain('food')">🍴 美食</div>
-        <div class="main-tab" onclick="switchMain('money')">💰 公積金</div>
-        <div class="main-tab" onclick="switchMain('checklist')">✅ 清單</div>
-        <div class="main-tab" onclick="switchMain('tools')">🔧 工具</div>
-    </nav>
-
     <section id="itinerary-sec" class="content-section active">
-        <div class="days-nav">
-            <button class="day-btn active" onclick="showDay(1)">Day 1</button>
-            <button class="day-btn" onclick="showDay(2)">Day 2</button>
-            <button class="day-btn" onclick="showDay(3)">Day 3</button>
-            <button class="day-btn" onclick="showDay(4)">Day 4</button>
-            <button class="day-btn" onclick="showDay(5)">Day 5</button>
-            <button class="day-btn" onclick="showDay(6)">Day 6</button>
-            <button class="day-btn" onclick="showDay(7)">Day 7</button>
-        </div>
-        <div class="info-card" id="itinerary-container"></div>
-    </section>
-
-    <section id="food-sec" class="content-section">
-        <div class="info-card">
-            <h3 style="color:var(--food-orange); margin-bottom:10px;">必吃口袋名單</h3>
-            <p style="font-size:0.8rem; margin-bottom:15px;">🥩 燒肉多牛、🍜 Shin-Shin、🥖 明太子法國麵包</p>
-            <a href="https://maps.app.goo.gl/2V9Y8X7W6V5U4T3S27" target="_blank" class="btn btn-primary" style="background:var(--food-orange)">搜尋附近熱門餐廳</a>
-        </div>
+        <div class="day-nav" id="day-tabs"></div>
+        <div id="itinerary-content"></div>
     </section>
 
     <section id="money-sec" class="content-section">
         <div class="info-card">
-            <div class="fund-header">
-                <h3>👥 成員繳費</h3>
-                <div class="fund-summary">總收入 ¥ <span id="total-income">0</span></div>
-            </div>
+            <h3 style="font-family:'Noto Serif TC';">👥 成員繳費 (¥<span id="total-income">0</span>)</h3>
             <div id="members-list"></div>
-            <button class="btn btn-add-fund" onclick="addMember()">+ 新增成員</button>
+            <button class="btn-wood" onclick="addMember()">+ 新增成員</button>
         </div>
-
         <div class="info-card">
-            <div class="fund-header">
-                <h3>💸 消費紀錄</h3>
-                <div class="fund-summary" style="color:var(--sos-red)">餘額 ¥ <span id="fund-balance">0</span></div>
-            </div>
+            <h3 style="font-family:'Noto Serif TC';">💸 公款支出 (餘 ¥<span id="fund-balance">0</span>)</h3>
             <div id="expenses-list"></div>
-            <button class="btn btn-add-fund" onclick="addExpense()" style="background:#fff3e0; color:var(--food-orange)">+ 新增支出</button>
+            <button class="btn-wood" onclick="addExpense()">+ 新增支出</button>
         </div>
     </section>
 
-    <section id="checklist-sec" class="content-section">
+    <section id="food-sec" class="content-section">
         <div class="info-card">
-            <h3 style="color:var(--check-green); margin-bottom:10px;">🛍️ 採買清單</h3>
-            <div id="check-container"></div>
-            <button class="btn btn-primary" onclick="addCheckItem()" style="background:var(--check-green); margin-top:15px;">+ 新增項目</button>
+            <h3 style="color:var(--accent-red); font-family:'Noto Serif TC';">📍 飯店周邊 (天神)</h3>
+            <p>• <b>稚加榮</b>：經典活魚料亭</p>
+            <p>• <b>天婦羅 Hirao</b>：福岡靈魂炸物</p>
+        </div>
+        <div class="info-card">
+            <h3 style="color:var(--accent-red); font-family:'Noto Serif TC';">♨️ 由布院精選</h3>
+            <p>• <b>由布釜飯 心</b>：豐後牛一鍋三吃</p>
+            <p>• <b>湯之岳庵</b>：金鱗湖畔山家料理</p>
+        </div>
+    </section>
+
+    <section id="check-sec" class="content-section">
+        <div class="info-card">
+            <h3 style="font-family:'Noto Serif TC';">✅ 準備清單</h3>
+            <div id="check-list"></div>
+            <button class="btn-wood" onclick="addCheckItem()">+ 新增項目</button>
         </div>
     </section>
 
     <section id="tools-sec" class="content-section">
-        <div class="info-card" style="border: 2px solid var(--sos-red);">
-            <h3 style="color:var(--sos-red); margin-bottom:10px;">🚑 緊急救助</h3>
-            <a href="tel:119" class="sos-btn">🚨 救急車/火警 (119)</a>
-            <a href="tel:0332807911" class="sos-btn" style="background:var(--map-blue);">🇹🇼 駐日代表處</a>
-        </div>
         <div class="info-card">
-            <h3 style="color:var(--primary); margin-bottom:10px;">🏨 飯店：FUKUOKA U-BELL</h3>
-            <a href="https://maps.app.goo.gl/2V9Y8X7W6V5U4T3S28" target="_blank" class="btn btn-primary">開啟導航</a>
+            <h4 style="font-family:'Noto Serif TC';">🛫 航班與住宿</h4>
+            <p style="font-size:0.9rem;">長榮 BR106 / BR105<br>Fukuoka U-BELL Hotel</p>
+            <a href="https://www.google.com/maps/search/FUKUOKA+U-BELL+HOTEL8" class="map-link">導覽至飯店</a>
+        </div>
+        <div class="info-card" style="border-left: 4px solid var(--accent-red);">
+            <h4 style="font-family:'Noto Serif TC'; color:var(--accent-red);">🚨 緊急聯絡</h4>
+            <p style="font-size:0.8rem;">急救：119 | 警察：110</p>
         </div>
     </section>
 </div>
 
 <script>
-    // --- 資料存儲 ---
+    const API_KEY = 'b8f2962f275943c4264c5d1e72c1b21b';
+    const CITY_ID = '1863967';
+
+    // 數據結構
     const defaultTrip = {
-        1: [{t: "11:15", c: "抵達機場"}, {t: "13:00", c: "飯店寄物"}],
-        2: [{t: "09:00", c: "🏨 飯店出發"}, {t: "20:00", c: "🏨 返回飯店"}],
-        3: [{t: "09:30", c: "🏨 飯店出發"}, {t: "18:00", c: "🏨 返回飯店"}],
-        4: [{t: "07:30", c: "🏨 飯店出發"}, {t: "21:00", c: "🏨 返回飯店"}],
-        5: [{t: "10:00", c: "🏨 飯店出發"}, {t: "18:30", c: "🏨 返回飯店"}],
-        6: [{t: "08:30", c: "🏨 飯店出發"}, {t: "20:30", c: "🏨 返回飯店"}],
-        7: [{t: "09:30", c: "飯店退房"}, {t: "17:25", c: "抵達機場"}]
+        1: [
+            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線至天神。", memo: "提示：博多站可先劃位由布院之森。"},
+            {t: "19:00", type: "food", title: "中洲屋台街", desc: "博多特有的路邊攤文化。", memo: "必吃：明太子玉子燒。", map: "Nakasu"}
+        ],
+        2: [
+            {t: "09:30", type: "trans", title: "西鐵福岡站", desc: "前往太宰府與柳川。", memo: "記得購買觀光套票。", map: "Nishitetsu+Fukuoka"}
+        ],
+        4: [
+            {t: "08:00", type: "spot", title: "高千穗一日團", desc: "博多站筑紫口集合。", memo: "重要：請提早10分鐘抵達。", map: "Hakata+Station"}
+        ],
+        6: [
+            {t: "09:24", type: "trans", title: "由布院之森", desc: "搭乘特急前往由布院。", memo: "必吃：車內販售大分縣特產。", map: "Yufuin"}
+        ]
     };
 
-    let tripData = JSON.parse(localStorage.getItem('fuk_trip_v5')) || defaultTrip;
-    let checkData = JSON.parse(localStorage.getItem('fuk_check_v5')) || ["護照、保險", "日幣現金"];
-    let members = JSON.parse(localStorage.getItem('fuk_members')) || [{n: "成員1", a: 10000}];
-    let expenses = JSON.parse(localStorage.getItem('fuk_expenses')) || [{n: "機場交通", a: 1500}];
+    let members = JSON.parse(localStorage.getItem('wood_mem')) || [{n: "成員A", a: 20000}];
+    let expenses = JSON.parse(localStorage.getItem('wood_exp')) || [{n: "交通費", a: 0}];
+    let checkData = JSON.parse(localStorage.getItem('wood_check')) || ["護照", "日幣現金", "保險憑證"];
 
-    // --- 公積金邏輯 ---
-    function renderFund() {
-        const memList = document.getElementById('members-list');
-        memList.innerHTML = members.map((m, i) => `
-            <div class="table-row">
-                <input class="table-input" value="${m.n}" oninput="updateMem(${i},'n',this.value)">
-                <input class="table-input" type="number" value="${m.a}" oninput="updateMem(${i},'a',this.value)">
-                <div class="delete-icon" onclick="removeMem(${i})">×</div>
-            </div>`).join('');
-
-        const expList = document.getElementById('expenses-list');
-        expList.innerHTML = expenses.map((e, i) => `
-            <div class="table-row">
-                <input class="table-input" value="${e.n}" oninput="updateExp(${i},'n',this.value)">
-                <input class="table-input" type="number" value="${e.a}" oninput="updateExp(${i},'a',this.value)">
-                <div class="delete-icon" onclick="removeExp(${i})">×</div>
-            </div>`).join('');
-
-        calculateFund();
-    }
-
-    function calculateFund() {
-        const totalIncome = members.reduce((sum, m) => sum + Number(m.a || 0), 0);
-        const totalExpense = expenses.reduce((sum, e) => sum + Number(e.a || 0), 0);
-        document.getElementById('total-income').innerText = totalIncome.toLocaleString();
-        document.getElementById('fund-balance').innerText = (totalIncome - totalExpense).toLocaleString();
-        localStorage.setItem('fuk_members', JSON.stringify(members));
-        localStorage.setItem('fuk_expenses', JSON.stringify(expenses));
-    }
-
-    function addMember() { members.push({n: "新成員", a: 0}); renderFund(); }
-    function removeMem(i) { members.splice(i,1); renderFund(); }
-    function updateMem(i,f,v) { members[i][f] = v; calculateFund(); }
-
-    function addExpense() { expenses.push({n: "新支出", a: 0}); renderFund(); }
-    function removeExp(i) { expenses.splice(i,1); renderFund(); }
-    function updateExp(i,f,v) { expenses[i][f] = v; calculateFund(); }
-
-    // --- 其他分頁邏輯 ---
-    function renderItinerary() {
-        const container = document.getElementById('itinerary-container');
-        container.innerHTML = '';
-        for (let day in tripData) {
-            let pane = document.createElement('div');
-            pane.className = `day-pane ${day == 1 ? 'active' : ''}`;
-            pane.id = `day-${day}`;
-            pane.innerHTML = tripData[day].map((item, idx) => `
-                <div class="timeline-item">
-                    <span class="time-text" contenteditable="true" onblur="saveTrip(${day},${idx},'t',this.innerText)">${item.t}</span>
-                    <span class="content-text" contenteditable="true" onblur="saveTrip(${day},${idx},'c',this.innerText)">${item.c}</span>
-                </div>`).join('') + `<button class="btn" onclick="addTrip(${day})">+ 新增</button>`;
-            container.appendChild(pane);
-        }
-    }
-
-    function saveTrip(d, i, f, v) { tripData[d][i][f] = v; localStorage.setItem('fuk_trip_v5', JSON.stringify(tripData)); }
-    function addTrip(d) { tripData[d].push({t: "12:00", c: "新內容"}); renderItinerary(); showDay(d); }
-
-    function renderChecklist() {
-        document.getElementById('check-container').innerHTML = checkData.map((item, idx) => `
-            <div class="check-item"><input type="checkbox">
-            <span contenteditable="true" onblur="saveCheck(${idx}, this.innerText)">${item}</span>
-            <span style="margin-left:auto;color:#ccc" onclick="removeCheck(${idx})">×</span></div>`).join('');
-    }
-
-    function saveCheck(i, v) { checkData[i] = v; localStorage.setItem('fuk_check_v5', JSON.stringify(checkData)); }
-    function addCheckItem() { checkData.push("新項目"); renderChecklist(); }
-    function removeCheck(i) { checkData.splice(i, 1); renderChecklist(); }
-
+    // 核心功能：切換分頁
     function switchMain(target) {
-        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(target + '-sec').classList.add('active');
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        document.getElementById(`${target}-sec`).classList.add('active');
     }
 
-    function showDay(day) {
-        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.day-pane').forEach(p => p.classList.remove('active'));
-        const btn = document.querySelector(`.day-btn:nth-child(${day})`);
-        if(btn) btn.classList.add('active');
-        document.getElementById(`day-${day}`).classList.add('active');
+    // 行程渲染
+    function renderItinerary(day) {
+        const container = document.getElementById('itinerary-content');
+        container.innerHTML = "";
+        const items = defaultTrip[day] || [{t: "--:--", type: "spot", title: "自由探索", desc: "今日隨意安排。", memo: "推薦：天神地下街。"}];
+        
+        items.forEach(item => {
+            const tagMap = { trans: 'tag-trans', food: 'tag-food', spot: 'tag-spot' };
+            const typeText = { trans: '交通', food: '食事', spot: '景點' };
+            container.innerHTML += `
+                <div class="timeline-item">
+                    <div class="time">${item.t}</div>
+                    <div class="content">
+                        <div style="font-weight:700; font-size:1.1rem; margin-bottom:5px;">
+                            <span class="tag ${tagMap[item.type]}">${typeText[item.type]}</span> ${item.title}
+                        </div>
+                        <div style="font-size:0.9rem; color:#6D6D6D; margin-bottom:8px;">${item.desc}</div>
+                        <div style="font-size:0.8rem; background:rgba(215,204,200,0.2); padding:8px; border-left:2px solid var(--border);">📜 ${item.memo}</div>
+                        ${item.map ? `<a href="https://www.google.com/maps/search/FUKUOKA+U-BELL+HOTEL9{item.map}&travelmode=transit" target="_blank" class="map-link" style="margin-top:8px; display:inline-block;">查詢轉乘</a>` : ''}
+                    </div>
+                </div>`;
+        });
     }
 
-    function updateCountdowns() {
-        const start = new Date('October 3, 2026 00:00:00').getTime();
-        const end = new Date('October 9, 2026 23:59:59').getTime();
-        const now = new Date().getTime();
-        document.getElementById('go-countdown').innerText = start > now ? Math.floor((start-now)/86400000) + " 天" : "旅行中";
-        document.getElementById('back-countdown').innerText = end > now ? Math.floor((end-now)/86400000) + " 天" : "已回國";
+    // 公積金與清單邏輯 (簡化版)
+    function renderFund() {
+        document.getElementById('members-list').innerHTML = members.map((m, i) => `<div class="fund-row"><input class="input-wood" value="${m.n}" oninput="members[${i}].n=this.value;saveFund()"><input class="input-wood" type="number" value="${m.a}" oninput="members[${i}].a=this.value;saveFund()"><span onclick="members.splice(${i},1);renderFund()">×</span></div>`).join('');
+        document.getElementById('expenses-list').innerHTML = expenses.map((e, i) => `<div class="fund-row"><input class="input-wood" value="${e.n}" oninput="expenses[${i}].n=this.value;saveFund()"><input class="input-wood" type="number" value="${e.a}" oninput="expenses[${i}].a=this.value;saveFund()"><span onclick="expenses.splice(${i},1);renderFund()">×</span></div>`).join('');
+        const inc = members.reduce((s, m) => s + Number(m.a||0), 0);
+        const exp = expenses.reduce((s, e) => s + Number(e.a||0), 0);
+        document.getElementById('total-income').innerText = inc.toLocaleString();
+        document.getElementById('fund-balance').innerText = (inc - exp).toLocaleString();
+    }
+    function saveFund() { localStorage.setItem('wood_mem', JSON.stringify(members)); localStorage.setItem('wood_exp', JSON.stringify(expenses)); renderFund(); }
+    function addMember() { members.push({n: "姓名", a: 0}); renderFund(); }
+    function addExpense() { expenses.push({n: "項目", a: 0}); renderFund(); }
+
+    function renderCheck() {
+        document.getElementById('check-list').innerHTML = checkData.map((c, i) => `<div style="margin-bottom:10px;"><input type="checkbox"> <span contenteditable="true" onblur="checkData[${i}]=this.innerText;saveCheck()">${c}</span></div>`).join('');
+    }
+    function saveCheck() { localStorage.setItem('wood_check', JSON.stringify(checkData)); }
+    function addCheckItem() { checkData.push("新項目"); renderCheck(); }
+
+    async function fetchWeather() {
+        try {
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?id=${CITY_ID}&appid=${API_KEY}&units=metric&lang=zh_tw`);
+            const data = await res.json();
+            if(data.cod === 200) document.getElementById('weather-info').innerText = `福岡：${Math.round(data.main.temp)}°C / ${data.weather[0].description}`;
+        } catch(e) { document.getElementById('weather-info').innerText = "福岡：18°C / 晴"; }
     }
 
     window.onload = () => {
-        renderItinerary();
-        renderChecklist();
-        renderFund();
-        updateCountdowns();
+        const tabs = document.getElementById('day-tabs');
+        for(let i=1; i<=7; i++) {
+            tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
+        }
+        fetchWeather(); renderItinerary(1); renderFund(); renderCheck();
     };
 </script>
 
