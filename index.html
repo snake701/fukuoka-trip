@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 全自訂手帖 V15</title>
+    <title>福岡行旅 2026 | 全自訂手帖</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -54,7 +54,6 @@
 <header>
     <h1>福岡行旅 2026</h1>
     <div class="sub-date">10.03 - 10.09 (BR106 / BR101)</div>
-    <div id="weather-info" style="font-size:0.8rem; margin-top:5px; color:#8D8273;">福岡市：多雲轉晴 12°C / 18°C</div>
 </header>
 
 <nav class="main-nav">
@@ -105,22 +104,12 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
-            <h3>💹 匯率換算</h3>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <input type="number" id="rate-input" class="input-wood" style="width:100px" value="0.215" oninput="calcExchange()">
-                <span>日幣 ¥ <input type="number" id="jpy-input" class="input-wood" style="width:120px" value="1000" oninput="calcExchange()"></span>
-            </div>
-            <div style="margin-top:10px; font-weight:bold;">台幣約：$ <span id="twd-output">215</span> 元</div>
-        </div>
-
-        <div class="info-card">
-            <h3 style="color: var(--accent-blue);">🏨 住宿資訊管理</h3>
+            <h3>🏨 住宿資訊</h3>
             <div id="hotel-manager-list"></div>
             <button class="btn-sm" style="width:100%; margin-top:10px;" onclick="addHotel()">+ 新增住宿地點</button>
         </div>
-
-        <div class="info-card" style="border: 2px solid var(--accent-red);">
-            <h3 style="color: var(--accent-red); border-bottom-color: var(--accent-red);">🚨 緊急聯絡</h3>
+        <div class="info-card">
+            <h3>🚨 緊急聯絡</h3>
             <div id="emergency-list"></div>
             <button class="btn-sm" style="width:100%; margin-top:10px;" onclick="addEmergency()">+ 新增聯絡資訊</button>
         </div>
@@ -131,7 +120,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // 你的 Firebase 金鑰整合
     const firebaseConfig = {
         apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
         authDomain: "fukuoka-trip-2026.firebaseapp.com",
@@ -147,7 +135,6 @@
     const db = getDatabase(app);
     const dbRef = ref(db, 'fukuoka_trip_v15');
 
-    // 全域變數
     window.currentDay = 1;
     window.tripData = {};
     window.members = [];
@@ -157,7 +144,29 @@
     window.hotelData = [];
     window.emergencyInfo = [];
 
-    // --- 從 Firebase 讀取數據 (即時監聽) ---
+    // --- 初始化預填資料 ---
+    const defaultData = {
+        hotelData: [{name: "Fukuoka U-BELL Hotel", addr: "福岡市中央區警固 1-9-3", tel: "092-751-0011"}],
+        tripData: {
+            1: [
+                {t: "04:00", title: "出發前往機場", memo: "台北市吉林路26巷出發", map: "台北市吉林路26巷"},
+                {t: "08:10", title: "桃園機場 (BR106)", memo: "長榮航空起飛", map: "桃園機場"},
+                {t: "12:00", title: "飯店 Check-in", memo: "寄放行李", map: "HOTEL_REF"}
+            ],
+            2: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+            3: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+            4: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+            5: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+            6: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+            7: [
+                {t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"},
+                {t: "15:30", title: "前往福岡機場", memo: "準備搭乘 BR101 回台", map: "Fukuoka Airport"}
+            ]
+        },
+        members: [{n: "成員A", v: 0}, {n: "成員B", v: 0}],
+        emergencyInfo: [{label: "報警", val: "110"}, {label: "飯店電話", val: "092-751-0011"}]
+    };
+
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -170,12 +179,15 @@
             window.emergencyInfo = data.emergencyInfo || [];
             refreshUI();
         } else {
-            // 若為空資料則初始化
+            // 如果資料庫是空的，塞入預填資料
+            window.tripData = defaultData.tripData;
+            window.hotelData = defaultData.hotelData;
+            window.members = defaultData.members;
+            window.emergencyInfo = defaultData.emergencyInfo;
             window.saveAll();
         }
     });
 
-    // --- 儲存數據到 Firebase ---
     window.saveAll = function() {
         set(dbRef, {
             tripData: window.tripData,
@@ -188,7 +200,6 @@
         });
     };
 
-    // --- UI 切換與渲染邏輯 ---
     function refreshUI() {
         renderItinerary(window.currentDay);
         renderMoney();
@@ -220,7 +231,7 @@
             let displayTitle = item.title;
             let displayMap = item.map;
             if(displayMap === 'HOTEL_REF') {
-                displayTitle = item.title.includes('飯店') ? item.title : `前往飯店 (${hotel.name})`;
+                displayTitle = item.title.includes('飯店') ? item.title : `飯店出發 (${hotel.name})`;
                 displayMap = hotel.addr || hotel.name;
             }
             list.innerHTML += `
@@ -279,8 +290,8 @@
         document.getElementById('balance-val').innerText = (totalInc - totalExp).toLocaleString();
     };
 
-    window.addMember = () => { window.members.push({n:"新成員", v:0}); window.saveAll(); };
-    window.addExpense = () => { window.expenses.push({n:"新項目", v:0}); window.saveAll(); };
+    window.addMember = () => { window.members.push({n: "新成員", v: 0}); window.saveAll(); };
+    window.addExpense = () => { window.expenses.push({n: "新項目", v: 0}); window.saveAll(); };
 
     window.renderFood = function() {
         const list = document.getElementById('food-list');
@@ -298,7 +309,7 @@
                 </div>
             </div>`).join('');
     };
-    window.addFood = () => { window.foods.push({n:"新餐廳", d:"", s:3}); window.saveAll(); };
+    window.addFood = () => { window.foods.push({n: "新餐廳", d: "", s: 3}); window.saveAll(); };
 
     window.renderCheck = function() {
         const area = document.getElementById('checklist-area');
@@ -309,7 +320,7 @@
                 <span onclick="checks.splice(${i},1);saveAll()" style="cursor:pointer; color:#ccc;">×</span>
             </div>`).join('');
     };
-    window.addCheck = () => { window.checks.push({n:"待辦事項", c:false}); window.saveAll(); };
+    window.addCheck = () => { window.checks.push({n: "待辦事項", c: false}); window.saveAll(); };
 
     window.renderHotelManager = function() {
         const area = document.getElementById('hotel-manager-list');
@@ -317,13 +328,11 @@
             <div style="background:#fcfcfc; border:1px solid #eee; padding:10px; border-radius:6px; margin-bottom:10px;">
                 <input class="input-wood" style="font-weight:700;" value="${h.name}" placeholder="飯店名稱" onchange="hotelData[${i}].name=this.value;saveAll()">
                 <input class="input-wood" style="font-size:0.8rem;" value="${h.addr}" placeholder="地址" onchange="hotelData[${i}].addr=this.value;saveAll()">
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input class="input-wood" style="flex:2; margin-bottom:0;" value="${h.tel}" placeholder="電話" onchange="hotelData[${i}].tel=this.value;saveAll()">
-                    <span onclick="hotelData.splice(${i},1);saveAll()" style="cursor:pointer; color:red;">×</span>
-                </div>
+                <input class="input-wood" style="flex:2; margin-bottom:0;" value="${h.tel}" placeholder="電話" onchange="hotelData[${i}].tel=this.value;saveAll()">
+                <span onclick="hotelData.splice(${i},1);saveAll()" style="cursor:pointer; color:red;">× 刪除住宿</span>
             </div>`).join('');
     };
-    window.addHotel = () => { window.hotelData.push({name:"", addr:"", tel:""}); window.saveAll(); };
+    window.addHotel = () => { window.hotelData.push({name: "", addr: "", tel: ""}); window.saveAll(); };
 
     window.renderEmergency = function() {
         const area = document.getElementById('emergency-list');
@@ -335,7 +344,7 @@
                 <span onclick="emergencyInfo.splice(${i},1);saveAll()">×</span>
             </div>`).join('');
     };
-    window.addEmergency = () => { window.emergencyInfo.push({label:"", val:""}); window.saveAll(); };
+    window.addEmergency = () => { window.emergencyInfo.push({label: "", val: ""}); window.saveAll(); };
 
     window.calcExchange = function() {
         const r = document.getElementById('rate-input').value;
