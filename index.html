@@ -3,194 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 木質手帖 V11</title>
+    <title>福岡行旅 2026 | 可編輯木質手帖</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --wood-dark: #5D4037; 
-            --wood-light: #EFEBE9; 
-            --paper: #FAF9F6; 
-            --accent-green: #8D9977; 
-            --accent-red: #B06B6B; 
-            --accent-blue: #78909C; 
-            --border: #D7CCC8;
-            --shadow: 0 4px 12px rgba(93, 64, 55, 0.08);
+            --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
+            --accent-green: #8D9977; --accent-red: #B06B6B; --accent-blue: #78909C; 
+            --border: #D7CCC8; --shadow: 0 4px 12px rgba(93, 64, 55, 0.08);
         }
-
         * { box-sizing: border-box; }
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--wood-light);
+            font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light);
             background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
-            color: var(--wood-dark);
-            margin: 0; padding: 0;
-            line-height: 1.8;
-            padding-bottom: 50px;
+            color: var(--wood-dark); margin: 0; line-height: 1.8; padding-bottom: 50px;
         }
-
-        header {
-            max-width: 900px; margin: 0 auto; padding: 30px 20px;
-            text-align: center;
-        }
+        header { max-width: 900px; margin: 0 auto; padding: 30px 20px; text-align: center; }
         h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; margin-bottom: 5px; letter-spacing: 3px; }
-        #weather-info { font-size: 0.85rem; color: #8D8273; }
-
+        
         .main-nav {
-            max-width: 800px; margin: 0 auto 20px;
-            display: flex; background: rgba(215, 204, 200, 0.3);
-            padding: 5px; border-radius: 8px; border: 1px solid var(--border);
-            overflow-x: auto; scrollbar-width: none;
+            max-width: 800px; margin: 0 auto 20px; display: flex; 
+            background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border);
         }
-        .nav-tab {
-            flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px;
-            cursor: pointer; font-weight: 500; color: var(--wood-dark); transition: 0.3s;
-            font-family: 'Noto Serif TC', serif; font-size: 0.9rem;
-        }
+        .nav-tab { flex: 1; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-family: 'Noto Serif TC', serif; font-size: 0.9rem; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        .content-section { display: none; animation: fadeIn 0.4s ease; }
-        .content-section.active { display: block; }
-
         .day-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 25px; scrollbar-width: none; }
-        .day-tab {
-            cursor: pointer; padding: 6px 15px; background: var(--paper);
-            border: 1px solid var(--border); border-radius: 4px; white-space: nowrap;
-            font-size: 0.8rem; color: #8D8273;
-        }
+        .day-tab { cursor: pointer; padding: 6px 15px; background: var(--paper); border: 1px solid var(--border); border-radius: 4px; font-size: 0.8rem; }
         .day-tab.active { background: var(--wood-dark); color: white; }
 
-        .timeline-item { display: grid; grid-template-columns: 70px 1fr; margin-bottom: 20px; }
+        /* 行程卡片 */
+        .timeline-item { display: grid; grid-template-columns: 70px 1fr; margin-bottom: 25px; position: relative; }
         .time { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.95rem; padding-top: 5px; }
-        .content { 
-            padding-left: 20px; border-left: 1px solid var(--border); position: relative; 
-            padding-bottom: 10px;
-        }
-        .content::before {
-            content: ''; position: absolute; left: -4px; top: 12px;
-            width: 7px; height: 7px; background: var(--border); border-radius: 50%;
-        }
+        .content { padding-left: 20px; border-left: 1px solid var(--border); position: relative; padding-bottom: 10px; }
+        .content::before { content: ''; position: absolute; left: -4px; top: 12px; width: 7px; height: 7px; background: var(--border); border-radius: 50%; }
 
-        .tag { font-size: 0.65rem; padding: 2px 8px; margin-right: 5px; border-radius: 2px; border: 1px solid; vertical-align: middle; }
-        .tag-trans { border-color: var(--accent-blue); color: var(--accent-blue); }
-        .tag-food { border-color: var(--accent-red); color: var(--accent-red); }
-        .tag-spot { border-color: var(--accent-green); color: var(--accent-green); }
-        .tag-hotel { border-color: var(--wood-dark); background: var(--wood-dark); color: white; }
+        .tag { font-size: 0.65rem; padding: 2px 8px; border-radius: 2px; border: 1px solid; margin-right: 5px; }
+        .edit-controls { margin-top: 10px; display: flex; gap: 10px; }
+        .btn-sm { font-size: 0.75rem; cursor: pointer; background: none; border: 1px solid var(--border); color: var(--wood-dark); padding: 2px 8px; border-radius: 4px; }
+        
+        /* 編輯表單 */
+        .edit-form { background: var(--paper); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .input-wood { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid var(--border); background: #fff; border-radius: 4px; color: var(--wood-dark); }
+        .btn-save { background: var(--wood-dark); color: white; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
 
-        .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
-        .map-link { font-size: 0.8rem; color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid; display: inline-block; margin-top: 5px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>福岡行旅 2026</h1>
+    <h1 contenteditable="true">福岡行旅 2026</h1>
     <div id="weather-info">取得天氣中...</div>
 </header>
 
 <div class="main-nav">
-    <div class="nav-tab active" onclick="switchMain('itinerary')">📅 行程日誌</div>
-    <div class="nav-tab" onclick="switchMain('money')">💰 公積金</div>
-    <div class="nav-tab" onclick="switchMain('food')">🍴 美食清單</div>
-    <div class="nav-tab" onclick="switchMain('check')">✅ 出發檢查</div>
-    <div class="nav-tab" onclick="switchMain('tools')">🔧 轉乘工具</div>
+    <div class="nav-tab active">📅 行程日誌</div>
+    <div class="nav-tab">🔧 其他工具</div>
 </div>
 
 <div class="container">
-    <section id="itinerary-sec" class="content-section active">
-        <div class="day-nav" id="day-tabs"></div>
-        <div id="itinerary-content"></div>
-    </section>
+    <div class="day-nav" id="day-tabs"></div>
 
-    <section id="money-sec" class="content-section">
-        <div class="info-card">
-            <h3 style="font-family:'Noto Serif TC';">👥 公積金 (¥)</h3>
-            <p>可在此紀錄成員預繳與公共支出。</p>
-        </div>
-    </section>
+    <button class="btn-sm" style="margin-bottom:20px; width:100%; padding:10px;" onclick="showAddForm()">+ 新增行程項目</button>
 
+    <div id="edit-area" class="edit-form hidden">
+        <h4 id="form-title">編輯項目</h4>
+        <input type="text" id="f-time" class="input-wood" placeholder="時間 (例如 09:00)">
+        <select id="f-type" class="input-wood">
+            <option value="hotel">住所 (Hotel)</option>
+            <option value="spot">景點 (Spot)</option>
+            <option value="food">食事 (Food)</option>
+            <option value="trans">交通 (Trans)</option>
+        </select>
+        <input type="text" id="f-title" class="input-wood" placeholder="標題">
+        <input type="text" id="f-desc" class="input-wood" placeholder="描述">
+        <input type="text" id="f-memo" class="input-wood" placeholder="備忘/攻略">
+        <input type="text" id="f-map" class="input-wood" placeholder="地圖搜尋關鍵字">
+        <button class="btn-save" onclick="saveItem()">儲存行程</button>
+        <button class="btn-sm" style="margin-top:5px; width:100%" onclick="hideForm()">取消</button>
     </div>
 
-<script>
-    const HOTEL_NAME = "Fukuoka+U-BELL+Hotel";
-    const HOTEL_ADDR = "福岡中央區警固 1-9-3";
+    <div id="itinerary-content"></div>
+</div>
 
-    const tripData = {
+<script>
+    let currentDay = 1;
+    let editingIndex = -1;
+
+    // 預設行程資料
+    const defaultData = {
         1: [
-            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線直達博多或天神。", memo: "提示：博多站可先處理 JR Pass。"},
-            {t: "13:00", type: "hotel", title: "Check-in / 寄放行李", desc: "前往 Fukuoka U-BELL Hotel。", memo: "從天神站步行約 10 分鐘。", map: HOTEL_NAME},
-            {t: "15:00", type: "spot", title: "大濠公園散策", desc: "飯店出發，搭乘地下鐵至大濠公園站。", memo: "悠閒散步，享受福岡午後。", map: "Ohori+Park"},
-            {t: "19:00", type: "food", title: "中洲屋台街", desc: "體驗博多屋台文化。", memo: "必吃拉麵，之後散步回飯店。", map: "Nakasu"}
+            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線直達天神。", memo: "提示：博多站可先劃位。", map: "Fukuoka+Airport"},
+            {t: "13:00", type: "hotel", title: "Check-in / 寄放行李", desc: "前往 Fukuoka U-BELL Hotel。", memo: "從天神站步行約 10 分鐘。", map: "Fukuoka+U-BELL+Hotel"}
         ],
-        2: [
-            {t: "09:00", type: "hotel", title: "飯店出發", desc: "U-BELL Hotel 步行至西鐵福岡站。", memo: "開啟太宰府、柳川一日遊。", map: "Nishitetsu+Fukuoka+Station"},
-            {t: "11:00", type: "spot", title: "柳川下り", desc: "乘船體驗與鰻魚飯午餐。", map: "Yanagawa"},
-            {t: "15:00", type: "spot", title: "太宰府天滿宮", desc: "參拜神道，品嚐梅枝餅。", map: "Dazaifu"},
-            {t: "20:00", type: "hotel", title: "返回飯店", desc: "搭乘西鐵返回天神，回飯店休息。", map: HOTEL_NAME}
-        ],
-        3: [
-            {t: "09:00", type: "hotel", title: "飯店出發", desc: "天神區漫步或前往博多站採買。", memo: "今日為自由移動日。", map: "Hakata+Station"},
-            {t: "20:30", type: "hotel", title: "返回飯店", desc: "U-BELL Hotel 休息。", map: HOTEL_NAME}
-        ],
-        4: [
-            {t: "07:30", type: "hotel", title: "飯店出發", desc: "前往博多站筑紫口集合。", memo: "參加高千穗一日巴士團。", map: "Hakata+Station"},
-            {t: "09:00", type: "spot", title: "高千穗峽谷", desc: "欣賞峽谷美景與神話之鄉。", map: "Takachiho"},
-            {t: "20:00", type: "hotel", title: "返回飯店", desc: "巴士團回程後，搭車回飯店。", map: HOTEL_NAME}
-        ],
-        5: [
-            {t: "09:00", type: "hotel", title: "飯店出發", desc: "前往博多車站。", memo: "今日使用 JR Pass 開啟跨縣行程。", map: "Hakata+Station"},
-            {t: "19:00", type: "food", title: "博多車站晚餐", desc: "博多運河城或地下街用餐。", map: "Canal+City+Hakata"},
-            {t: "21:00", type: "hotel", title: "返回飯店", desc: "U-BELL Hotel 休息。", map: HOTEL_NAME}
-        ],
-        6: [
-            {t: "09:00", type: "hotel", title: "飯店出發", desc: "搭乘「由布院之森」特急火車。", map: "Hakata+Station"},
-            {t: "11:30", type: "spot", title: "由布院散策", desc: "湯之坪街道、金鱗湖。", map: "Yufuin"},
-            {t: "18:00", type: "hotel", title: "返回飯店", desc: "搭乘 JR 回博多，轉車回飯店。", map: HOTEL_NAME}
-        ],
-        7: [
-            {t: "09:30", type: "hotel", title: "飯店出發", desc: "Check-out 並寄放行李或前往機場。", memo: "最後採買時間。", map: "Fukuoka+Airport"}
-        ]
+        2: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "開啟今日行程。", memo: "記得帶傘。", map: "Fukuoka+U-BELL+Hotel"}],
+        3: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "自由活動。", memo: "放鬆心情。", map: "Fukuoka+U-BELL+Hotel"}],
+        4: [{t: "07:30", type: "hotel", title: "飯店出發", desc: "前往高千穗。", memo: "早起加油。", map: "Hakata+Station"}],
+        5: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "市區採買。", memo: "買伴手禮。", map: "Hakata+Station"}],
+        6: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "前往由布院。", memo: "看風景。", map: "Hakata+Station"}],
+        7: [{t: "09:30", type: "hotel", title: "最後巡禮", desc: "前往機場。", memo: "祝一路順風。", map: "Fukuoka+Airport"}]
     };
 
+    // 從 LocalStorage 讀取或初始化
+    let tripData = JSON.parse(localStorage.getItem('fukuoka_trip_v12')) || defaultData;
+
     function renderItinerary(day) {
+        currentDay = day;
         const container = document.getElementById('itinerary-content');
         container.innerHTML = "";
-        const items = tripData[day] || [];
         
-        items.forEach(item => {
-            const tagMap = { trans: 'tag-trans', food: 'tag-food', spot: 'tag-spot', hotel: 'tag-hotel' };
-            const typeText = { trans: '交通', food: '食事', spot: '景點', hotel: '住所' };
+        if (!tripData[day]) tripData[day] = [];
+
+        tripData[day].forEach((item, index) => {
+            const typeText = { hotel: '住所', spot: '景點', food: '食事', trans: '交通' };
             container.innerHTML += `
                 <div class="timeline-item">
                     <div class="time">${item.t}</div>
                     <div class="content">
-                        <div style="font-weight:700; font-size:1.05rem; margin-bottom:5px;">
-                            <span class="tag ${tagMap[item.type]}">${typeText[item.type]}</span> ${item.title}
+                        <div style="font-weight:700;">
+                            <span class="tag">${typeText[item.type]}</span> ${item.title}
                         </div>
-                        <div style="font-size:0.9rem; color:#6D6D6D; margin-bottom:8px;">${item.desc}</div>
-                        <div style="font-size:0.8rem; background:rgba(215,204,200,0.2); padding:8px; border-left:2px solid var(--border);">📜 ${item.memo}</div>
-                        ${item.map ? `<a href="http://google.com/maps/search/燒肉多牛0{item.map}&travelmode=transit" target="_blank" class="map-link">查詢轉乘 ▸</a>` : ''}
+                        <div style="font-size:0.85rem; color:#666;">${item.desc}</div>
+                        <div style="font-size:0.8rem; color:#8D4F31;">📜 ${item.memo}</div>
+                        <div class="edit-controls">
+                            <button class="btn-sm" onclick="editItem(${index})">✎ 編輯</button>
+                            <button class="btn-sm" onclick="deleteItem(${index})">🗑 刪除</button>
+                            ${item.map ? `<a href="https://www.google.com/maps/search/?api=1&query=${item.map}&travelmode=transit" target="_blank" class="btn-sm" style="text-decoration:none">🧭 地圖</a>` : ''}
+                        </div>
                     </div>
                 </div>`;
         });
     }
 
-    function switchMain(target) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(target + '-sec').classList.add('active');
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    function showAddForm() {
+        editingIndex = -1;
+        document.getElementById('form-title').innerText = "新增行程 (Day " + currentDay + ")";
+        clearForm();
+        document.getElementById('edit-area').classList.remove('hidden');
     }
 
-    window.onload = () => {
-        const tabs = document.getElementById('day-tabs');
-        for(let i=1; i<=7; i++) {
-            tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
+    function editItem(index) {
+        editingIndex = index;
+        const item = tripData[currentDay][index];
+        document.getElementById('form-title').innerText = "編輯行程項目";
+        document.getElementById('f-time').value = item.t;
+        document.getElementById('f-type').value = item.type;
+        document.getElementById('f-title').value = item.title;
+        document.getElementById('f-desc').value = item.desc;
+        document.getElementById('f-memo').value = item.memo;
+        document.getElementById('f-map').value = item.map || "";
+        document.getElementById('edit-area').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    function saveItem() {
+        const newItem = {
+            t: document.getElementById('f-time').value,
+            type: document.getElementById('f-type').value,
+            title: document.getElementById('f-title').value,
+            desc: document.getElementById('f-desc').value,
+            memo: document.getElementById('f-memo').value,
+            map: document.getElementById('f-map').value
+        };
+
+        if (editingIndex > -1) {
+            tripData[currentDay][editingIndex] = newItem;
+        } else {
+            tripData[currentDay].push(newItem);
         }
-        renderItinerary(1);
-    };
+
+        // 排序：按時間簡單排序
+        tripData[currentDay].sort((a, b) => a.t.localeCompare(b.t));
+
+        localStorage.setItem('fukuoka_trip_v12', JSON.stringify(tripData));
+        hideForm();
+        renderItinerary(currentDay);
+    }
+
+    function deleteItem(index) {
+        if (confirm("確定要刪除這個項目嗎？")) {
+            tripData[currentDay].splice(index, 1);
+            localStorage.setItem('fukuoka_trip_v12', JSON.stringify(tripData));
+            renderItinerary(currentDay);
+        }
+    }
+
+    function hideForm() { document.getElementById('edit-area').classList.add('hidden'); }
+    function clearForm() {
+        document.querySelectorAll('.input-wood').forEach(i => i.value = "");
+        document.getElementById('f-type').value = "spot";
+    }
+
+    // 初始化天數按鈕
+    const tabs = document.getElementById('day-tabs');
+    for(let i=1; i<=7; i++) {
+        tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
+    }
+
+    window.onload = () => renderItinerary(1);
 </script>
+
 </body>
 </html>
