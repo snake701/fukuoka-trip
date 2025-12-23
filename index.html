@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 全同步手帖</title>
+    <title>福岡行旅 2026 | 雲端同步手帖</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,16 +20,16 @@
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
         h1 { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin: 0; letter-spacing: 2px; }
         
-        /* 倒數計時與天氣樣式 */
-        .status-bar { display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 0.85rem; color: #8D8273; }
-        .status-item { background: rgba(255,255,255,0.5); padding: 2px 10px; border-radius: 20px; border: 1px solid var(--border); }
+        /* 狀態列：倒數與天氣 */
+        .status-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .status-item { background: rgba(255,255,255,0.6); padding: 3px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.8rem; color: var(--wood-dark); }
 
         .main-nav {
             max-width: 800px; margin: 0 auto 15px; display: flex; 
             background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border);
             overflow-x: auto; scrollbar-width: none;
         }
-        .nav-tab { flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+        .nav-tab { flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; transition: 0.3s; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
@@ -37,12 +37,15 @@
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
         .info-card { background: var(--paper); padding: 18px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow); }
         
-        .input-wood { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; }
-        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 10px; border-radius: 4px; width: 100%; cursor: pointer; }
-        .btn-sm { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: white; }
+        .input-wood { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: white; }
+        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: 700; }
+        .btn-sm { font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--wood-dark); }
 
-        .itinerary-item { position: relative; padding-left: 20px; border-left: 2px solid var(--border); margin-bottom: 15px; margin-left: 10px; }
+        /* 行程項目樣式 */
+        .itinerary-item { position: relative; padding-left: 20px; border-left: 2px solid var(--border); margin-bottom: 20px; margin-left: 10px; }
         .itinerary-item::before { content: ""; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent-green); border-radius: 50%; }
+        .map-btn { display: inline-block; margin-top: 8px; font-size: 0.75rem; color: var(--accent-blue); text-decoration: none; border: 1px solid var(--accent-blue); padding: 2px 10px; border-radius: 15px; }
+        .map-btn:hover { background: var(--accent-blue); color: white; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -52,8 +55,8 @@
 <header>
     <h1>福岡行旅 2026</h1>
     <div class="status-bar">
-        <div class="status-item" id="countdown-text">計算中...</div>
-        <div class="status-item" id="weather-text">福岡 18°C 🌤️</div>
+        <div class="status-item" id="countdown-text">載入中...</div>
+        <div class="status-item">福岡 12°C ~ 18°C 🌤️</div>
     </div>
 </header>
 
@@ -67,38 +70,50 @@
 
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
-        <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px;"></div>
+        <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
         <div id="itinerary-list" class="info-card"></div>
-        <button class="btn-wood" onclick="addItem()">+ 新增行程</button>
+        <button class="btn-wood" onclick="addItem()">+ 新增行程項目</button>
     </section>
 
     <section id="money-sec" class="content-section">
-        <div class="info-card"><h3>👥 成員與公積金</h3><div id="member-list"></div><button class="btn-sm" onclick="addMember()">+ 成員</button></div>
-        <div class="info-card"><h3>💸 支出明細</h3><div id="expense-list"></div><div id="balance-val" style="text-align:right; font-weight:700;"></div></div>
+        <div class="info-card">
+            <h3>👥 成員繳費</h3>
+            <div id="member-list"></div>
+            <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
+        </div>
+        <div class="info-card">
+            <h3>💸 公共支出</h3>
+            <div id="expense-list"></div>
+            <button class="btn-sm" onclick="addExpense()">+ 新增項目</button>
+            <div style="margin-top:15px; text-align:right; font-weight:700; border-top:1px dashed var(--border); padding-top:10px;">
+                餘額：¥ <span id="balance-val">0</span>
+            </div>
+        </div>
     </section>
 
-    <section id="food-sec" class="content-section"><div id="food-list"></div><button class="btn-wood" onclick="addFood()">+ 餐廳</button></section>
-    <section id="check-sec" class="content-section"><div class="info-card"><h3>🧳 檢查清單</h3><div id="checklist-area"></div><button class="btn-sm" onclick="addCheck()">+ 項目</button></div></section>
+    <section id="food-sec" class="content-section"><div id="food-list"></div><button class="btn-wood" onclick="addFood()">+ 新增美食名單</button></section>
+    <section id="check-sec" class="content-section"><div class="info-card"><h3>🧳 物品檢查</h3><div id="checklist-area"></div><button class="btn-sm" onclick="addCheck()">+ 新增檢查項</button></div></section>
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
-            <h3>🏨 飯店資訊編輯</h3>
+            <h3>🏨 飯店資訊管理</h3>
             <label style="font-size:0.7rem;">飯店名稱</label>
-            <input id="h-name" class="input-wood" onchange="updateHotel()">
-            <label style="font-size:0.7rem;">地址</label>
-            <input id="h-addr" class="input-wood" onchange="updateHotel()">
-            <label style="font-size:0.7rem;">電話</label>
-            <input id="h-tel" class="input-wood" onchange="updateHotel()">
-            <p style="font-size:0.7rem; color:var(--accent-blue);">* 修改後會即時更新全站行程中的「飯店出發」地點</p>
+            <input id="h-name" class="input-wood" placeholder="例如：Fukuoka U-BELL Hotel" onchange="updateHotel()">
+            <label style="font-size:0.7rem;">飯店地址 (用於導航)</label>
+            <input id="h-addr" class="input-wood" placeholder="福岡市中央區..." onchange="updateHotel()">
+            <label style="font-size:0.7rem;">連絡電話</label>
+            <input id="h-tel" class="input-wood" placeholder="092-XXX-XXXX" onchange="updateHotel()">
         </div>
 
         <div class="info-card">
             <h3>🚨 緊急聯絡</h3>
             <div id="emergency-list"></div>
-            <button class="btn-sm" onclick="addEmergency()">+ 聯絡</button>
+            <button class="btn-sm" onclick="addEmergency()">+ 新增聯絡資訊</button>
         </div>
 
-        <button class="btn-sm" style="width:100%; background:#ffebee; color:#c62828; border:none; padding:10px;" onclick="forceReset()">一鍵初始化 (會覆蓋現有資料)</button>
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-sm" style="color:var(--accent-red); border-color:var(--accent-red);" onclick="forceReset()">⚠️ 強制重設為初始資料</button>
+        </div>
     </section>
 </div>
 
@@ -106,6 +121,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // 1. Firebase 金鑰整合
     const firebaseConfig = {
         apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
         authDomain: "fukuoka-trip-2026.firebaseapp.com",
@@ -118,48 +134,43 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_v16');
+    const dbRef = ref(db, 'fukuoka_trip_v2026');
 
-    // 初始化變數
+    // 全域變數
     window.currentDay = 1;
     window.tripData = {}; window.members = []; window.expenses = [];
     window.foods = []; window.checks = []; window.hotelData = []; window.emergencyInfo = [];
 
-    // --- 1. 倒數計時邏輯 ---
+    // --- 2. 倒數計時邏輯 ---
     function updateCountdown() {
-        const startDate = new Date('2026-10-03T00:00:00');
-        const endDate = new Date('2026-10-09T23:59:59');
+        const start = new Date('2026-10-03T00:00:00');
+        const end = new Date('2026-10-09T23:59:59');
         const now = new Date();
-        const diff = startDate - now;
+        const diff = start - now;
         const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
         const el = document.getElementById('countdown-text');
-        if (days > 0) {
-            el.innerText = `距離出發還有 ${days} 天`;
-        } else if (now >= startDate && now <= endDate) {
-            const tripDay = Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1;
-            el.innerText = `旅程第 ${tripDay} 天 / 共 7 天`;
-        } else {
-            el.innerText = `旅程已結束`;
-        }
+        
+        if (days > 0) el.innerText = `⏳ 離出發還有 ${days} 天`;
+        else if (now >= start && now <= end) {
+            const current = Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1;
+            el.innerText = `🌸 旅程第 ${current} 天 / 剩餘 ${7 - current} 天`;
+        } else el.innerText = `✈️ 旅程已結束`;
     }
 
-    // --- 2. 飯店資訊編輯邏輯 ---
-    window.updateHotel = () => {
-        window.hotelData = [{
-            name: document.getElementById('h-name').value,
-            addr: document.getElementById('h-addr').value,
-            tel: document.getElementById('h-tel').value
-        }];
-        saveAll();
+    // --- 3. Google Maps 導航網址產生 ---
+    window.openNav = (dest) => {
+        const hotel = window.hotelData[0] || { addr: "福岡市中央區警固 1-9-3" };
+        const finalDest = (dest === 'HOTEL_REF') ? hotel.addr : dest;
+        // dirflg=r 代表大眾運輸
+        const url = `https://maps.google.com/?cid=1650146253583818679&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQ{encodeURIComponent(finalDest)}&dirflg=r`;
+        window.open(url, '_blank');
     };
 
-    // --- 3. Firebase 監聽 ---
+    // --- 4. Firebase 資料監聽與同步 ---
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             Object.assign(window, data);
-            // 填充飯店編輯欄位
             if(window.hotelData[0]) {
                 document.getElementById('h-name').value = window.hotelData[0].name || "";
                 document.getElementById('h-addr').value = window.hotelData[0].addr || "";
@@ -175,7 +186,16 @@
         foods: window.foods, checks: window.checks, hotelData: window.hotelData, emergencyInfo: window.emergencyInfo
     });
 
-    // --- UI 渲染邏輯 ---
+    window.updateHotel = () => {
+        window.hotelData = [{
+            name: document.getElementById('h-name').value,
+            addr: document.getElementById('h-addr').value,
+            tel: document.getElementById('h-tel').value
+        }];
+        saveAll();
+    };
+
+    // --- 5. UI 渲染邏輯 ---
     function refreshUI() {
         renderItinerary(window.currentDay);
         renderMoney(); renderFood(); renderCheck(); renderEmergency();
@@ -186,7 +206,6 @@
         document.getElementById(id + '-sec').classList.add('active');
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        refreshUI();
     };
 
     window.renderItinerary = (day) => {
@@ -196,52 +215,75 @@
         
         const list = document.getElementById('itinerary-list');
         const items = window.tripData[day] || [];
-        const hotel = window.hotelData[0] || { name: "未設定", addr: "" };
-        list.innerHTML = `<h3>Day ${day}</h3>`;
+        const hotel = window.hotelData[0] || { name: "未設定飯店", addr: "" };
+        list.innerHTML = `<h3>Day ${day} 行程</h3>`;
+        
         items.forEach((item, idx) => {
-            let title = item.title, map = item.map;
-            if(map === 'HOTEL_REF') { title = title.includes('飯店') ? title : `飯店出發 (${hotel.name})`; map = hotel.addr; }
-            list.innerHTML += `<div class="itinerary-item">
-                <div style="display:flex; justify-content:space-between;"><span style="font-size:0.7rem;font-weight:700;">${item.t}</span><span onclick="deleteItem(${idx})" style="color:#ccc">×</span></div>
-                <b>${title}</b><br><small>${item.memo}</small>
-            </div>`;
+            let title = item.title;
+            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
+            list.innerHTML += `
+                <div class="itinerary-item">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem; font-weight:700;">${item.t}</span>
+                        <span onclick="deleteItem(${idx})" style="color:#ccc; cursor:pointer; font-size:1.2rem;">&times;</span>
+                    </div>
+                    <b>${title}</b><br><small style="color:#666;">${item.memo}</small><br>
+                    <a href="javascript:void(0)" class="map-btn" onclick="openNav('${item.map}')">🗺️ 大眾運輸導航</a>
+                </div>`;
         });
     };
 
-    // 其他原本的功能函數 (addItem, deleteItem, addMember 等) 保留...
+    // --- 6. 各項管理功能 ---
     window.addItem = () => {
-        const title = prompt("行程名稱？"); if(!title) return;
+        const title = prompt("要去哪裡？(輸入'飯店'會自動關聯)"); if(!title) return;
         const time = prompt("時間？", "09:00");
         if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
         window.tripData[window.currentDay].push({ t: time, title: title, memo: "", map: title.includes("飯店") ? "HOTEL_REF" : title });
         saveAll();
     };
-    window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
+    window.deleteItem = (idx) => { if(confirm("確定刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
+
     window.renderMoney = () => {
         let inc = 0, exp = 0;
-        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:5px;"><input class="input-wood" style="margin:0" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"></div>`; }).join('');
-        document.getElementById('balance-val').innerText = `餘額：¥ ${(inc - 0).toLocaleString()}`;
+        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="margin:0;flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="margin:0;flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"></div>`; }).join('');
+        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="margin:0;flex:2;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="margin:0;flex:1;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"></div>`; }).join('');
+        document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
     };
     window.addMember = () => { window.members.push({n: "姓名", v: 0}); saveAll(); };
-    window.renderFood = () => { document.getElementById('food-list').innerHTML = window.foods.map((f, i) => `<div class="info-card"><b>${f.n}</b><br><small>${f.d}</small></div>`).join(''); };
-    window.addFood = () => { window.foods.push({n: "新餐廳", d: ""}); saveAll(); };
-    window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div><input type="checkbox" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"> ${c.n}</div>`).join(''); };
+    window.addExpense = () => { window.expenses.push({n: "支出項目", v: 0}); saveAll(); };
+
+    window.renderFood = () => { document.getElementById('food-list').innerHTML = window.foods.map((f, i) => `<div class="info-card"><div style="display:flex;justify-content:space-between;"><b>${f.n}</b><span onclick="foods.splice(${i},1);saveAll()">×</span></div><small>${f.d}</small><br><a href="javascript:void(0)" class="map-btn" onclick="openNav('${f.n}')">🗺️ 地圖導航</a></div>`).join(''); };
+    window.addFood = () => { window.foods.push({n: "餐廳名稱", d: "必吃點評"}); saveAll(); };
+
+    window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div style="margin-bottom:8px;"><input type="checkbox" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"> <input style="border:none;background:transparent;width:80%;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"></div>`).join(''); };
     window.addCheck = () => { window.checks.push({n: "新物品", c: false}); saveAll(); };
-    window.renderEmergency = () => { document.getElementById('emergency-list').innerHTML = window.emergencyInfo.map((e, i) => `<div style="font-size:0.8rem;">${e.label}: ${e.val}</div>`).join(''); };
+
+    window.renderEmergency = () => { document.getElementById('emergency-list').innerHTML = window.emergencyInfo.map((e, i) => `<div style="margin-bottom:5px;"><b>${e.label}</b>: <a href="tel:${e.val}">${e.val}</a></div>`).join(''); };
     window.addEmergency = () => { window.emergencyInfo.push({label: "標籤", val: "號碼"}); saveAll(); };
 
-    // 初始化按鈕邏輯
+    // --- 7. 強制重設邏輯 ---
     window.forceReset = () => {
-        if(confirm("確定要重設資料嗎？")) {
-            const init = {
+        if(confirm("這將會清除現有資料並還原為 D1/D7 預設行程。確定嗎？")) {
+            const initData = {
                 hotelData: [{name: "Fukuoka U-BELL Hotel", addr: "福岡市中央區警固 1-9-3", tel: "092-751-0011"}],
-                tripData: { 
-                    1: [{t: "04:00", title: "出發桃園機場", memo: "吉林路26巷", map: "吉林路"}, {t: "08:10", title: "BR106 起飛", memo: "", map: "TPE"}, {t: "12:00", title: "飯店寄行李", memo: "", map: "HOTEL_REF"}],
-                    7: [{t: "15:30", title: "前往機場", memo: "BR101 回台", map: "FUK"}]
+                tripData: {
+                    1: [
+                        {t: "04:00", title: "吉林路26巷出發", memo: "桃園機場方向", map: "桃園機場"},
+                        {t: "08:10", title: "BR106 航班起飛", memo: "前往福岡", map: "桃園機場"},
+                        {t: "12:00", title: "飯店寄放行李", memo: "Check-in", map: "HOTEL_REF"}
+                    ],
+                    2: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+                    3: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+                    4: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+                    5: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+                    6: [{t: "09:00", title: "飯店出發", memo: "", map: "HOTEL_REF"}],
+                    7: [{t: "15:30", title: "前往機場回台", memo: "BR101 航班", map: "福岡機場"}]
                 },
-                members: [], expenses: [], foods: [], checks: [], emergencyInfo: [{label:"警局",val:"110"}]
+                members: [{n: "你的名字", v: 20000}],
+                emergencyInfo: [{label: "報警", val: "110"}, {label: "急救", val: "119"}],
+                expenses: [], foods: [], checks: []
             };
-            set(dbRef, init).then(() => location.reload());
+            set(dbRef, initData).then(() => location.reload());
         }
     };
 </script>
