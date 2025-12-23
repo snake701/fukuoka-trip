@@ -2,275 +2,291 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2026 福岡秋季自由行 | 雲端同步版</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福岡行旅 2026 | 數位旅行手札 V5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --wa-pink: #f9eef0;
-            --wa-brown: #8d7471;
-            --wa-accent: #d19a9a;
-            --wa-white: #ffffff;
-            --wa-pool: #8da4d1;
-            --border-style: 1px solid rgba(141, 116, 113, 0.15);
+            --primary: #FF8C94;
+            --accent: #2D3047;
+            --map-blue: #4285F4;
+            --food-orange: #FF9800;
+            --check-green: #4CAF50;
+            --money-purple: #9C27B0;
+            --sos-red: #F44336;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--wa-pink);
-            color: var(--wa-brown);
-            line-height: 1.7;
+            font-family: 'Poppins', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: var(--accent);
             padding-bottom: 50px;
         }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* 狀態指示燈 */
-        .sync-indicator {
-            position: fixed; top: 10px; right: 10px; font-size: 0.6rem;
-            padding: 4px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            z-index: 2000; display: flex; align-items: center; gap: 5px;
+        .container { max-width: 850px; margin: 0 auto; padding: 15px; }
+
+        /* 頂部狀態欄 */
+        .status-header { text-align: center; margin-bottom: 15px; color: white; }
+        .countdown-bar {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
-        .status-dot.online { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
 
-        .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; }
+        /* 導覽列 */
+        .main-nav {
+            display: flex; background: rgba(255,255,255,0.3);
+            padding: 5px; border-radius: 20px; margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .main-tab {
+            flex: 1; min-width: 70px; text-align: center; padding: 10px; border-radius: 15px;
+            cursor: pointer; font-weight: 700; color: #fff; transition: 0.3s; font-size: 0.85rem;
+        }
+        .main-tab.active { background: #fff; color: var(--primary); box-shadow: var(--shadow); }
 
-        header { text-align: center; padding: 40px 20px 20px; }
-        h1 { font-family: 'Noto Serif TC', serif; font-size: 1.6rem; letter-spacing: 0.2rem; color: var(--wa-brown); }
-        .subtitle { font-size: 0.8rem; opacity: 0.7; text-transform: uppercase; }
+        .content-section { display: none; animation: fadeIn 0.4s ease; }
+        .content-section.active { display: block; }
 
-        .card { background: var(--wa-white); border: var(--border-style); padding: 20px; border-radius: 4px; margin-bottom: 15px; }
-        .card-title { font-family: 'Noto Serif TC', serif; font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 3px solid var(--wa-accent); padding-left: 10px; }
-        .card-title.pool { border-left-color: var(--wa-pool); }
-
-        .calc-input { width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid #eee; font-family: 'Quicksand', sans-serif; font-size: 1rem; color: var(--wa-brown); outline: none; background: transparent; }
-        .calc-result-val { font-family: 'Quicksand', sans-serif; font-size: 1.1rem; color: var(--wa-accent); font-weight: 600; }
-
-        .pool-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; text-align: center; }
-        .pool-stat { padding: 5px; border-radius: 4px; background: #fafafa; }
-        .pool-stat-label { font-size: 0.6rem; color: #aaa; display: block; }
-        .pool-stat-val { font-family: 'Quicksand', sans-serif; font-size: 0.8rem; font-weight: 600; }
-
-        .days-nav { display: flex; overflow-x: auto; gap: 12px; padding: 10px 0; position: sticky; top: 0; z-index: 1000; background: rgba(249, 238, 240, 0.9); backdrop-filter: blur(5px); margin-bottom: 20px; scrollbar-width: none; }
-        .days-nav::-webkit-scrollbar { display: none; }
-        .day-btn { background: none; border: none; padding: 8px 12px; font-family: 'Quicksand', sans-serif; font-size: 0.85rem; color: #b0a4a2; cursor: pointer; white-space: nowrap; }
-        .day-btn.active { color: var(--wa-brown); font-weight: 600; border-bottom: 2px solid var(--wa-brown); }
-
-        .spending-item { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-        .pay-toggle { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; min-width: 55px; background: white; color: #aaa; }
-        .pay-toggle.is-pool { background: var(--wa-pool); color: white; border-color: var(--wa-pool); }
-        .spending-input { border: none; border-bottom: 1px solid #eee; padding: 4px; font-size: 0.8rem; background: transparent; outline: none; color: var(--wa-brown); }
-
-        .btn-add { background: none; border: 1px solid var(--wa-accent); color: var(--wa-accent); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; cursor: pointer; }
-        .btn-del { background: none; border: none; color: #ddd; font-size: 1.2rem; cursor: pointer; line-height: 1; }
+        .info-card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: var(--shadow); margin-bottom: 15px; }
         
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000; }
+        /* 公積金樣式 */
+        .fund-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .fund-summary { font-size: 1.2rem; font-weight: 700; color: var(--money-purple); }
+        .table-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; margin-bottom: 8px; align-items: center; }
+        .table-input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.9rem; }
+        .delete-icon { color: #ccc; cursor: pointer; text-align: center; font-weight: bold; }
+
+        /* 行程與清單樣式 */
+        .day-pane { display: none; }
+        .day-pane.active { display: block; }
+        .days-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; scrollbar-width: none; }
+        .day-btn { background: rgba(255,255,255,0.5); border: none; padding: 10px 18px; border-radius: 50px; cursor: pointer; white-space: nowrap; font-weight: 600; }
+        .day-btn.active { background: var(--primary); color: #fff; }
+        .timeline-item { display: flex; margin-bottom: 15px; border-left: 2px solid #eee; padding-left: 15px; position: relative; }
+        .timeline-item::before { content: ''; position: absolute; left: -7px; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; }
+        .time-text { font-weight: 700; color: var(--primary); min-width: 60px; margin-right: 10px; }
+        .content-text { font-weight: 600; flex-grow: 1; }
+
+        .btn { padding: 10px 15px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+        .btn-add-fund { background: #f3e5f5; color: var(--money-purple); width: 100%; margin-top: 5px; }
+        .sos-btn { background: var(--sos-red); color: white; padding: 12px; border-radius: 12px; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="sync-indicator">
-    <div class="status-dot" id="sync-dot"></div>
-    <span id="sync-text">連線中...</span>
-</div>
-
-<header>
-    <h1>福岡秋意行旅</h1>
-    <div class="subtitle">Cloud Sync Version</div>
-</header>
-
 <div class="container">
-    <!-- 匯率 -->
-    <div class="card">
-        <div class="card-title">匯率設定</div>
-        <input type="number" id="current-rate" class="calc-input" step="0.001" placeholder="讀取中...">
-        <div class="calc-result-box" style="margin-top:15px">
-            <input type="number" id="quick-jpy" class="calc-input" style="width: 50%; border-bottom: 1px solid #eee;" placeholder="輸入 JPY 換算..." oninput="quickCalc()">
-            <span class="calc-result-val" id="quick-twd">≈ $0</span>
+    <header class="status-header">
+        <h2 style="letter-spacing: 2px;">FUKUOKA 2026</h2>
+        <div class="countdown-bar">
+            <div>🛫 出發：<span id="go-countdown">--</span></div>
+            <div>🛬 回國：<span id="back-countdown">--</span></div>
         </div>
-    </div>
+    </header>
 
-    <!-- 公積金 -->
-    <div class="card">
-        <div class="card-title pool">公積金概覽</div>
-        <div class="pool-summary">
-            <div class="pool-stat">
-                <span class="pool-stat-label">總收入</span>
-                <span class="pool-stat-val" id="pool-income">¥ 0</span>
-            </div>
-            <div class="pool-stat">
-                <span class="pool-stat-label">總支出</span>
-                <span class="pool-stat-val" id="pool-expense">¥ 0</span>
-            </div>
-            <div class="pool-stat">
-                <span class="pool-stat-label">餘額</span>
-                <span class="pool-stat-val" id="pool-remain" style="color:var(--wa-pool)">¥ 0</span>
-            </div>
+    <nav class="main-nav">
+        <div class="main-tab active" onclick="switchMain('itinerary')">📅 行程</div>
+        <div class="main-tab" onclick="switchMain('food')">🍴 美食</div>
+        <div class="main-tab" onclick="switchMain('money')">💰 公積金</div>
+        <div class="main-tab" onclick="switchMain('checklist')">✅ 清單</div>
+        <div class="main-tab" onclick="switchMain('tools')">🔧 工具</div>
+    </nav>
+
+    <section id="itinerary-sec" class="content-section active">
+        <div class="days-nav">
+            <button class="day-btn active" onclick="showDay(1)">Day 1</button>
+            <button class="day-btn" onclick="showDay(2)">Day 2</button>
+            <button class="day-btn" onclick="showDay(3)">Day 3</button>
+            <button class="day-btn" onclick="showDay(4)">Day 4</button>
+            <button class="day-btn" onclick="showDay(5)">Day 5</button>
+            <button class="day-btn" onclick="showDay(6)">Day 6</button>
+            <button class="day-btn" onclick="showDay(7)">Day 7</button>
         </div>
-    </div>
+        <div class="info-card" id="itinerary-container"></div>
+    </section>
 
-    <!-- 天數選單 -->
-    <div class="days-nav" id="days-nav"></div>
+    <section id="food-sec" class="content-section">
+        <div class="info-card">
+            <h3 style="color:var(--food-orange); margin-bottom:10px;">必吃口袋名單</h3>
+            <p style="font-size:0.8rem; margin-bottom:15px;">🥩 燒肉多牛、🍜 Shin-Shin、🥖 明太子法國麵包</p>
+            <a href="https://maps.app.goo.gl/2V9Y8X7W6V5U4T3S27" target="_blank" class="btn btn-primary" style="background:var(--food-orange)">搜尋附近熱門餐廳</a>
+        </div>
+    </section>
 
-    <!-- 支出內容 -->
-    <div class="itinerary-box">
-        <div id="day-display"></div>
-    </div>
+    <section id="money-sec" class="content-section">
+        <div class="info-card">
+            <div class="fund-header">
+                <h3>👥 成員繳費</h3>
+                <div class="fund-summary">總收入 ¥ <span id="total-income">0</span></div>
+            </div>
+            <div id="members-list"></div>
+            <button class="btn btn-add-fund" onclick="addMember()">+ 新增成員</button>
+        </div>
+
+        <div class="info-card">
+            <div class="fund-header">
+                <h3>💸 消費紀錄</h3>
+                <div class="fund-summary" style="color:var(--sos-red)">餘額 ¥ <span id="fund-balance">0</span></div>
+            </div>
+            <div id="expenses-list"></div>
+            <button class="btn btn-add-fund" onclick="addExpense()" style="background:#fff3e0; color:var(--food-orange)">+ 新增支出</button>
+        </div>
+    </section>
+
+    <section id="checklist-sec" class="content-section">
+        <div class="info-card">
+            <h3 style="color:var(--check-green); margin-bottom:10px;">🛍️ 採買清單</h3>
+            <div id="check-container"></div>
+            <button class="btn btn-primary" onclick="addCheckItem()" style="background:var(--check-green); margin-top:15px;">+ 新增項目</button>
+        </div>
+    </section>
+
+    <section id="tools-sec" class="content-section">
+        <div class="info-card" style="border: 2px solid var(--sos-red);">
+            <h3 style="color:var(--sos-red); margin-bottom:10px;">🚑 緊急救助</h3>
+            <a href="tel:119" class="sos-btn">🚨 救急車/火警 (119)</a>
+            <a href="tel:0332807911" class="sos-btn" style="background:var(--map-blue);">🇹🇼 駐日代表處</a>
+        </div>
+        <div class="info-card">
+            <h3 style="color:var(--primary); margin-bottom:10px;">🏨 飯店：FUKUOKA U-BELL</h3>
+            <a href="https://maps.app.goo.gl/2V9Y8X7W6V5U4T3S28" target="_blank" class="btn btn-primary">開啟導航</a>
+        </div>
+    </section>
 </div>
 
-<div id="toast">雲端資料同步成功</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-
-    // Firebase 配置 (會由環境自動注入)
-    const firebaseConfig = JSON.parse(__firebase_config);
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'fukuoka-trip-cloud';
-
-    let currentDay = 1;
-    let localData = {
-        rate: 0.215,
-        members: [{ name: '成員 A', amount: 50000 }],
-        dailySpend: {} 
+<script>
+    // --- 資料存儲 ---
+    const defaultTrip = {
+        1: [{t: "11:15", c: "抵達機場"}, {t: "13:00", c: "飯店寄物"}],
+        2: [{t: "09:00", c: "🏨 飯店出發"}, {t: "20:00", c: "🏨 返回飯店"}],
+        3: [{t: "09:30", c: "🏨 飯店出發"}, {t: "18:00", c: "🏨 返回飯店"}],
+        4: [{t: "07:30", c: "🏨 飯店出發"}, {t: "21:00", c: "🏨 返回飯店"}],
+        5: [{t: "10:00", c: "🏨 飯店出發"}, {t: "18:30", c: "🏨 返回飯店"}],
+        6: [{t: "08:30", c: "🏨 飯店出發"}, {t: "20:30", c: "🏨 返回飯店"}],
+        7: [{t: "09:30", c: "飯店退房"}, {t: "17:25", c: "抵達機場"}]
     };
 
-    // 初始化導覽
-    const nav = document.getElementById('days-nav');
-    for(let i=1; i<=7; i++) {
-        const btn = document.createElement('button');
-        btn.className = `day-btn ${i===1?'active':''}`;
-        btn.innerText = `DAY ${i}`;
-        btn.onclick = () => switchDay(i);
-        nav.appendChild(btn);
+    let tripData = JSON.parse(localStorage.getItem('fuk_trip_v5')) || defaultTrip;
+    let checkData = JSON.parse(localStorage.getItem('fuk_check_v5')) || ["護照、保險", "日幣現金"];
+    let members = JSON.parse(localStorage.getItem('fuk_members')) || [{n: "成員1", a: 10000}];
+    let expenses = JSON.parse(localStorage.getItem('fuk_expenses')) || [{n: "機場交通", a: 1500}];
+
+    // --- 公積金邏輯 ---
+    function renderFund() {
+        const memList = document.getElementById('members-list');
+        memList.innerHTML = members.map((m, i) => `
+            <div class="table-row">
+                <input class="table-input" value="${m.n}" oninput="updateMem(${i},'n',this.value)">
+                <input class="table-input" type="number" value="${m.a}" oninput="updateMem(${i},'a',this.value)">
+                <div class="delete-icon" onclick="removeMem(${i})">×</div>
+            </div>`).join('');
+
+        const expList = document.getElementById('expenses-list');
+        expList.innerHTML = expenses.map((e, i) => `
+            <div class="table-row">
+                <input class="table-input" value="${e.n}" oninput="updateExp(${i},'n',this.value)">
+                <input class="table-input" type="number" value="${e.a}" oninput="updateExp(${i},'a',this.value)">
+                <div class="delete-icon" onclick="removeExp(${i})">×</div>
+            </div>`).join('');
+
+        calculateFund();
     }
 
-    // 啟動雲端同步
-    async function initSync() {
-        await signInAnonymously(auth);
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'travel_config');
-        
-        onSnapshot(docRef, (snapshot) => {
-            if (snapshot.exists()) {
-                localData = snapshot.data();
-                renderAll();
-                document.getElementById('sync-dot').classList.add('online');
-                document.getElementById('sync-text').innerText = '雲端已連線';
-            } else {
-                // 首次使用建立檔案
-                setDoc(docRef, localData);
-            }
-        }, (err) => {
-            document.getElementById('sync-text').innerText = '連線失敗';
-        });
+    function calculateFund() {
+        const totalIncome = members.reduce((sum, m) => sum + Number(m.a || 0), 0);
+        const totalExpense = expenses.reduce((sum, e) => sum + Number(e.a || 0), 0);
+        document.getElementById('total-income').innerText = totalIncome.toLocaleString();
+        document.getElementById('fund-balance').innerText = (totalIncome - totalExpense).toLocaleString();
+        localStorage.setItem('fuk_members', JSON.stringify(members));
+        localStorage.setItem('fuk_expenses', JSON.stringify(expenses));
     }
 
-    function renderAll() {
-        // 更新匯率輸入框 (僅在未聚焦時更新，避免干擾打字)
-        const rateInput = document.getElementById('current-rate');
-        if (document.activeElement !== rateInput) rateInput.value = localData.rate;
+    function addMember() { members.push({n: "新成員", a: 0}); renderFund(); }
+    function removeMem(i) { members.splice(i,1); renderFund(); }
+    function updateMem(i,f,v) { members[i][f] = v; calculateFund(); }
 
-        // 計算公積金
-        let income = 0;
-        (localData.members || []).forEach(m => income += parseFloat(m.amount || 0));
-        document.getElementById('pool-income').innerText = `¥ ${income.toLocaleString()}`;
+    function addExpense() { expenses.push({n: "新支出", a: 0}); renderFund(); }
+    function removeExp(i) { expenses.splice(i,1); renderFund(); }
+    function updateExp(i,f,v) { expenses[i][f] = v; calculateFund(); }
 
-        let totalPoolExpense = 0;
-        Object.values(localData.dailySpend || {}).forEach(dayItems => {
-            dayItems.forEach(item => { if(item.isPool) totalPoolExpense += parseFloat(item.amount || 0); });
-        });
-        document.getElementById('pool-expense').innerText = `¥ ${totalPoolExpense.toLocaleString()}`;
-        document.getElementById('pool-remain').innerText = `¥ ${(income - totalPoolExpense).toLocaleString()}`;
-        
-        renderDay();
-        quickCalc();
+    // --- 其他分頁邏輯 ---
+    function renderItinerary() {
+        const container = document.getElementById('itinerary-container');
+        container.innerHTML = '';
+        for (let day in tripData) {
+            let pane = document.createElement('div');
+            pane.className = `day-pane ${day == 1 ? 'active' : ''}`;
+            pane.id = `day-${day}`;
+            pane.innerHTML = tripData[day].map((item, idx) => `
+                <div class="timeline-item">
+                    <span class="time-text" contenteditable="true" onblur="saveTrip(${day},${idx},'t',this.innerText)">${item.t}</span>
+                    <span class="content-text" contenteditable="true" onblur="saveTrip(${day},${idx},'c',this.innerText)">${item.c}</span>
+                </div>`).join('') + `<button class="btn" onclick="addTrip(${day})">+ 新增</button>`;
+            container.appendChild(pane);
+        }
     }
 
-    function renderDay() {
-        const display = document.getElementById('day-display');
-        const dayKey = `day${currentDay}`;
-        const items = localData.dailySpend[dayKey] || [];
-        let pSum = 0, poolSum = 0;
+    function saveTrip(d, i, f, v) { tripData[d][i][f] = v; localStorage.setItem('fuk_trip_v5', JSON.stringify(tripData)); }
+    function addTrip(d) { tripData[d].push({t: "12:00", c: "新內容"}); renderItinerary(); showDay(d); }
 
-        const listHtml = items.map((item, idx) => {
-            const amt = parseFloat(item.amount || 0);
-            if(item.isPool) poolSum += amt; else pSum += amt;
-            return `
-                <div class="spending-item">
-                    <button class="pay-toggle ${item.isPool?'is-pool':''}" onclick="updateItem(${idx}, 'isPool', ${!item.isPool})">
-                        ${item.isPool?'公積金':'自付'}
-                    </button>
-                    <input type="text" class="spending-input" style="flex:1" value="${item.name || ''}" 
-                        placeholder="項目名稱" onchange="updateItem(${idx}, 'name', this.value)">
-                    <input type="number" class="spending-input" style="width:70px; text-align:right" value="${item.amount || ''}" 
-                        placeholder="¥" onchange="updateItem(${idx}, 'amount', this.value)">
-                    <button class="btn-del" onclick="deleteItem(${idx})">×</button>
-                </div>
-            `;
-        }).join('');
-
-        display.innerHTML = `
-            <div style="margin-bottom:20px; font-family:'Noto Serif TC'; font-size:0.8rem; color:var(--wa-accent)">DAY ${currentDay} 支出詳細</div>
-            ${listHtml}
-            <button class="btn-add" style="margin-top:10px" onclick="addItem()">+ 新增紀錄</button>
-            <div style="margin-top:20px; text-align:right; font-size:0.7rem; border-top:1px dashed #eee; padding-top:15px; color:#b0a4a2">
-                個人小計: ¥ ${pSum.toLocaleString()}<br>
-                <span style="color:var(--wa-pool)">公積金小計: ¥ ${poolSum.toLocaleString()}</span>
-            </div>
-        `;
+    function renderChecklist() {
+        document.getElementById('check-container').innerHTML = checkData.map((item, idx) => `
+            <div class="check-item"><input type="checkbox">
+            <span contenteditable="true" onblur="saveCheck(${idx}, this.innerText)">${item}</span>
+            <span style="margin-left:auto;color:#ccc" onclick="removeCheck(${idx})">×</span></div>`).join('');
     }
 
-    // 更新雲端
-    async function syncToCloud() {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'travel_config');
-        await updateDoc(docRef, localData);
-        const t = document.getElementById('toast');
-        t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000);
+    function saveCheck(i, v) { checkData[i] = v; localStorage.setItem('fuk_check_v5', JSON.stringify(checkData)); }
+    function addCheckItem() { checkData.push("新項目"); renderChecklist(); }
+    function removeCheck(i) { checkData.splice(i, 1); renderChecklist(); }
+
+    function switchMain(target) {
+        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.getElementById(`${target}-sec`).classList.add('active');
     }
 
-    // 視窗全域函式
-    window.updateItem = (idx, field, value) => {
-        localData.dailySpend[`day${currentDay}`][idx][field] = value;
-        syncToCloud();
-    };
+    function showDay(day) {
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.day-pane').forEach(p => p.classList.remove('active'));
+        const btn = document.querySelector(`.day-btn:nth-child(${day})`);
+        if(btn) btn.classList.add('active');
+        document.getElementById(`day-${day}`).classList.add('active');
+    }
 
-    window.addItem = () => {
-        const dayKey = `day${currentDay}`;
-        if(!localData.dailySpend[dayKey]) localData.dailySpend[dayKey] = [];
-        localData.dailySpend[dayKey].push({ name: '', amount: 0, isPool: false });
-        syncToCloud();
-    };
+    function updateCountdowns() {
+        const start = new Date('October 3, 2026 00:00:00').getTime();
+        const end = new Date('October 9, 2026 23:59:59').getTime();
+        const now = new Date().getTime();
+        document.getElementById('go-countdown').innerText = start > now ? Math.floor((start-now)/86400000) + " 天" : "旅行中";
+        document.getElementById('back-countdown').innerText = end > now ? Math.floor((end-now)/86400000) + " 天" : "已回國";
+    }
 
-    window.deleteItem = (idx) => {
-        localData.dailySpend[`day${currentDay}`].splice(idx, 1);
-        syncToCloud();
+    window.onload = () => {
+        renderItinerary();
+        renderChecklist();
+        renderFund();
+        updateCountdowns();
     };
-
-    window.switchDay = (n) => {
-        currentDay = n;
-        document.querySelectorAll('.day-btn').forEach((b, i) => b.classList.toggle('active', i === n-1));
-        renderDay();
-    };
-
-    window.quickCalc = () => {
-        const r = parseFloat(document.getElementById('current-rate').value) || 0;
-        const j = parseFloat(document.getElementById('quick-jpy').value) || 0;
-        document.getElementById('quick-twd').innerText = `≈ $${Math.round(j * r).toLocaleString()}`;
-    };
-
-    document.getElementById('current-rate').onchange = (e) => {
-        localData.rate = parseFloat(e.target.value) || 0.215;
-        syncToCloud();
-    };
-
-    // 啟動
-    onAuthStateChanged(auth, (user) => { if (user) initSync(); });
 </script>
+
 </body>
 </html>
