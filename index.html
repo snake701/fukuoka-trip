@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 和風木質誌 V10</title>
+    <title>福岡行旅 2026 | 木質手帖 V11</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -28,7 +28,6 @@
             padding-bottom: 50px;
         }
 
-        /* 標頭區 */
         header {
             max-width: 900px; margin: 0 auto; padding: 30px 20px;
             text-align: center;
@@ -36,7 +35,6 @@
         h1 { font-family: 'Noto Serif TC', serif; font-size: 2rem; margin-bottom: 5px; letter-spacing: 3px; }
         #weather-info { font-size: 0.85rem; color: #8D8273; }
 
-        /* V5 分頁導覽列 */
         .main-nav {
             max-width: 800px; margin: 0 auto 20px;
             display: flex; background: rgba(215, 204, 200, 0.3);
@@ -54,7 +52,6 @@
         .content-section { display: none; animation: fadeIn 0.4s ease; }
         .content-section.active { display: block; }
 
-        /* 行程天數導航 */
         .day-nav { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 25px; scrollbar-width: none; }
         .day-tab {
             cursor: pointer; padding: 6px 15px; background: var(--paper);
@@ -63,34 +60,25 @@
         }
         .day-tab.active { background: var(--wood-dark); color: white; }
 
-        /* 時間軸排版 */
-        .timeline-item { display: grid; grid-template-columns: 70px 1fr; margin-bottom: 30px; }
-        .time { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 1rem; }
+        .timeline-item { display: grid; grid-template-columns: 70px 1fr; margin-bottom: 20px; }
+        .time { font-family: 'Noto Serif TC', serif; font-weight: 700; font-size: 0.95rem; padding-top: 5px; }
         .content { 
             padding-left: 20px; border-left: 1px solid var(--border); position: relative; 
+            padding-bottom: 10px;
         }
         .content::before {
-            content: ''; position: absolute; left: -4px; top: 10px;
+            content: ''; position: absolute; left: -4px; top: 12px;
             width: 7px; height: 7px; background: var(--border); border-radius: 50%;
         }
 
-        /* 標籤 */
         .tag { font-size: 0.65rem; padding: 2px 8px; margin-right: 5px; border-radius: 2px; border: 1px solid; vertical-align: middle; }
         .tag-trans { border-color: var(--accent-blue); color: var(--accent-blue); }
         .tag-food { border-color: var(--accent-red); color: var(--accent-red); }
         .tag-spot { border-color: var(--accent-green); color: var(--accent-green); }
+        .tag-hotel { border-color: var(--wood-dark); background: var(--wood-dark); color: white; }
 
-        /* 公積金與表格 */
         .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
-        .fund-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 10px; margin-bottom: 10px; }
-        .input-wood { width: 100%; padding: 8px; border: 1px solid var(--border); background: transparent; font-size: 0.9rem; border-radius: 4px; }
-        
-        .btn-wood { 
-            width: 100%; padding: 10px; background: var(--wood-dark); color: white; border: none; 
-            border-radius: 4px; cursor: pointer; font-family: 'Noto Serif TC', serif; margin-top: 10px;
-        }
-
-        .map-link { font-size: 0.8rem; color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid; }
+        .map-link { font-size: 0.8rem; color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid; display: inline-block; margin-top: 5px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -103,11 +91,11 @@
 </header>
 
 <div class="main-nav">
-    <div class="nav-tab active" onclick="switchMain('itinerary')">📅 行程</div>
+    <div class="nav-tab active" onclick="switchMain('itinerary')">📅 行程日誌</div>
     <div class="nav-tab" onclick="switchMain('money')">💰 公積金</div>
-    <div class="nav-tab" onclick="switchMain('food')">🍴 美食</div>
-    <div class="nav-tab" onclick="switchMain('check')">✅ 清單</div>
-    <div class="nav-tab" onclick="switchMain('tools')">🔧 工具</div>
+    <div class="nav-tab" onclick="switchMain('food')">🍴 美食清單</div>
+    <div class="nav-tab" onclick="switchMain('check')">✅ 出發檢查</div>
+    <div class="nav-tab" onclick="switchMain('tools')">🔧 轉乘工具</div>
 </div>
 
 <div class="container">
@@ -118,77 +106,77 @@
 
     <section id="money-sec" class="content-section">
         <div class="info-card">
-            <h3 style="font-family:'Noto Serif TC';">👥 成員繳費 (¥<span id="total-income">0</span>)</h3>
-            <div id="members-list"></div>
-            <button class="btn-wood" onclick="addMember()">+ 新增成員</button>
-        </div>
-        <div class="info-card">
-            <h3 style="font-family:'Noto Serif TC';">💸 公款支出 (餘 ¥<span id="fund-balance">0</span>)</h3>
-            <div id="expenses-list"></div>
-            <button class="btn-wood" onclick="addExpense()">+ 新增支出</button>
+            <h3 style="font-family:'Noto Serif TC';">👥 公積金 (¥)</h3>
+            <p>可在此紀錄成員預繳與公共支出。</p>
         </div>
     </section>
 
-    <section id="food-sec" class="content-section">
-        <div class="info-card">
-            <h3 style="color:var(--accent-red); font-family:'Noto Serif TC';">📍 飯店周邊 (天神)</h3>
-            <p>• <b>稚加榮</b>：經典活魚料亭</p>
-            <p>• <b>天婦羅 Hirao</b>：福岡靈魂炸物</p>
-        </div>
-        <div class="info-card">
-            <h3 style="color:var(--accent-red); font-family:'Noto Serif TC';">♨️ 由布院精選</h3>
-            <p>• <b>由布釜飯 心</b>：豐後牛一鍋三吃</p>
-            <p>• <b>湯之岳庵</b>：金鱗湖畔山家料理</p>
-        </div>
-    </section>
-
-    <section id="check-sec" class="content-section">
-        <div class="info-card">
-            <h3 style="font-family:'Noto Serif TC';">✅ 準備清單</h3>
-            <div id="check-list"></div>
-            <button class="btn-wood" onclick="addCheckItem()">+ 新增項目</button>
-        </div>
-    </section>
-
-    <section id="tools-sec" class="content-section">
-        <div class="info-card">
-            <h4 style="font-family:'Noto Serif TC';">🛫 航班與住宿</h4>
-            <p style="font-size:0.9rem;">長榮 BR106 / BR105<br>Fukuoka U-BELL Hotel</p>
-            <a href="https://www.google.com/maps/search/FUKUOKA+U-BELL+HOTEL8" class="map-link">導覽至飯店</a>
-        </div>
-        <div class="info-card" style="border-left: 4px solid var(--accent-red);">
-            <h4 style="font-family:'Noto Serif TC'; color:var(--accent-red);">🚨 緊急聯絡</h4>
-            <p style="font-size:0.8rem;">急救：119 | 警察：110</p>
-        </div>
-    </section>
-</div>
+    </div>
 
 <script>
-    const API_KEY = 'b8f2962f275943c4264c5d1e72c1b21b';
-    const CITY_ID = '1863967';
+    const HOTEL_NAME = "Fukuoka+U-BELL+Hotel";
+    const HOTEL_ADDR = "福岡中央區警固 1-9-3";
 
-    // 數據結構
-    const defaultTrip = {
+    const tripData = {
         1: [
-            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線至天神。", memo: "提示：博多站可先劃位由布院之森。"},
-            {t: "19:00", type: "food", title: "中洲屋台街", desc: "博多特有的路邊攤文化。", memo: "必吃：明太子玉子燒。", map: "Nakasu"}
+            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線直達博多或天神。", memo: "提示：博多站可先處理 JR Pass。"},
+            {t: "13:00", type: "hotel", title: "Check-in / 寄放行李", desc: "前往 Fukuoka U-BELL Hotel。", memo: "從天神站步行約 10 分鐘。", map: HOTEL_NAME},
+            {t: "15:00", type: "spot", title: "大濠公園散策", desc: "飯店出發，搭乘地下鐵至大濠公園站。", memo: "悠閒散步，享受福岡午後。", map: "Ohori+Park"},
+            {t: "19:00", type: "food", title: "中洲屋台街", desc: "體驗博多屋台文化。", memo: "必吃拉麵，之後散步回飯店。", map: "Nakasu"}
         ],
         2: [
-            {t: "09:30", type: "trans", title: "西鐵福岡站", desc: "前往太宰府與柳川。", memo: "記得購買觀光套票。", map: "Nishitetsu+Fukuoka"}
+            {t: "09:00", type: "hotel", title: "飯店出發", desc: "U-BELL Hotel 步行至西鐵福岡站。", memo: "開啟太宰府、柳川一日遊。", map: "Nishitetsu+Fukuoka+Station"},
+            {t: "11:00", type: "spot", title: "柳川下り", desc: "乘船體驗與鰻魚飯午餐。", map: "Yanagawa"},
+            {t: "15:00", type: "spot", title: "太宰府天滿宮", desc: "參拜神道，品嚐梅枝餅。", map: "Dazaifu"},
+            {t: "20:00", type: "hotel", title: "返回飯店", desc: "搭乘西鐵返回天神，回飯店休息。", map: HOTEL_NAME}
+        ],
+        3: [
+            {t: "09:00", type: "hotel", title: "飯店出發", desc: "天神區漫步或前往博多站採買。", memo: "今日為自由移動日。", map: "Hakata+Station"},
+            {t: "20:30", type: "hotel", title: "返回飯店", desc: "U-BELL Hotel 休息。", map: HOTEL_NAME}
         ],
         4: [
-            {t: "08:00", type: "spot", title: "高千穗一日團", desc: "博多站筑紫口集合。", memo: "重要：請提早10分鐘抵達。", map: "Hakata+Station"}
+            {t: "07:30", type: "hotel", title: "飯店出發", desc: "前往博多站筑紫口集合。", memo: "參加高千穗一日巴士團。", map: "Hakata+Station"},
+            {t: "09:00", type: "spot", title: "高千穗峽谷", desc: "欣賞峽谷美景與神話之鄉。", map: "Takachiho"},
+            {t: "20:00", type: "hotel", title: "返回飯店", desc: "巴士團回程後，搭車回飯店。", map: HOTEL_NAME}
+        ],
+        5: [
+            {t: "09:00", type: "hotel", title: "飯店出發", desc: "前往博多車站。", memo: "今日使用 JR Pass 開啟跨縣行程。", map: "Hakata+Station"},
+            {t: "19:00", type: "food", title: "博多車站晚餐", desc: "博多運河城或地下街用餐。", map: "Canal+City+Hakata"},
+            {t: "21:00", type: "hotel", title: "返回飯店", desc: "U-BELL Hotel 休息。", map: HOTEL_NAME}
         ],
         6: [
-            {t: "09:24", type: "trans", title: "由布院之森", desc: "搭乘特急前往由布院。", memo: "必吃：車內販售大分縣特產。", map: "Yufuin"}
+            {t: "09:00", type: "hotel", title: "飯店出發", desc: "搭乘「由布院之森」特急火車。", map: "Hakata+Station"},
+            {t: "11:30", type: "spot", title: "由布院散策", desc: "湯之坪街道、金鱗湖。", map: "Yufuin"},
+            {t: "18:00", type: "hotel", title: "返回飯店", desc: "搭乘 JR 回博多，轉車回飯店。", map: HOTEL_NAME}
+        ],
+        7: [
+            {t: "09:30", type: "hotel", title: "飯店出發", desc: "Check-out 並寄放行李或前往機場。", memo: "最後採買時間。", map: "Fukuoka+Airport"}
         ]
     };
 
-    let members = JSON.parse(localStorage.getItem('wood_mem')) || [{n: "成員A", a: 20000}];
-    let expenses = JSON.parse(localStorage.getItem('wood_exp')) || [{n: "交通費", a: 0}];
-    let checkData = JSON.parse(localStorage.getItem('wood_check')) || ["護照", "日幣現金", "保險憑證"];
+    function renderItinerary(day) {
+        const container = document.getElementById('itinerary-content');
+        container.innerHTML = "";
+        const items = tripData[day] || [];
+        
+        items.forEach(item => {
+            const tagMap = { trans: 'tag-trans', food: 'tag-food', spot: 'tag-spot', hotel: 'tag-hotel' };
+            const typeText = { trans: '交通', food: '食事', spot: '景點', hotel: '住所' };
+            container.innerHTML += `
+                <div class="timeline-item">
+                    <div class="time">${item.t}</div>
+                    <div class="content">
+                        <div style="font-weight:700; font-size:1.05rem; margin-bottom:5px;">
+                            <span class="tag ${tagMap[item.type]}">${typeText[item.type]}</span> ${item.title}
+                        </div>
+                        <div style="font-size:0.9rem; color:#6D6D6D; margin-bottom:8px;">${item.desc}</div>
+                        <div style="font-size:0.8rem; background:rgba(215,204,200,0.2); padding:8px; border-left:2px solid var(--border);">📜 ${item.memo}</div>
+                        ${item.map ? `<a href="http://google.com/maps/search/燒肉多牛0{item.map}&travelmode=transit" target="_blank" class="map-link">查詢轉乘 ▸</a>` : ''}
+                    </div>
+                </div>`;
+        });
+    }
 
-    // 核心功能：切換分頁
     function switchMain(target) {
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
         document.getElementById(target + '-sec').classList.add('active');
@@ -196,65 +184,13 @@
         event.currentTarget.classList.add('active');
     }
 
-    // 行程渲染
-    function renderItinerary(day) {
-        const container = document.getElementById('itinerary-content');
-        container.innerHTML = "";
-        const items = defaultTrip[day] || [{t: "--:--", type: "spot", title: "自由探索", desc: "今日隨意安排。", memo: "推薦：天神地下街。"}];
-        
-        items.forEach(item => {
-            const tagMap = { trans: 'tag-trans', food: 'tag-food', spot: 'tag-spot' };
-            const typeText = { trans: '交通', food: '食事', spot: '景點' };
-            container.innerHTML += `
-                <div class="timeline-item">
-                    <div class="time">${item.t}</div>
-                    <div class="content">
-                        <div style="font-weight:700; font-size:1.1rem; margin-bottom:5px;">
-                            <span class="tag ${tagMap[item.type]}">${typeText[item.type]}</span> ${item.title}
-                        </div>
-                        <div style="font-size:0.9rem; color:#6D6D6D; margin-bottom:8px;">${item.desc}</div>
-                        <div style="font-size:0.8rem; background:rgba(215,204,200,0.2); padding:8px; border-left:2px solid var(--border);">📜 ${item.memo}</div>
-                        ${item.map ? `<a href="https://www.google.com/maps/search/FUKUOKA+U-BELL+HOTEL9{item.map}&travelmode=transit" target="_blank" class="map-link" style="margin-top:8px; display:inline-block;">查詢轉乘</a>` : ''}
-                    </div>
-                </div>`;
-        });
-    }
-
-    // 公積金與清單邏輯 (簡化版)
-    function renderFund() {
-        document.getElementById('members-list').innerHTML = members.map((m, i) => `<div class="fund-row"><input class="input-wood" value="${m.n}" oninput="members[${i}].n=this.value;saveFund()"><input class="input-wood" type="number" value="${m.a}" oninput="members[${i}].a=this.value;saveFund()"><span onclick="members.splice(${i},1);renderFund()">×</span></div>`).join('');
-        document.getElementById('expenses-list').innerHTML = expenses.map((e, i) => `<div class="fund-row"><input class="input-wood" value="${e.n}" oninput="expenses[${i}].n=this.value;saveFund()"><input class="input-wood" type="number" value="${e.a}" oninput="expenses[${i}].a=this.value;saveFund()"><span onclick="expenses.splice(${i},1);renderFund()">×</span></div>`).join('');
-        const inc = members.reduce((s, m) => s + Number(m.a||0), 0);
-        const exp = expenses.reduce((s, e) => s + Number(e.a||0), 0);
-        document.getElementById('total-income').innerText = inc.toLocaleString();
-        document.getElementById('fund-balance').innerText = (inc - exp).toLocaleString();
-    }
-    function saveFund() { localStorage.setItem('wood_mem', JSON.stringify(members)); localStorage.setItem('wood_exp', JSON.stringify(expenses)); renderFund(); }
-    function addMember() { members.push({n: "姓名", a: 0}); renderFund(); }
-    function addExpense() { expenses.push({n: "項目", a: 0}); renderFund(); }
-
-    function renderCheck() {
-        document.getElementById('check-list').innerHTML = checkData.map((c, i) => `<div style="margin-bottom:10px;"><input type="checkbox"> <span contenteditable="true" onblur="checkData[${i}]=this.innerText;saveCheck()">${c}</span></div>`).join('');
-    }
-    function saveCheck() { localStorage.setItem('wood_check', JSON.stringify(checkData)); }
-    function addCheckItem() { checkData.push("新項目"); renderCheck(); }
-
-    async function fetchWeather() {
-        try {
-            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?id=${CITY_ID}&appid=${API_KEY}&units=metric&lang=zh_tw`);
-            const data = await res.json();
-            if(data.cod === 200) document.getElementById('weather-info').innerText = `福岡：${Math.round(data.main.temp)}°C / ${data.weather[0].description}`;
-        } catch(e) { document.getElementById('weather-info').innerText = "福岡：18°C / 晴"; }
-    }
-
     window.onload = () => {
         const tabs = document.getElementById('day-tabs');
         for(let i=1; i<=7; i++) {
             tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
         }
-        fetchWeather(); renderItinerary(1); renderFund(); renderCheck();
+        renderItinerary(1);
     };
 </script>
-
 </body>
 </html>
