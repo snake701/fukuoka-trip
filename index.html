@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 可編輯木質手帖 V11.5</title>
+    <title>福岡行旅 2026 | 木質手帖 V12 修正版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -52,11 +52,11 @@
 
         .item-memo { font-size: 0.8rem; background: rgba(215,204,200,0.2); padding: 8px; border-left: 2px solid var(--border); margin: 8px 0; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-wood-sm { font-size: 0.7rem; cursor: pointer; background: #fff; border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; color: var(--wood-dark); }
+        .btn-wood-sm { font-size: 0.7rem; cursor: pointer; background: #fff; border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; color: var(--wood-dark); text-decoration: none; display: inline-block;}
 
-        /* 編輯表單樣式 */
+        /* 卡片容器 */
         .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; }
-        .input-wood { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; }
+        .input-wood { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: white; }
         .btn-save { background: var(--wood-dark); color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; font-family: 'Noto Serif TC', serif; cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -71,11 +71,11 @@
 </header>
 
 <nav class="main-nav">
-    <div class="nav-tab active" onclick="switchSection('itinerary')">📅 行程日誌</div>
-    <div class="nav-tab" onclick="switchSection('money')">💰 公積金</div>
-    <div class="nav-tab" onclick="switchSection('food')">🍴 美食清單</div>
-    <div class="nav-tab" onclick="switchSection('check')">✅ 出發檢查</div>
-    <div class="nav-tab" onclick="switchSection('tools')">🔧 轉乘工具</div>
+    <div class="nav-tab active" id="tab-itinerary" onclick="switchSection('itinerary')">📅 行程日誌</div>
+    <div class="nav-tab" id="tab-money" onclick="switchSection('money')">💰 公積金</div>
+    <div class="nav-tab" id="tab-food" onclick="switchSection('food')">🍴 美食清單</div>
+    <div class="nav-tab" id="tab-check" onclick="switchSection('check')">✅ 出發檢查</div>
+    <div class="nav-tab" id="tab-tools" onclick="switchSection('tools')">🔧 轉乘工具</div>
 </nav>
 
 <div class="container">
@@ -85,7 +85,7 @@
         <button class="btn-wood-sm" style="width:100%; padding:10px; margin-bottom:20px; border-style:dashed;" onclick="showEditForm(-1)">+ 新增行程內容</button>
 
         <div id="edit-form-container" class="info-card hidden">
-            <h4 id="form-title" style="margin-top:0;">編輯行程</h4>
+            <h4 id="form-title" style="margin-top:0; font-family:'Noto Serif TC';">編輯行程</h4>
             <input type="text" id="f-time" class="input-wood" placeholder="時間 (如 09:00)">
             <select id="f-type" class="input-wood">
                 <option value="hotel">住所 (Hotel)</option>
@@ -95,23 +95,41 @@
             </select>
             <input type="text" id="f-title" class="input-wood" placeholder="活動名稱">
             <input type="text" id="f-desc" class="input-wood" placeholder="簡短描述">
-            <input type="text" id="f-memo" class="input-wood" placeholder="攻略或預約號碼">
-            <input type="text" id="f-map" class="input-wood" placeholder="Google地圖關鍵字">
+            <input type="text" id="f-memo" class="input-wood" placeholder="攻略或備忘">
+            <input type="text" id="f-map" class="input-wood" placeholder="Google地圖關鍵字 (店名或地標)">
             <button class="btn-save" onclick="saveTripItem()">儲存行程</button>
-            <button class="btn-wood-sm" style="width:100%; margin-top:8px;" onclick="hideEditForm()">取消</button>
+            <button class="btn-wood-sm" style="width:100%; margin-top:8px;" onclick="hideEditForm()">取消編輯</button>
         </div>
 
         <div id="itinerary-list"></div>
     </section>
 
     <section id="money-sec" class="content-section">
-        <div class="info-card"><h3>💰 公積金管理</h3><p>請在此紀錄預算與支出。</p></div>
+        <div class="info-card">
+            <h3 style="font-family:'Noto Serif TC';">💰 公積金</h3>
+            <p style="font-size:0.9rem;">這裡可紀錄旅伴預繳金與公共支出。</p>
+            </div>
+    </section>
+
+    <section id="food-sec" class="content-section">
+        <div class="info-card">
+            <h3 style="font-family:'Noto Serif TC';">🍴 推薦清單</h3>
+            <p>• <b>稚加榮</b>：經典活魚料亭<br>• <b>天婦羅 Hirao</b>：福岡靈魂炸物</p>
+        </div>
+    </section>
+
+    <section id="check-sec" class="content-section">
+        <div class="info-card">
+            <h3 style="font-family:'Noto Serif TC';">✅ 準備清單</h3>
+            <p>☑️ 護照 / 簽證<br>☑️ 國際駕照<br>☑️ 預約代碼</p>
+        </div>
     </section>
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
-            <h4>🏨 預設住所</h4>
+            <h4 style="font-family:'Noto Serif TC';">🏨 住宿資訊</h4>
             <p>Fukuoka U-BELL Hotel<br>中央區警固 1-9-3</p>
+            <a href="https://www.google.com/maps/search/?api=1&query=Fukuoka+U-BELL+Hotel" target="_blank" class="btn-wood-sm">開啟地圖</a>
         </div>
     </section>
 </div>
@@ -122,34 +140,42 @@
     let currentDay = 1;
     let editingIndex = -1;
 
-    // 初始 V11 行程數據
+    // 初始預設行程 (Day 1 - Day 7 都包含「飯店」作為出發/結束點)
     const initialData = {
         1: [
-            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線直達天神。", memo: "提示：博多站可先處理 JR Pass。", map: "Fukuoka+Airport"},
-            {t: "13:00", type: "hotel", title: "飯店寄放行李", desc: "Fukuoka U-BELL Hotel Check-in。", memo: "從天神站步行約 10 分鐘。", map: "Fukuoka+U-BELL+Hotel"},
-            {t: "15:00", type: "spot", title: "大濠公園散策", desc: "飯店出發，搭地鐵至大濠公園站。", memo: "必吃：水上星巴克。", map: "Ohori+Park"}
+            {t: "11:15", type: "trans", title: "抵達福岡空港", desc: "搭乘地下鐵空港線直達天神站。", memo: "記得處理 JR Pass。", map: "Fukuoka+Airport"},
+            {t: "13:00", type: "hotel", title: "寄放行李", desc: "Fukuoka U-BELL Hotel 入住辦理。", memo: "從天神站步行約 10 分鐘。", map: "Fukuoka+U-BELL+Hotel"}
         ],
-        2: [
-            {t: "09:00", type: "hotel", title: "飯店出發", desc: "前往西鐵福岡站。", memo: "開啟太宰府一日遊。", map: "Nishitetsu+Fukuoka+Station"},
-            {t: "20:00", type: "hotel", title: "返回飯店休息", desc: "U-BELL Hotel。", memo: "早點休息。", map: "Fukuoka+U-BELL+Hotel"}
-        ],
-        // ...其餘天數預設空數據供新增
-        3: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "自由活動。", memo: "", map: "Hakata"}],
-        4: [{t: "07:30", type: "hotel", title: "飯店出發", desc: "高千穗一日團。", memo: "", map: "Hakata+Station"}],
+        2: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "開始行程。", memo: "", map: "Fukuoka+U-BELL+Hotel"}],
+        3: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "自由活動。", memo: "", map: "Fukuoka+U-BELL+Hotel"}],
+        4: [{t: "07:30", type: "hotel", title: "飯店出發", desc: "前往博多車站。", memo: "", map: "Hakata+Station"}],
         5: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "跨縣行程。", memo: "", map: "Hakata+Station"}],
         6: [{t: "09:00", type: "hotel", title: "飯店出發", desc: "由布院之森。", memo: "", map: "Hakata+Station"}],
-        7: [{t: "10:00", type: "hotel", title: "飯店出發", desc: "Check-out 前往機場。", memo: "祝旅途平安。", map: "Fukuoka+Airport"}]
+        7: [{t: "10:00", type: "hotel", title: "飯店出發", desc: "Check-out 歸途。", memo: "", map: "Fukuoka+Airport"}]
     };
 
-    let tripData = JSON.parse(localStorage.getItem('fukuoka_v11_data')) || initialData;
+    let tripData = JSON.parse(localStorage.getItem('fukuoka_v12_trip')) || initialData;
 
-    function switchSection(id) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id + '-sec').classList.add('active');
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    // 分頁切換功能修正
+    function switchSection(sectionId) {
+        // 隱藏所有分頁
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        // 移除所有導覽按鈕的 active
+        document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+        
+        // 顯示目標分頁
+        const targetSec = document.getElementById(sectionId + '-sec');
+        if(targetSec) targetSec.classList.add('active');
+        
+        // 點亮目標導覽按鈕
+        const targetTab = document.getElementById('tab-' + sectionId);
+        if(targetTab) targetTab.classList.add('active');
+        
+        // 如果切換到行程分頁，重新渲染
+        if(sectionId === 'itinerary') renderItinerary(currentDay);
     }
 
+    // 行程渲染功能
     function renderItinerary(day) {
         currentDay = day;
         const list = document.getElementById('itinerary-list');
@@ -158,28 +184,29 @@
         if(!tripData[day]) tripData[day] = [];
         
         tripData[day].forEach((item, index) => {
-            const tags = { hotel: 'tag-hotel', spot: 'tag-spot', food: 'tag-food', trans: 'tag-trans' };
-            const names = { hotel: '住所', spot: '景點', food: '食事', trans: '交通' };
+            const tagClasses = { hotel: 'tag-hotel', spot: 'tag-spot', food: 'tag-food', trans: 'tag-trans' };
+            const tagNames = { hotel: '住所', spot: '景點', food: '食事', trans: '交通' };
             
             list.innerHTML += `
                 <div class="timeline-item">
                     <div class="time">${item.t}</div>
                     <div class="content">
                         <div style="font-weight:700;">
-                            <span class="tag ${tags[item.type]}">${names[item.type]}</span> ${item.title}
+                            <span class="tag ${tagClasses[item.type] || 'tag-spot'}">${tagNames[item.type] || '行程'}</span> ${item.title}
                         </div>
                         <div style="font-size:0.85rem; color:#6D6D6D;">${item.desc}</div>
                         ${item.memo ? `<div class="item-memo">📜 ${item.memo}</div>` : ''}
                         <div class="btn-group">
                             <span class="btn-wood-sm" onclick="showEditForm(${index})">✎ 編輯</span>
                             <span class="btn-wood-sm" onclick="deleteItem(${index})">🗑 刪除</span>
-                            ${item.map ? `<a href="http://google.com/maps/search/燒肉多牛0{item.map}&travelmode=transit" target="_blank" class="btn-wood-sm" style="text-decoration:none;">🧭 地圖</a>` : ''}
+                            ${item.map ? `<a href="https://www.google.com/maps/search/?api=1&query=${item.map}" target="_blank" class="btn-wood-sm">🧭 地圖</a>` : ''}
                         </div>
                     </div>
                 </div>`;
         });
     }
 
+    // 編輯表單顯示
     function showEditForm(index) {
         editingIndex = index;
         document.getElementById('edit-form-container').classList.remove('hidden');
@@ -192,17 +219,22 @@
             document.getElementById('f-memo').value = item.memo;
             document.getElementById('f-map').value = item.map;
         } else {
-            document.querySelectorAll('.input-wood').forEach(i => i.value = "");
+            // 清空表單
+            document.getElementById('f-time').value = "";
             document.getElementById('f-type').value = "spot";
+            document.getElementById('f-title').value = "";
+            document.getElementById('f-desc').value = "";
+            document.getElementById('f-memo').value = "";
+            document.getElementById('f-map').value = "";
         }
-        window.scrollTo(0, document.getElementById('edit-form-container').offsetTop - 100);
+        window.scrollTo(0, document.getElementById('edit-form-container').offsetTop - 20);
     }
 
     function saveTripItem() {
         const item = {
             t: document.getElementById('f-time').value || "00:00",
             type: document.getElementById('f-type').value,
-            title: document.getElementById('f-title').value || "未命名行程",
+            title: document.getElementById('f-title').value || "新行程",
             desc: document.getElementById('f-desc').value,
             memo: document.getElementById('f-memo').value,
             map: document.getElementById('f-map').value
@@ -211,22 +243,24 @@
         if(editingIndex > -1) tripData[currentDay][editingIndex] = item;
         else tripData[currentDay].push(item);
         
+        // 依時間排序
         tripData[currentDay].sort((a, b) => a.t.localeCompare(b.t));
-        localStorage.setItem('fukuoka_v11_data', JSON.stringify(tripData));
+        localStorage.setItem('fukuoka_v12_trip', JSON.stringify(tripData));
         hideEditForm();
         renderItinerary(currentDay);
     }
 
     function deleteItem(index) {
-        if(confirm("確定刪除此行程？")) {
+        if(confirm("確定刪除此項行程？")) {
             tripData[currentDay].splice(index, 1);
-            localStorage.setItem('fukuoka_v11_data', JSON.stringify(tripData));
+            localStorage.setItem('fukuoka_v12_trip', JSON.stringify(tripData));
             renderItinerary(currentDay);
         }
     }
 
     function hideEditForm() { document.getElementById('edit-form-container').classList.add('hidden'); }
 
+    // 天氣 API
     async function fetchWeather() {
         try {
             const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?id=${CITY_ID}&appid=${API_KEY}&units=metric&lang=zh_tw`);
@@ -235,10 +269,11 @@
         } catch(e) {}
     }
 
+    // 初始化
     window.onload = () => {
         const tabs = document.getElementById('day-tabs');
         for(let i=1; i<=7; i++) {
-            tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
+            tabs.innerHTML += `<div class="day-tab ${i===1?'active':''}" id="day-tab-${i}" onclick="document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');renderItinerary(${i})">Day ${i}</div>`;
         }
         fetchWeather();
         renderItinerary(1);
