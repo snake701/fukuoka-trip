@@ -9,10 +9,56 @@
     
     <link rel="icon" id="dynamic-favicon">
     <link rel="apple-touch-icon" id="dynamic-apple-icon">
-    <link rel="manifest" id="dynamic-manifest">
-
+    
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        (function() {
+            // 1. 定義圖示來源 (日本鳥居)
+            const iconSource = 'https://cdn-icons-png.flaticon.com/512/5253/5253966.png';
+            
+            // 2. 建立畫布
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // 3. 載入圖片並合成
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = iconSource;
+            img.onload = function() {
+                // A. 填滿實心背景 (重要！解決全黑問題)
+                ctx.fillStyle = '#5D4037'; // 深木色
+                ctx.fillRect(0, 0, 512, 512);
+
+                // B. 畫上鳥居圖案 (縮小一點留白邊，比較好看)
+                const padding = 80;
+                ctx.drawImage(img, padding, padding, 512 - padding*2, 512 - padding*2);
+
+                // C. 輸出並設定
+                const iconUrl = canvas.toDataURL('image/png');
+                document.getElementById('dynamic-favicon').href = iconUrl;
+                document.getElementById('dynamic-apple-icon').href = iconUrl;
+            };
+            
+            // 4. 如果圖片載入失敗，至少給一個純色方塊備案
+            img.onerror = function() {
+                ctx.fillStyle = '#5D4037';
+                ctx.fillRect(0, 0, 512, 512);
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 250px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('旅', 256, 256);
+                const backupUrl = canvas.toDataURL('image/png');
+                document.getElementById('dynamic-favicon').href = backupUrl;
+                document.getElementById('dynamic-apple-icon').href = backupUrl;
+            };
+        })();
+    </script>
+
     <style>
         :root {
             --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
@@ -25,7 +71,6 @@
         
         /* PWA Splash */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out, visibility 0.8s; }
-        /* 調整飛機動畫，讓它飛入 */
         .plane-icon { font-size: 4rem; animation: flyIn 1.5s ease-out forwards; opacity: 0; transform: translateX(-50px) translateY(20px); }
         @keyframes flyIn { 0% { opacity: 0; transform: translateX(-50px) translateY(20px) rotate(-10deg); } 100% { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg); } }
         .splash-title { margin-top: 20px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--wood-dark); letter-spacing: 3px; animation: fadeInText 2s ease-in-out forwards; opacity: 0; }
@@ -223,33 +268,6 @@
 </div>
 
 <script type="module">
-    // --- 🚨 使用者自訂設定區 🚨 ---
-    // 想要換成自己的照片？請把下面這個網址換成您圖片的「直接連結」
-    // 建議使用正方形的 JPG 或 PNG (不要透明背景)
-    const APP_ICON_URL = "https://cdn-icons-png.flaticon.com/512/5253/5253966.png"; 
-    // ----------------------------
-
-    // 自動設定圖示腳本
-    (function() {
-        const linkIcon = document.getElementById('dynamic-favicon');
-        linkIcon.href = APP_ICON_URL;
-        
-        const linkApple = document.getElementById('dynamic-apple-icon');
-        linkApple.href = APP_ICON_URL;
-        
-        const linkManifest = document.getElementById('dynamic-manifest');
-        const manifestData = {
-            name: "福岡行旅 2026",
-            short_name: "福岡行旅",
-            display: "standalone",
-            start_url: ".",
-            background_color: "#EFEBE9",
-            theme_color: "#5D4037",
-            icons: [{ src: APP_ICON_URL, sizes: "512x512", type: "image/png" }]
-        };
-        linkManifest.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
-    })();
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -265,8 +283,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    // V8 結構
     const publicRef = ref(db, 'fukuoka_trip_final_v8/public');
     let privateRef = null;
+    
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
@@ -353,13 +373,14 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
+    // --- 秘密觸發 (連按 3 下) ---
     const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000);
+        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內
         if (state.count === 3) {
             state.count = 0;
             if (type === 'reset') triggerResetFlow();
@@ -408,6 +429,7 @@
     };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
+    // --- 備份功能 (僅備份公用資料) ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
