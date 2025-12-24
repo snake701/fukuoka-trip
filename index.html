@@ -42,6 +42,7 @@
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; cursor: default; position: relative; }
         
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        
         .secret-trigger { font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; user-select: none; opacity: 0.8; }
         .secret-trigger:active { transform: scale(0.9); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
@@ -98,7 +99,6 @@
 <div id="backup-modal" class="modal-overlay">
     <div class="modal-content">
         <h3 style="margin-top:0; color:var(--wood-dark);">💾 資料備份中心</h3>
-        <p style="font-size:0.8rem; color:#666;">下載備份可防止雲端資料遺失。</p>
         <button class="modal-btn primary" onclick="backupData()">📥 下載備份檔 (JSON)</button>
         <button class="modal-btn" onclick="document.getElementById('file-input').click()">📤 匯入還原</button>
         <input type="file" id="file-input" style="display:none;" onchange="restoreData(this)">
@@ -147,7 +147,6 @@
             <div id="checklist-area"></div>
             <button class="btn-wood" style="background:var(--accent-green); margin-top:10px;" onclick="addCheck()">+ 新增項目</button>
         </div>
-        <div style="text-align:center; font-size:0.8rem; color:#999;">此清單為全體共用，勾選狀態會同步</div>
     </section>
 
     <section id="money-sec" class="content-section">
@@ -174,7 +173,6 @@
                 <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
                 <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 隱藏並上鎖</button>
             </div>
-            <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">* 資料已同步至雲端，使用密碼 <span id="current-user-id" style="font-weight:bold;"></span> 保護</p>
             
             <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--private-gold);">
                 <label style="font-size:0.75rem; color:#888;">💰 攜帶日幣現金 (預算)</label>
@@ -199,6 +197,7 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
+        
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
@@ -223,9 +222,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    // 資料庫結構更新：V6 包含 public 和 private 兩大區塊
-    const publicRef = ref(db, 'fukuoka_trip_final_v6/public');
-    let privateRef = null; // 解鎖後才會連線
+    // 更新資料庫版本以避免衝突：v7 (public + private)
+    const publicRef = ref(db, 'fukuoka_trip_final_v7/public');
+    let privateRef = null;
     
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
@@ -245,7 +244,7 @@
     `;
     ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
 
-    // 1. 監聽公用資料
+    // 監聽公用資料
     onValue(publicRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -274,10 +273,7 @@
     // 儲存私有資料 (雲端)
     window.savePrivate = () => { 
         if(!privateRef) return;
-        set(privateRef, { 
-            expenses: window.privateExpenses, 
-            budget: window.privateBudget 
-        }).then(() => showToast("🔒 私帳已雲端同步"));
+        set(privateRef, { expenses: window.privateExpenses, budget: window.privateBudget }).then(() => showToast("🔒 私帳已雲端同步"));
     };
     
     window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
@@ -299,14 +295,14 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 秘密觸發邏輯 ---
+    // --- 秘密觸發邏輯 (全部使用連點 3 下) ---
     const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000);
+        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內
         if (state.count === 3) {
             state.count = 0;
             if (type === 'reset') triggerResetFlow();
@@ -316,18 +312,14 @@
     };
 
     function triggerResetFlow() {
-        if(prompt("⚠️ [危險] 請輸入管理員密碼進行重設：(預設 8888)") === "8888") { forceResetAction(); } 
+        if(prompt("⚠️ [重設警告] 請輸入密碼 (預設 8888)：") === "8888") { forceResetAction(); } 
         else { alert("❌ 密碼錯誤"); }
     }
 
     function triggerPrivateFlow() {
-        const pwd = prompt("請輸入您的私帳通行碼 (此碼即為您的雲端鑰匙)", "");
+        const pwd = prompt("請輸入私帳密碼 (此密碼即為您的雲端鑰匙)", "");
         if(pwd) {
-            // 設定私有 DB 路徑
-            privateRef = ref(db, `fukuoka_trip_final_v6/private/${pwd}`);
-            document.getElementById('current-user-id').innerText = pwd;
-            
-            // 監聽該使用者的私有資料
+            privateRef = ref(db, `fukuoka_trip_final_v7/private/${pwd}`);
             onValue(privateRef, (snapshot) => {
                 const pData = snapshot.val();
                 if(pData) {
@@ -338,29 +330,27 @@
                     window.privateBudget = 0;
                 }
                 renderPrivate();
-                // 資料載入後才顯示頁面
                 const tab = document.getElementById('tab-private');
                 tab.style.display = 'block'; tab.click(); 
             });
-            alert(`🔓 歡迎回來，${pwd}`);
+            alert(`🔓 私帳同步中... (Key: ${pwd})`);
         }
     }
 
     function triggerBackupFlow() {
-        if(prompt("💾 [備份中心] 請輸入密碼：(預設 8888)") === "8888") { 
+        if(prompt("💾 [備份中心] 請輸入密碼 (預設 8888)：") === "8888") { 
             document.getElementById('backup-modal').style.display = 'flex';
         } else { alert("❌ 密碼錯誤"); }
     }
 
     window.lockPrivate = () => { 
         document.getElementById('tab-private').style.display = 'none'; 
-        privateRef = null; // 斷開連線
-        window.privateExpenses = []; // 清空記憶體
+        privateRef = null; window.privateExpenses = []; 
         document.querySelector('.nav-tab').click(); 
     };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
-    // --- 備份功能 (僅備份公用資料，私帳因隱私不備份) ---
+    // --- 備份功能 ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
