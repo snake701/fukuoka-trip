@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 預算管理版</title>
+    <title>福岡行旅 2026 | 智能飯店顯示版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -88,7 +88,7 @@
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
-                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'開車'自動切換模式)">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'會自動顯示全名)">
                 <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
             </div>
         </div>
@@ -181,11 +181,8 @@
 
     window.currentDay = 1;
     window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = [];
-    
-    // 私帳資料初始化
     window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
-    window.privateBudget = Number(localStorage.getItem('fukuoka_private_budget')) || 0; // 載入預算
-    
+    window.privateBudget = Number(localStorage.getItem('fukuoka_private_budget')) || 0;
     window.currentRate = 0.215;
 
     // 匯率模板
@@ -222,20 +219,8 @@
 
     function showToast() { const t = document.getElementById('toast'); t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
     window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
-    
-    // 儲存私帳與預算
-    window.savePrivate = () => { 
-        localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses));
-        renderPrivate(); 
-        showToast(); 
-    };
-    
-    // 更新預算函數
-    window.updatePrivateBudget = (val) => {
-        window.privateBudget = Number(val);
-        localStorage.setItem('fukuoka_private_budget', window.privateBudget);
-        renderPrivate(); // 重新計算
-    };
+    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast(); };
+    window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); localStorage.setItem('fukuoka_private_budget', window.privateBudget); renderPrivate(); };
 
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
@@ -291,18 +276,26 @@
         items.forEach((item, idx) => {
             let title = item.title;
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
+            
+            // --- 智能顯示邏輯 ---
+            if(item.map === 'HOTEL_REF') {
+                // 如果標題含有"飯店"，替換為真實飯店名稱
+                title = title.replace(/飯店/g, hotel.name);
+            }
+
             let originName = "目前位置", originAddr = "My+Location";
             if (idx > 0) {
                 const prev = items[idx - 1];
-                originName = prev.title;
+                originName = prev.title.replace(/飯店/g, hotel.name); // 起點名稱也要處理
                 originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
             }
+
             const isDriving = item.mode === 'driving';
             const travelMode = isDriving ? 'driving' : 'transit';
             const btnClass = isDriving ? 'driving' : 'transit';
             const btnText = isDriving ? '🚗 開車導航' : '🚍 大眾運輸導航';
             const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelMode}`;
+
             list.innerHTML += `
                 <div style="border-left:3px solid ${isDriving?'var(--accent-blue)':'var(--accent-green)'}; padding-left:15px; margin-bottom:20px; position:relative;">
                     <div style="position:absolute; left:-9px; top:0; width:15px; height:15px; background:${isDriving?'var(--accent-blue)':'var(--accent-green)'}; border-radius:50%; border:3px solid var(--paper);"></div>
@@ -343,7 +336,15 @@
         document.getElementById('new-title').value = "";
     };
 
-    window.deleteItem = (idx) => { if(confirm("確定刪除此行程？")) { let items = window.tripData[window.currentDay]; items.sort((a, b) => a.t.localeCompare(b.t)); items.splice(idx, 1); window.tripData[window.currentDay] = items; saveAll(); } };
+    window.deleteItem = (idx) => {
+        if(confirm("確定刪除此行程？")) {
+            let items = window.tripData[window.currentDay];
+            items.sort((a, b) => a.t.localeCompare(b.t));
+            items.splice(idx, 1);
+            window.tripData[window.currentDay] = items;
+            saveAll();
+        }
+    };
 
     window.renderMoney = () => {
         let inc = 0, exp = 0;
@@ -353,21 +354,14 @@
     };
 
     window.renderPrivate = () => {
-        // 更新預算輸入框 (避免重繪時失去焦點)
         const budgetInput = document.getElementById('private-budget');
-        if(budgetInput && document.activeElement !== budgetInput) {
-            budgetInput.value = window.privateBudget || "";
-        }
-
+        if(budgetInput && document.activeElement !== budgetInput) { budgetInput.value = window.privateBudget || ""; }
         let total = 0;
         document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { 
             total += Number(e.v); 
             return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; 
         }).join('');
-        
         document.getElementById('private-total').innerText = total.toLocaleString();
-        
-        // 計算剩餘現金
         const balance = window.privateBudget - total;
         const balEl = document.getElementById('private-balance');
         balEl.innerText = `¥ ${balance.toLocaleString()}`;
