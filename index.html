@@ -42,7 +42,6 @@
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; cursor: default; position: relative; }
         
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 15px; }
-        
         .secret-trigger { font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; user-select: none; opacity: 0.8; }
         .secret-trigger:active { transform: scale(0.9); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
@@ -110,9 +109,7 @@
 <header>
     <div class="header-title-row">
         <span id="reset-plane" class="secret-trigger" onclick="handleHeaderClick('reset')">✈️</span>
-        
         <h1 style="margin:0; font-family: 'Noto Serif TC', serif;" onclick="handleHeaderClick('title')">福岡行旅 2026</h1>
-        
         <span id="backup-plane" class="secret-trigger" onclick="handleHeaderClick('backup')">✈️</span>
     </div>
     
@@ -177,6 +174,7 @@
                 <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
                 <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 隱藏並上鎖</button>
             </div>
+            <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">* 資料已同步至雲端，使用密碼 <span id="current-user-id" style="font-weight:bold;"></span> 保護</p>
             
             <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--private-gold);">
                 <label style="font-size:0.75rem; color:#888;">💰 攜帶日幣現金 (預算)</label>
@@ -201,7 +199,6 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
@@ -226,13 +223,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_final_v5'); 
+    // 資料庫結構更新：V6 包含 public 和 private 兩大區塊
+    const publicRef = ref(db, 'fukuoka_trip_final_v6/public');
+    let privateRef = null; // 解鎖後才會連線
+    
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
     window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = [];
-    window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
-    window.privateBudget = Number(localStorage.getItem('fukuoka_private_budget')) || 0;
+    window.privateExpenses = []; window.privateBudget = 0;
     window.currentRate = 0.215;
 
     const exHTML = `
@@ -246,7 +245,8 @@
     `;
     ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
 
-    onValue(dbRef, (snapshot) => {
+    // 1. 監聽公用資料
+    onValue(publicRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             window.tripData = data.tripData || {};
@@ -267,9 +267,20 @@
     });
 
     function showToast(msg="✅ 資料已儲存同步") { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
-    window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
-    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast("🔒 私帳已更新"); };
-    window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); localStorage.setItem('fukuoka_private_budget', window.privateBudget); renderPrivate(); };
+    
+    // 儲存公用資料
+    window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
+    
+    // 儲存私有資料 (雲端)
+    window.savePrivate = () => { 
+        if(!privateRef) return;
+        set(privateRef, { 
+            expenses: window.privateExpenses, 
+            budget: window.privateBudget 
+        }).then(() => showToast("🔒 私帳已雲端同步"));
+    };
+    
+    window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
 
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
@@ -288,21 +299,16 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 秘密點擊邏輯 (統一管理) ---
-    const clickStates = {
-        reset: { count: 0, timer: null },
-        title: { count: 0, timer: null },
-        backup: { count: 0, timer: null }
-    };
+    // --- 秘密觸發邏輯 ---
+    const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內點3下有效
-
+        state.timer = setTimeout(() => { state.count = 0; }, 1000);
         if (state.count === 3) {
-            state.count = 0; // 重置
+            state.count = 0;
             if (type === 'reset') triggerResetFlow();
             if (type === 'title') triggerPrivateFlow();
             if (type === 'backup') triggerBackupFlow();
@@ -315,12 +321,29 @@
     }
 
     function triggerPrivateFlow() {
-        const pwd = prompt("請輸入私帳通行碼 (預設 8888)", "");
-        if(pwd === "8888") {
-            const tab = document.getElementById('tab-private');
-            tab.style.display = 'block'; tab.click(); 
-            alert("🔓 歡迎進入私密空間");
-        } else if (pwd !== null) { alert("❌ 密碼錯誤"); }
+        const pwd = prompt("請輸入您的私帳通行碼 (此碼即為您的雲端鑰匙)", "");
+        if(pwd) {
+            // 設定私有 DB 路徑
+            privateRef = ref(db, `fukuoka_trip_final_v6/private/${pwd}`);
+            document.getElementById('current-user-id').innerText = pwd;
+            
+            // 監聽該使用者的私有資料
+            onValue(privateRef, (snapshot) => {
+                const pData = snapshot.val();
+                if(pData) {
+                    window.privateExpenses = pData.expenses || [];
+                    window.privateBudget = pData.budget || 0;
+                } else {
+                    window.privateExpenses = [];
+                    window.privateBudget = 0;
+                }
+                renderPrivate();
+                // 資料載入後才顯示頁面
+                const tab = document.getElementById('tab-private');
+                tab.style.display = 'block'; tab.click(); 
+            });
+            alert(`🔓 歡迎回來，${pwd}`);
+        }
     }
 
     function triggerBackupFlow() {
@@ -329,15 +352,20 @@
         } else { alert("❌ 密碼錯誤"); }
     }
 
-    window.lockPrivate = () => { document.getElementById('tab-private').style.display = 'none'; document.querySelector('.nav-tab').click(); };
+    window.lockPrivate = () => { 
+        document.getElementById('tab-private').style.display = 'none'; 
+        privateRef = null; // 斷開連線
+        window.privateExpenses = []; // 清空記憶體
+        document.querySelector('.nav-tab').click(); 
+    };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
-    // --- 備份功能 ---
+    // --- 備份功能 (僅備份公用資料，私帳因隱私不備份) ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `fukuoka_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = `fukuoka_public_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
     };
     window.restoreData = (input) => {
         const file = input.files[0]; if(!file) return;
@@ -346,7 +374,7 @@
             try {
                 const data = JSON.parse(e.target.result);
                 if(confirm("確定要用備份檔覆蓋現有資料嗎？此操作不可逆。")) {
-                    set(dbRef, data).then(() => { alert("✅ 還原成功！"); location.reload(); });
+                    set(publicRef, data).then(() => { alert("✅ 還原成功！"); location.reload(); });
                 }
             } catch(err) { alert("❌ 檔案格式錯誤"); }
         };
@@ -449,7 +477,7 @@
     function updateCountdown() { const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24)); document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`; }
 
     function forceResetAction() {
-        set(dbRef, { 
+        set(publicRef, { 
             hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
             tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, 
             checks: [{n: "護照 (有效期限6個月以上)", c: false}, {n: "Visit Japan Web (VJW) QR Code 截圖", c: false}, {n: "日幣現鈔 & 信用卡", c: false}, {n: "網卡 / 原號漫遊開通", c: false}, {n: "行動電源 & 充電線", c: false}],
