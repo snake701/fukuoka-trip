@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 完美同步版</title>
+    <title>福岡行旅 2026 | 完美導航修正版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,7 +14,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 80px; }
         
-        /* Loading 畫面 */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
@@ -34,11 +33,9 @@
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: 700; width: 100%; }
         .btn-sm { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--wood-dark); }
 
-        /* 行程列表樣式 */
         .itinerary-item { position: relative; padding-left: 20px; border-left: 2px solid var(--border); margin-left: 10px; padding-bottom: 15px; }
         .itinerary-item::before { content: ""; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent-green); border-radius: 50%; }
         
-        /* 交通時間樣式 */
         .travel-time { margin-left: 20px; margin-bottom: 15px; font-size: 0.8rem; color: #888; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.02); padding: 5px; border-radius: 4px; }
         .travel-time::before { content: "↓"; font-weight: bold; color: var(--accent-blue); }
         .btn-query { color: var(--accent-blue); cursor: pointer; text-decoration: underline; }
@@ -146,13 +143,10 @@
     window.tripData = {}; window.members = []; window.expenses = [];
     window.foods = []; window.checks = []; window.hotelData = []; window.emergencyInfo = [];
 
-    // --- Firebase 監聽與同步 ---
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             Object.assign(window, data);
-            
-            // 填入工具頁的飯店欄位
             if(window.hotelData[0]) {
                 document.getElementById('h-name').value = window.hotelData[0].name || "";
                 document.getElementById('h-addr').value = window.hotelData[0].addr || "";
@@ -161,8 +155,6 @@
             refreshUI();
             updateCountdown();
         }
-        
-        // 資料載入完成，隱藏 Loading
         const loader = document.getElementById('loading-screen');
         if(loader) {
             loader.style.opacity = '0';
@@ -175,13 +167,11 @@
         foods: window.foods, checks: window.checks, hotelData: window.hotelData, emergencyInfo: window.emergencyInfo
     });
 
-    // --- UI 渲染核心 ---
     function refreshUI() {
         renderItinerary(window.currentDay);
         renderMoney(); renderFood(); renderCheck(); renderEmergency();
     }
 
-    // --- 行程渲染 (含自動排序) ---
     window.renderItinerary = (day) => {
         window.currentDay = day;
         const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
@@ -190,7 +180,6 @@
         }
         
         const list = document.getElementById('itinerary-list');
-        // ★ 優化3: 自動依照時間排序
         let items = window.tripData[day] || [];
         items.sort((a, b) => a.t.localeCompare(b.t));
 
@@ -203,7 +192,9 @@
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
             if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
 
-            // 行程本體
+            // 修正重點：使用標準 Google Maps 網址
+            const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`;
+
             list.innerHTML += `
                 <div class="itinerary-item">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -211,10 +202,9 @@
                         <span onclick="deleteItem(${idx})" style="color:#ccc; cursor:pointer; font-size:1.2rem;">×</span>
                     </div>
                     <div style="font-weight:700; font-size:1.05rem; margin:5px 0;">${title}</div>
-                    <a href="https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D%E5%9C%8B%E7%AB%8B%E6%95%85%E5%AE%AE%E5%8D%9A%E7%89%A9%E9%99%A2{encodeURIComponent(dest)}&dirflg=r" target="_blank" class="map-btn">🗺️ 大眾運輸導航</a>
+                    <a href="${navUrl}" target="_blank" class="map-btn">🗺️ 大眾運輸導航</a>
                 </div>`;
 
-            // 點對點交通時間
             if (idx < items.length - 1) {
                 const nextItem = items[idx + 1];
                 const nextDest = (nextItem.map === 'HOTEL_REF') ? hotel.addr : nextItem.map;
@@ -230,14 +220,10 @@
         });
     };
 
-    // --- 功能邏輯區 ---
-    // 新的 UI 新增邏輯 (取代 prompt)
     window.addItemUI = () => {
         const tInput = document.getElementById('new-t');
         const titleInput = document.getElementById('new-title');
-        
         if(!titleInput.value) { alert("請輸入地點名稱"); return; }
-        
         if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
         window.tripData[window.currentDay].push({ 
             t: tInput.value, 
@@ -245,19 +231,13 @@
             map: titleInput.value.includes("飯店") ? "HOTEL_REF" : titleInput.value, 
             driveTime: "" 
         });
-        
         saveAll();
-        titleInput.value = ""; // 清空輸入框方便下一筆
-        // 時間不需清空，方便連續輸入
+        titleInput.value = "";
     };
 
     window.deleteItem = (idx) => { if(confirm("確定刪除此行程？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); } };
     
     window.updateDriveTime = (idx, val) => {
-        // 因為有排序，需先排序才能找到正確的 index 存回 (或是簡單處理：排序是顯示層，儲存時建議也排序)
-        // 為了簡單穩定，這裡我們先不重排資料庫陣列，而是直接更新。
-        // *注意：如果用戶頻繁插入時間，這個簡易版可能會有對應問題。
-        // 但考慮到這是個人手帖，最穩定的方式是：讀取->排序->修改->存回。
         let items = window.tripData[window.currentDay];
         items.sort((a, b) => a.t.localeCompare(b.t));
         items[idx].driveTime = val;
@@ -265,8 +245,9 @@
         saveAll();
     };
 
+    // 修正重點：使用標準 Google Maps 網址進行點對點查詢
     window.queryTravel = (start, end) => {
-        const url = `https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D%E5%A3%AB%E6%9E%97%E5%A4%9C%E5%B8%82{encodeURIComponent(start)}&daddr=${encodeURIComponent(end)}&dirflg=r`;
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(start)}&destination=${encodeURIComponent(end)}&travelmode=transit`;
         window.open(url, '_blank');
     };
 
