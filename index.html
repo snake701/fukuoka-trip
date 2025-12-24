@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 全能助手版</title>
+    <title>福岡行旅 2026 | 預算管理版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -125,10 +125,24 @@
         <div class="info-card ex-tool" id="ex-container-private"></div>
         <div class="info-card" style="border: 1px solid var(--private-gold);">
             <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
+            
+            <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--private-gold);">
+                <label style="font-size:0.75rem; color:#888;">💰 攜帶日幣現金 (預算)</label>
+                <input type="number" id="private-budget" class="input-wood" style="margin:0; font-weight:bold; color:var(--wood-dark);" placeholder="輸入金額..." onchange="updatePrivateBudget(this.value)">
+            </div>
+
             <div id="private-expense-list"></div>
             <button class="btn-wood" style="background:var(--private-gold); margin-top:10px;" onclick="addPrivateExpense()">+ 紀錄個人消費</button>
-            <div style="margin-top:15px; text-align:right; border-top:1px dashed var(--private-gold); padding-top:10px;">
-                個人總花費：¥ <span id="private-total" style="font-weight:bold; font-size:1.1rem;">0</span>
+            
+            <div style="margin-top:15px; border-top:1px dashed var(--private-gold); padding-top:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:5px; color:#666;">
+                    <span>總花費：</span>
+                    <span>¥ <span id="private-total">0</span></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:bold;">
+                    <span>剩餘現金：</span>
+                    <span id="private-balance" style="color:var(--accent-green);">¥ 0</span>
+                </div>
             </div>
         </div>
     </section>
@@ -163,13 +177,15 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const dbRef = ref(db, 'fukuoka_trip_final_v3'); 
-
-    // OpenWeather API Key (您提供的)
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
     window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = [];
+    
+    // 私帳資料初始化
     window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
+    window.privateBudget = Number(localStorage.getItem('fukuoka_private_budget')) || 0; // 載入預算
+    
     window.currentRate = 0.215;
 
     // 匯率模板
@@ -198,7 +214,7 @@
             }
             refreshUI();
             updateCountdown();
-            fetchWeather(); // 取得天氣
+            fetchWeather();
         } else { refreshUI(); }
         const loader = document.getElementById('loading-screen');
         if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 500); }
@@ -206,10 +222,23 @@
 
     function showToast() { const t = document.getElementById('toast'); t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
     window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
-    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast(); };
+    
+    // 儲存私帳與預算
+    window.savePrivate = () => { 
+        localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses));
+        renderPrivate(); 
+        showToast(); 
+    };
+    
+    // 更新預算函數
+    window.updatePrivateBudget = (val) => {
+        window.privateBudget = Number(val);
+        localStorage.setItem('fukuoka_private_budget', window.privateBudget);
+        renderPrivate(); // 重新計算
+    };
+
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
-    // --- 真實天氣 API 串接 ---
     async function fetchWeather() {
         const city = "Fukuoka";
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_tw`;
@@ -220,20 +249,11 @@
                 const temp = Math.round(data.main.temp);
                 const desc = data.weather[0].description;
                 const icon = data.weather[0].icon;
-                document.getElementById('weather-box').innerHTML = `
-                    <img src="https://openweathermap.org/img/wn/${icon}.png" style="width:20px; vertical-align:middle; margin-right:2px;"> 
-                    福岡 ${temp}°C ${desc}
-                `;
-            } else {
-                document.getElementById('weather-box').innerText = "福岡天氣讀取失敗";
-            }
-        } catch(e) {
-            console.log("Weather Error:", e);
-            document.getElementById('weather-box').innerText = "福岡天氣讀取失敗";
-        }
+                document.getElementById('weather-box').innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}.png" style="width:20px; vertical-align:middle; margin-right:2px;"> 福岡 ${temp}°C ${desc}`;
+            } else { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
+        } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 匯率與其他邏輯 (維持不變) ---
     window.syncEx = (el, type) => {
         const val = parseFloat(el.value);
         if(isNaN(val)) return;
@@ -272,20 +292,17 @@
             let title = item.title;
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
             if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
-
             let originName = "目前位置", originAddr = "My+Location";
             if (idx > 0) {
                 const prev = items[idx - 1];
                 originName = prev.title;
                 originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
             }
-
             const isDriving = item.mode === 'driving';
             const travelMode = isDriving ? 'driving' : 'transit';
             const btnClass = isDriving ? 'driving' : 'transit';
             const btnText = isDriving ? '🚗 開車導航' : '🚍 大眾運輸導航';
             const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelMode}`;
-
             list.innerHTML += `
                 <div style="border-left:3px solid ${isDriving?'var(--accent-blue)':'var(--accent-green)'}; padding-left:15px; margin-bottom:20px; position:relative;">
                     <div style="position:absolute; left:-9px; top:0; width:15px; height:15px; background:${isDriving?'var(--accent-blue)':'var(--accent-green)'}; border-radius:50%; border:3px solid var(--paper);"></div>
@@ -326,15 +343,7 @@
         document.getElementById('new-title').value = "";
     };
 
-    window.deleteItem = (idx) => {
-        if(confirm("確定刪除此行程？")) {
-            let items = window.tripData[window.currentDay];
-            items.sort((a, b) => a.t.localeCompare(b.t));
-            items.splice(idx, 1);
-            window.tripData[window.currentDay] = items;
-            saveAll();
-        }
-    };
+    window.deleteItem = (idx) => { if(confirm("確定刪除此行程？")) { let items = window.tripData[window.currentDay]; items.sort((a, b) => a.t.localeCompare(b.t)); items.splice(idx, 1); window.tripData[window.currentDay] = items; saveAll(); } };
 
     window.renderMoney = () => {
         let inc = 0, exp = 0;
@@ -342,10 +351,27 @@
         document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join('');
         document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
     };
+
     window.renderPrivate = () => {
+        // 更新預算輸入框 (避免重繪時失去焦點)
+        const budgetInput = document.getElementById('private-budget');
+        if(budgetInput && document.activeElement !== budgetInput) {
+            budgetInput.value = window.privateBudget || "";
+        }
+
         let total = 0;
-        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join('');
+        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { 
+            total += Number(e.v); 
+            return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; 
+        }).join('');
+        
         document.getElementById('private-total').innerText = total.toLocaleString();
+        
+        // 計算剩餘現金
+        const balance = window.privateBudget - total;
+        const balEl = document.getElementById('private-balance');
+        balEl.innerText = `¥ ${balance.toLocaleString()}`;
+        balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
     };
 
     window.addMember = () => { window.members.push({n: "", v: 0}); saveAll(); };
@@ -354,7 +380,17 @@
     window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
     window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); refreshUI(); };
     function updateCountdown() { const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24)); document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`; }
-    window.forceReset = () => { if(confirm("確定重設為預設資料？(會自動載入行程範本與檢查清單)")) { set(dbRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, checks: [{n: "護照 (有效期限6個月以上)", c: false}, {n: "Visit Japan Web (VJW) QR Code 截圖", c: false}, {n: "日幣現鈔 & 信用卡", c: false}, {n: "網卡 / 原號漫遊開通", c: false}, {n: "行動電源 & 充電線", c: false}], members:[], expenses:[] }).then(() => location.reload()); }};
+
+    window.forceReset = () => {
+        if(confirm("確定重設為預設資料？(會自動載入行程範本與檢查清單)")) {
+            set(dbRef, { 
+                hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
+                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, 
+                checks: [{n: "護照 (有效期限6個月以上)", c: false}, {n: "Visit Japan Web (VJW) QR Code 截圖", c: false}, {n: "日幣現鈔 & 信用卡", c: false}, {n: "網卡 / 原號漫遊開通", c: false}, {n: "行動電源 & 充電線", c: false}],
+                members:[], expenses:[] 
+            }).then(() => location.reload());
+        }
+    };
 </script>
 </body>
 </html>
