@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1">
-    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1">
-    
-    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="icon" id="dynamic-favicon">
+    <link rel="apple-touch-icon" id="dynamic-apple-icon">
+    <link rel="manifest" id="dynamic-manifest">
 
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -27,6 +25,7 @@
         
         /* PWA Splash */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out, visibility 0.8s; }
+        /* 調整飛機動畫，讓它飛入 */
         .plane-icon { font-size: 4rem; animation: flyIn 1.5s ease-out forwards; opacity: 0; transform: translateX(-50px) translateY(20px); }
         @keyframes flyIn { 0% { opacity: 0; transform: translateX(-50px) translateY(20px) rotate(-10deg); } 100% { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg); } }
         .splash-title { margin-top: 20px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--wood-dark); letter-spacing: 3px; animation: fadeInText 2s ease-in-out forwards; opacity: 0; }
@@ -86,7 +85,6 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
         
-        /* Memo */
         textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
         .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
 
@@ -225,6 +223,33 @@
 </div>
 
 <script type="module">
+    // --- 🚨 使用者自訂設定區 🚨 ---
+    // 想要換成自己的照片？請把下面這個網址換成您圖片的「直接連結」
+    // 建議使用正方形的 JPG 或 PNG (不要透明背景)
+    const APP_ICON_URL = "https://cdn-icons-png.flaticon.com/512/5253/5253966.png"; 
+    // ----------------------------
+
+    // 自動設定圖示腳本
+    (function() {
+        const linkIcon = document.getElementById('dynamic-favicon');
+        linkIcon.href = APP_ICON_URL;
+        
+        const linkApple = document.getElementById('dynamic-apple-icon');
+        linkApple.href = APP_ICON_URL;
+        
+        const linkManifest = document.getElementById('dynamic-manifest');
+        const manifestData = {
+            name: "福岡行旅 2026",
+            short_name: "福岡行旅",
+            display: "standalone",
+            start_url: ".",
+            background_color: "#EFEBE9",
+            theme_color: "#5D4037",
+            icons: [{ src: APP_ICON_URL, sizes: "512x512", type: "image/png" }]
+        };
+        linkManifest.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
+    })();
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -240,10 +265,8 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    // V8 結構
     const publicRef = ref(db, 'fukuoka_trip_final_v8/public');
     let privateRef = null;
-    
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
@@ -330,14 +353,13 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 秘密觸發 (連按 3 下) ---
     const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內
+        state.timer = setTimeout(() => { state.count = 0; }, 1000);
         if (state.count === 3) {
             state.count = 0;
             if (type === 'reset') triggerResetFlow();
@@ -386,7 +408,6 @@
     };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
-    // --- 備份功能 (僅備份公用資料) ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
