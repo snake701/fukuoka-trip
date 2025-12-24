@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 全方位匯率同步版</title>
+    <title>福岡行旅 2026 | 最終修訂版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,21 +15,27 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 100px; }
         
+        /* 載入畫面 */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         
+        /* 儲存提示 Toast */
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
+        #toast.show { visibility: visible; opacity: 1; }
+
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
-        .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; }
-        .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
+        .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; transform: scale(1.02); }
         
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
-        .content-section { display: none; }
-        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+        .content-section { display: none; animation: fadeIn 0.3s ease; }
+        .content-section.active { display: block; }
         
         .info-card { background: var(--paper); padding: 18px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow); }
         .input-wood { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; }
-        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: 700; }
-        .btn-sm { font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; }
+        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .btn-wood:active { transform: scale(0.98); }
+        .btn-sm { font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; }
 
         /* 匯率工具專用樣式 */
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 12px !important; margin-bottom: 15px; }
@@ -37,6 +43,11 @@
         .ex-input-group { flex: 1; }
         .ex-input-group label { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
         
+        /* 行程與按鈕 */
+        .map-btn { display: inline-block; background: var(--accent-green); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; }
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
+        .delete-btn:hover { color: var(--accent-red); }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -44,53 +55,78 @@
 
 <div id="loading-screen">
     <div style="font-size: 3rem;">✈️</div>
-    <div style="margin-top: 15px; font-weight: bold;">福岡行旅同步中...</div>
+    <div style="margin-top: 15px; font-weight: bold; color: #5D4037;">福岡行旅資料載入中...</div>
 </div>
 
-<header><h1>福岡行旅 2026</h1></header>
+<div id="toast">✅ 資料已儲存同步</div>
+
+<header>
+    <h1 style="margin:0; font-family: 'Noto Serif TC', serif;">福岡行旅 2026</h1>
+    <div style="font-size:0.8rem; color:#888; margin-top:5px;" id="countdown-text">計算中...</div>
+</header>
 
 <nav class="main-nav">
     <div class="nav-tab active" onclick="switchSection('itinerary', this)">📅 行程</div>
     <div class="nav-tab" onclick="switchSection('money', this)">💰 公積金</div>
-    <div class="nav-tab" style="color:var(--private-gold);" onclick="switchSection('private', this)">🔒 私帳</div>
+    <div class="nav-tab" style="color:var(--private-gold); font-weight:bold;" onclick="switchSection('private', this)">🔒 私帳</div>
     <div class="nav-tab" onclick="switchSection('tools', this)">🔧 工具</div>
 </nav>
 
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
-        <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px;"></div>
+        <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
+        
+        <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
+            <div style="display:flex; gap:5px;">
+                <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'自動關聯)">
+                <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
+            </div>
+        </div>
+
         <div id="itinerary-list"></div>
     </section>
 
     <section id="money-sec" class="content-section">
-        <div class="info-card ex-tool" id="ex-container-money"></div>
-        
-        <div class="info-card"><h3>👥 公積金繳費</h3><div id="member-list"></div><button class="btn-sm" onclick="addMember()">+ 成員</button></div>
-        <div class="info-card"><h3>💸 公共支出</h3><div id="expense-list"></div><button class="btn-sm" onclick="addExpense()">+ 支出項目</button>
-            <div style="margin-top:10px; text-align:right;">餘額：¥ <span id="balance-val" style="font-weight:700;">0</span></div>
+        <div class="info-card ex-tool" id="ex-container-money"></div> <div class="info-card">
+            <h3>👥 成員繳費 (公款)</h3>
+            <div id="member-list"></div>
+            <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
+        </div>
+        <div class="info-card">
+            <h3>💸 公共支出</h3>
+            <div id="expense-list"></div>
+            <button class="btn-sm" onclick="addExpense()">+ 新增支出</button>
+            <div style="margin-top:15px; text-align:right; border-top:1px dashed #ccc; padding-top:10px;">
+                公款餘額：¥ <span id="balance-val" style="font-weight:700; color:var(--accent-green); font-size:1.1rem;">0</span>
+            </div>
         </div>
     </section>
 
     <section id="private-sec" class="content-section">
-        <div class="info-card ex-tool" id="ex-container-private"></div>
-        
-        <div class="info-card" style="border: 1px solid var(--private-gold);">
+        <div class="info-card ex-tool" id="ex-container-private"></div> <div class="info-card" style="border: 1px solid var(--private-gold);">
             <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
+            <p style="font-size:0.75rem; color:#999; margin-bottom:10px;">* 資料僅存在此裝置，他人不可見</p>
             <div id="private-expense-list"></div>
-            <button class="btn-wood" style="background:var(--private-gold);" onclick="addPrivateExpense()">+ 紀錄個人消費</button>
-            <div style="margin-top:15px; text-align:right;">個人總花費：¥ <span id="private-total" style="font-weight:bold;">0</span></div>
+            <button class="btn-wood" style="background:var(--private-gold); margin-top:10px;" onclick="addPrivateExpense()">+ 紀錄個人消費</button>
+            <div style="margin-top:15px; text-align:right; border-top:1px dashed var(--private-gold); padding-top:10px;">
+                個人總花費：¥ <span id="private-total" style="font-weight:bold; font-size:1.1rem;">0</span>
+            </div>
         </div>
     </section>
 
     <section id="tools-sec" class="content-section">
-        <div class="info-card ex-tool" id="ex-container-tools"></div>
-
-        <div class="info-card">
+        <div class="info-card ex-tool" id="ex-container-tools"></div> <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
+            <label style="font-size:0.75rem; color:#888;">名稱</label>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
+            <label style="font-size:0.75rem; color:#888;">地址 (影響導航)</label>
             <input id="h-addr" class="input-wood" placeholder="地址" onchange="updateHotel()">
         </div>
-        <button class="btn-sm" style="color:red; border-color:red; width:100%; padding:10px;" onclick="forceReset()">⚠️ 重設同步資料</button>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有公用資料</button>
+        </div>
     </section>
 </div>
 
@@ -98,6 +134,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // 1. Firebase 設定
     const firebaseConfig = {
         apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
         authDomain: "fukuoka-trip-2026.firebaseapp.com",
@@ -110,106 +147,278 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_v23_smart');
+    const dbRef = ref(db, 'fukuoka_trip_final_v1'); // 更改路徑以防舊資料干擾
 
+    // 2. 全域變數初始化
     window.currentDay = 1;
-    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = [];
+    window.tripData = {}; 
+    window.members = []; 
+    window.expenses = []; 
+    window.hotelData = [];
     window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
-    window.currentRate = 0.21; // 預設匯率
+    window.currentRate = 0.215; // 預設匯率
 
-    // --- 匯率 HTML 模版 ---
+    // 3. 匯率工具 HTML 模板 (自動插入三個分頁)
     const exHTML = `
-        <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 匯率換算</h3>
+        <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
         <div class="ex-grid">
             <div class="ex-input-group">
                 <label>日幣 JPY</label>
-                <input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="金額" oninput="syncEx(this, 'jpy')">
+                <input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="¥" oninput="syncEx(this, 'jpy')">
             </div>
-            <div style="padding-top:15px; font-weight:bold;">→</div>
+            <div style="padding-top:15px; font-weight:bold;">⇄</div>
             <div class="ex-input-group">
                 <label>台幣 TWD</label>
-                <input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="結果" oninput="syncEx(this, 'twd')">
+                <input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="$" oninput="syncEx(this, 'twd')">
             </div>
         </div>
-        <div style="font-size:0.7rem; color:#888; margin-top:8px;">
-            匯率：1 JPY = <input type="number" class="ex-rate-input" value="0.21" step="0.001" style="width:45px; border:none; border-bottom:1px solid #ccc; background:transparent;" onchange="updateGlobalRate(this.value)"> TWD
+        <div style="font-size:0.7rem; color:#666; margin-top:5px; text-align:right;">
+            1 JPY = <input type="number" class="ex-rate-input" value="0.215" step="0.001" style="width:60px; border:none; border-bottom:1px solid #999; background:transparent; text-align:center;" onchange="updateGlobalRate(this.value)"> TWD
         </div>
     `;
-
-    // 渲染匯率到三個容器
-    document.getElementById('ex-container-money').innerHTML = exHTML;
-    document.getElementById('ex-container-private').innerHTML = exHTML;
-    document.getElementById('ex-container-tools').innerHTML = exHTML;
-
-    // --- 匯率同步邏輯 ---
-    window.syncEx = (el, type) => {
-        const val = el.value;
-        const jpyInputs = document.querySelectorAll('.ex-jpy');
-        const twdInputs = document.querySelectorAll('.ex-twd');
-        
-        if(type === 'jpy') {
-            const twdResult = (val * window.currentRate).toFixed(0);
-            jpyInputs.forEach(i => i.value = val);
-            twdInputs.forEach(i => i.value = twdResult);
-        } else {
-            const jpyResult = (val / window.currentRate).toFixed(0);
-            twdInputs.forEach(i => i.value = val);
-            jpyInputs.forEach(i => i.value = jpyResult);
-        }
-    };
-
-    window.updateGlobalRate = (newRate) => {
-        window.currentRate = newRate;
-        document.querySelectorAll('.ex-rate-input').forEach(i => i.value = newRate);
-        const firstJpy = document.querySelector('.ex-jpy').value;
-        if(firstJpy) syncEx({value: firstJpy}, 'jpy');
-    };
-
-    // Firebase 監聽與其他渲染 (與前版相同)
-    onValue(dbRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) { Object.assign(window, data); refreshUI(); }
-        document.getElementById('loading-screen').style.opacity = '0';
-        setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
+    ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = exHTML;
     });
 
-    window.saveAll = () => set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData });
-    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); };
+    // 4. Firebase 資料監聽
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // 安全載入資料，防止 undefined
+            window.tripData = data.tripData || {};
+            window.members = data.members || [];
+            window.expenses = data.expenses || [];
+            window.hotelData = data.hotelData || [{name:"", addr:""}];
+            
+            // 更新 UI 中的飯店資訊
+            if(window.hotelData[0]) {
+                document.getElementById('h-name').value = window.hotelData[0].name || "";
+                document.getElementById('h-addr').value = window.hotelData[0].addr || "";
+            }
+            refreshUI();
+            updateCountdown();
+        } else {
+            // 若為空資料庫，執行初始化
+            refreshUI();
+        }
+        // 關閉 Loading
+        const loader = document.getElementById('loading-screen');
+        if(loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 500);
+        }
+    });
 
+    // 5. 核心儲存功能
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.className = "show";
+        setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
+    }
+
+    window.saveAll = () => {
+        set(dbRef, {
+            tripData: window.tripData,
+            members: window.members,
+            expenses: window.expenses,
+            hotelData: window.hotelData
+        }).then(() => showToast()).catch(err => alert("儲存失敗: " + err));
+    };
+
+    window.savePrivate = () => {
+        localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses));
+        renderPrivate();
+        showToast();
+    };
+
+    // 6. UI 刷新總控
     function refreshUI() {
         renderItinerary(window.currentDay);
         renderMoney();
         renderPrivate();
     }
 
-    // 行程渲染 (簡化版邏輯)
-    window.renderItinerary = (day) => {
-        window.currentDay = day;
-        const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
-        for(let i=1; i<=7; i++) tabs.innerHTML += `<button class="btn-sm" style="${i===day?'background:var(--wood-dark);color:white;':''}" onclick="renderItinerary(${i})">D${i}</button>`;
-        const list = document.getElementById('itinerary-list');
-        let items = window.tripData[day] || [];
-        items.sort((a, b) => a.t.localeCompare(b.t));
-        list.innerHTML = items.map((item, idx) => `<div style="border-left:2px solid var(--accent-green); padding-left:15px; margin-bottom:10px;"><b>${item.t}</b> ${item.title}</div>`).join('');
+    // --- 匯率邏輯 ---
+    window.syncEx = (el, type) => {
+        const val = parseFloat(el.value);
+        if(isNaN(val)) return;
+        const jpyInputs = document.querySelectorAll('.ex-jpy');
+        const twdInputs = document.querySelectorAll('.ex-twd');
+        
+        if(type === 'jpy') {
+            const res = (val * window.currentRate).toFixed(0);
+            jpyInputs.forEach(i => i.value = val);
+            twdInputs.forEach(i => i.value = res);
+        } else {
+            const res = (val / window.currentRate).toFixed(0);
+            twdInputs.forEach(i => i.value = val);
+            jpyInputs.forEach(i => i.value = res);
+        }
+    };
+    window.updateGlobalRate = (newRate) => {
+        window.currentRate = parseFloat(newRate);
+        document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate);
+        // 觸發一次重新計算
+        const firstJpy = document.querySelector('.ex-jpy').value;
+        if(firstJpy) window.syncEx({value: firstJpy}, 'jpy');
     };
 
+    // --- 行程邏輯 (修復按鈕失效問題) ---
+    window.renderItinerary = (day) => {
+        window.currentDay = day;
+        const tabs = document.getElementById('day-tabs'); 
+        tabs.innerHTML = "";
+        for(let i=1; i<=7; i++) {
+            tabs.innerHTML += `<button class="btn-sm" style="margin-right:5px; padding:8px 15px; ${i===day?'background:var(--wood-dark);color:white;border-color:var(--wood-dark);':''}" onclick="renderItinerary(${i})">D${i}</button>`;
+        }
+        
+        const list = document.getElementById('itinerary-list');
+        let items = window.tripData[day] || [];
+        // 自動排序
+        items.sort((a, b) => a.t.localeCompare(b.t));
+        
+        const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
+        
+        list.innerHTML = "";
+        if(items.length === 0) {
+            list.innerHTML = `<div style="text-align:center; color:#ccc; padding:30px;">📭 本日尚無行程</div>`;
+            return;
+        }
+
+        items.forEach((item, idx) => {
+            let title = item.title;
+            const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
+            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
+
+            // 自動判斷起點
+            let originName = "目前位置";
+            let originAddr = "My+Location";
+            if (idx > 0) {
+                const prev = items[idx - 1];
+                originName = prev.title;
+                originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
+            }
+
+            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
+
+            list.innerHTML += `
+                <div style="border-left:3px solid var(--accent-green); padding-left:15px; margin-bottom:20px; position:relative;">
+                    <div style="position:absolute; left:-9px; top:0; width:15px; height:15px; background:var(--accent-green); border-radius:50%; border:3px solid var(--paper);"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:bold; color:var(--accent-green);">${item.t}</span>
+                        <span class="delete-btn" onclick="deleteItem(${idx})">×</span>
+                    </div>
+                    <div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div>
+                    
+                    <div style="background:#f1f3ee; padding:8px; border-radius:6px; font-size:0.8rem; color:#555;">
+                        <span>🚩 從 <b>${originName}</b> 出發</span>
+                        <a href="${navUrl}" target="_blank" class="map-btn" style="display:block; text-align:center; margin-top:5px;">🚍 Google 導航</a>
+                    </div>
+                </div>`;
+        });
+    };
+
+    window.addItemUI = () => {
+        const t = document.getElementById('new-t').value;
+        const title = document.getElementById('new-title').value;
+        if(!title) { alert("請輸入地點名稱"); return; }
+        
+        if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
+        window.tripData[window.currentDay].push({ 
+            t: t, 
+            title: title, 
+            map: title.includes("飯店") ? "HOTEL_REF" : title 
+        });
+        saveAll();
+        document.getElementById('new-title').value = ""; // 清空
+    };
+
+    window.deleteItem = (idx) => {
+        if(confirm("確定刪除此行程？")) {
+            // 因為有排序，需確保刪除正確的項目
+            let items = window.tripData[window.currentDay];
+            items.sort((a, b) => a.t.localeCompare(b.t));
+            items.splice(idx, 1);
+            window.tripData[window.currentDay] = items;
+            saveAll();
+        }
+    };
+
+    // --- 公積金與私帳邏輯 ---
     window.renderMoney = () => {
         let inc = 0, exp = 0;
-        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"></div>`; }).join('');
-        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"></div>`; }).join('');
+        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { 
+            inc += Number(m.v); 
+            return `<div style="display:flex;gap:5px;margin-bottom:8px;">
+                <input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> 
+                <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> 
+                <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span>
+            </div>`; 
+        }).join('');
+        
+        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { 
+            exp += Number(e.v); 
+            return `<div style="display:flex;gap:5px;margin-bottom:8px;">
+                <input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> 
+                <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> 
+                <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span>
+            </div>`; 
+        }).join('');
+        
         document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
     };
 
     window.renderPrivate = () => {
         let total = 0;
-        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:5px;"><input class="input-wood" style="flex:2;margin:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1;margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"></div>`; }).join('');
+        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => {
+            total += Number(e.v);
+            return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                <input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()">
+                <input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()">
+                <span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span>
+            </div>`;
+        }).join('');
         document.getElementById('private-total').innerText = total.toLocaleString();
     };
 
-    window.addMember = () => { window.members.push({n: "姓名", v: 0}); saveAll(); };
-    window.addExpense = () => { window.expenses.push({n: "支出", v: 0}); saveAll(); };
-    window.addPrivateExpense = () => { window.privateExpenses.push({n: "購物/吃飯", v: 0}); savePrivate(); };
-    window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); };
+    window.addMember = () => { window.members.push({n: "", v: 0}); saveAll(); };
+    window.addExpense = () => { window.expenses.push({n: "", v: 0}); saveAll(); };
+    window.addPrivateExpense = () => { window.privateExpenses.push({n: "", v: 0}); savePrivate(); };
+
+    // --- 工具邏輯 ---
+    window.updateHotel = () => {
+        window.hotelData = [{
+            name: document.getElementById('h-name').value,
+            addr: document.getElementById('h-addr').value
+        }];
+        saveAll();
+    };
+
+    window.switchSection = (id, el) => {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id + '-sec').classList.add('active');
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        refreshUI();
+    };
+
+    function updateCountdown() {
+        const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24));
+        const txt = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`;
+        document.getElementById('countdown-text').innerText = txt;
+    }
+
+    window.forceReset = () => {
+        if(confirm("確定重設所有「公用同步資料」？(您的私帳不會被刪除)")) {
+            set(dbRef, { 
+                hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
+                tripData:{1:[{t:"09:00", title:"出發", map:"My+Location"}]}, 
+                members:[{n:"範例成員", v:0}], 
+                expenses:[] 
+            }).then(() => location.reload());
+        }
+    };
 </script>
 </body>
 </html>
