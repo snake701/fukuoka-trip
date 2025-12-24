@@ -8,13 +8,45 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://placehold.co/192x192/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
+    <link rel="icon" id="dynamic-favicon">
+    <link rel="apple-touch-icon" id="dynamic-apple-icon">
     
-    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://placehold.co/512x512/5D4037/FAF9F6.png?text=%E6%97%85&font=serif","sizes":"512x512","type":"image/png"}]}'>
-
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        (function() {
+            // 設定圖示參數
+            const size = 512;
+            const text = "福岡"; // 圖示上的字
+            const bgColor = "#5D4037"; // 深木色
+            const textColor = "#FAF9F6"; // 米白色
+
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // 1. 繪製背景 (圓角矩形風格)
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, size, size);
+
+            // 2. 繪製文字
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 200px "Noto Serif TC", serif'; // 使用襯線體更有質感
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, size/2, size/2);
+
+            // 3. 輸出為圖片資料
+            const url = canvas.toDataURL('image/png');
+
+            // 4. 套用到網頁標籤
+            document.getElementById('dynamic-favicon').href = url;
+            document.getElementById('dynamic-apple-icon').href = url;
+        })();
+    </script>
+
     <style>
         :root {
             --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
@@ -329,14 +361,14 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 秘密觸發 (連按 3 下) ---
+    // --- 秘密觸發邏輯 ---
     const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內
+        state.timer = setTimeout(() => { state.count = 0; }, 1000);
         if (state.count === 3) {
             state.count = 0;
             if (type === 'reset') triggerResetFlow();
@@ -385,7 +417,6 @@
     };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
-    // --- 備份功能 (僅備份公用資料) ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
