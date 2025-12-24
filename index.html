@@ -15,36 +15,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
-        (function() {
-            // 設定圖示參數
-            const size = 512;
-            const text = "福岡"; // 圖示上的字
-            const bgColor = "#5D4037"; // 深木色
-            const textColor = "#FAF9F6"; // 米白色
-
+        window.onload = function() {
+            // 1. 建立一個 512x512 的畫布
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = 512;
+            canvas.height = 512;
             const ctx = canvas.getContext('2d');
 
-            // 1. 繪製背景 (圓角矩形風格)
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, size, size);
+            // 2. 填滿深木色背景 (解決 iOS 黑屏問題)
+            ctx.fillStyle = '#5D4037';
+            ctx.fillRect(0, 0, 512, 512);
 
-            // 2. 繪製文字
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 200px "Noto Serif TC", serif'; // 使用襯線體更有質感
+            // 3. 畫上白色的「旅」字
+            ctx.fillStyle = '#FAF9F6';
+            ctx.font = 'bold 300px "Noto Serif TC", serif'; // 使用書法字體
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, size/2, size/2);
+            ctx.fillText('旅', 256, 270); // 垂直置中微調
 
-            // 3. 輸出為圖片資料
-            const url = canvas.toDataURL('image/png');
+            // 4. 轉成 PNG 資料流 (Data URI)
+            const iconUrl = canvas.toDataURL('image/png');
 
-            // 4. 套用到網頁標籤
-            document.getElementById('dynamic-favicon').href = url;
-            document.getElementById('dynamic-apple-icon').href = url;
-        })();
+            // 5. 強制套用到 iOS 和 Android 的圖示標籤
+            document.getElementById('dynamic-favicon').href = iconUrl;
+            document.getElementById('dynamic-apple-icon').href = iconUrl;
+            
+            // 6. 啟動 Firebase 監聽 (原本的 onload 邏輯)
+            initApp();
+        };
     </script>
 
     <style>
@@ -171,7 +169,6 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
-        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
@@ -215,23 +212,18 @@
                 <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 隱藏並上鎖</button>
             </div>
             <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">* 已使用金鑰 <span id="current-user-id" style="font-weight:bold; background:#eee; padding:2px 5px; border-radius:3px;"></span> 雲端加密同步</p>
-            
             <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--private-gold);">
                 <label style="font-size:0.75rem; color:#888;">💰 攜帶日幣現金 (預算)</label>
                 <input type="number" id="private-budget" class="input-wood" style="margin:0; font-weight:bold; color:var(--wood-dark);" placeholder="輸入金額..." onchange="updatePrivateBudget(this.value)">
             </div>
-
             <div id="private-expense-list"></div>
             <button class="btn-wood" style="background:var(--private-gold); margin-top:10px;" onclick="addPrivateExpense()">+ 紀錄個人消費</button>
-            
             <div style="margin-top:15px; border-top:1px dashed var(--private-gold); padding-top:10px;">
                 <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:5px; color:#666;">
-                    <span>總花費：</span>
-                    <span>¥ <span id="private-total">0</span></span>
+                    <span>總花費：</span><span>¥ <span id="private-total">0</span></span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:bold;">
-                    <span>剩餘現金：</span>
-                    <span id="private-balance" style="color:var(--accent-green);">¥ 0</span>
+                    <span>剩餘現金：</span><span id="private-balance" style="color:var(--accent-green);">¥ 0</span>
                 </div>
             </div>
         </div>
@@ -239,18 +231,15 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
         <div class="info-card" style="border: 1px solid #aaa; background: #fffdf5;">
             <h3 style="margin-top:0; color:#666;">📝 公用備忘錄 (同步)</h3>
             <textarea id="group-memo" class="memo-area" placeholder="在此輸入Wi-Fi密碼、房間號碼等共用資訊..." oninput="updateMemo(this.value)"></textarea>
         </div>
-
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        
         <div class="footer-info">☁️ 資料最後同步於：<span id="last-updated">讀取中...</span></div>
     </section>
 </div>
@@ -269,277 +258,186 @@
         appId: "1:788923341638:web:838629fb9a547648372347"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    // V8 結構
-    const publicRef = ref(db, 'fukuoka_trip_final_v8/public');
-    let privateRef = null;
-    
-    const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
+    window.initApp = function() {
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const publicRef = ref(db, 'fukuoka_trip_final_v8/public');
+        let privateRef = null;
+        const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
-    window.currentDay = 1;
-    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = []; window.memo = "";
-    window.privateExpenses = []; window.privateBudget = 0;
-    window.currentRate = 0.215;
+        window.currentDay = 1;
+        window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = []; window.memo = "";
+        window.privateExpenses = []; window.privateBudget = 0;
+        window.currentRate = 0.215;
 
-    window.addEventListener('offline', () => document.getElementById('offline-alert').style.display='block');
-    window.addEventListener('online', () => document.getElementById('offline-alert').style.display='none');
+        // 匯率模板
+        const exHTML = `
+            <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
+            <div class="ex-grid">
+                <div class="ex-input-group"><label>日幣 JPY</label><input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="¥" oninput="syncEx(this, 'jpy')"></div>
+                <div style="padding-top:15px; font-weight:bold;">⇄</div>
+                <div class="ex-input-group"><label>台幣 TWD</label><input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="$" oninput="syncEx(this, 'twd')"></div>
+            </div>
+            <div style="font-size:0.7rem; color:#666; margin-top:5px; text-align:right;">1 JPY = <input type="number" class="ex-rate-input" value="0.215" step="0.001" style="width:60px; border:none; border-bottom:1px solid #999; background:transparent; text-align:center;" onchange="updateGlobalRate(this.value)"> TWD</div>
+        `;
+        ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
 
-    const exHTML = `
-        <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
-        <div class="ex-grid">
-            <div class="ex-input-group"><label>日幣 JPY</label><input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="¥" oninput="syncEx(this, 'jpy')"></div>
-            <div style="padding-top:15px; font-weight:bold;">⇄</div>
-            <div class="ex-input-group"><label>台幣 TWD</label><input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="$" oninput="syncEx(this, 'twd')"></div>
-        </div>
-        <div style="font-size:0.7rem; color:#666; margin-top:5px; text-align:right;">1 JPY = <input type="number" class="ex-rate-input" value="0.215" step="0.001" style="width:60px; border:none; border-bottom:1px solid #999; background:transparent; text-align:center;" onchange="updateGlobalRate(this.value)"> TWD</div>
-    `;
-    ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
+        // Firebase 監聽
+        onValue(publicRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                window.tripData = data.tripData || {};
+                window.members = data.members || [];
+                window.expenses = data.expenses || [];
+                window.hotelData = data.hotelData || [{name:"", addr:""}];
+                window.checks = data.checks || []; 
+                window.memo = data.memo || "";
+                
+                const memoArea = document.getElementById('group-memo');
+                if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
 
-    onValue(publicRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            window.tripData = data.tripData || {};
-            window.members = data.members || [];
-            window.expenses = data.expenses || [];
-            window.hotelData = data.hotelData || [{name:"", addr:""}];
-            window.checks = data.checks || []; 
-            window.memo = data.memo || "";
-            
-            const memoArea = document.getElementById('group-memo');
-            if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
-
-            if(data.lastUpdated) {
-                const date = new Date(data.lastUpdated);
-                document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-            }
-
-            if(window.hotelData[0]) {
-                document.getElementById('h-name').value = window.hotelData[0].name || "";
-                document.getElementById('h-addr').value = window.hotelData[0].addr || "";
-            }
-            refreshUI();
-            updateCountdown();
-            fetchWeather();
-        } else { refreshUI(); }
-        const splash = document.getElementById('splash-screen');
-        if(splash) { setTimeout(() => { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; }, 1000); }
-    });
-
-    function showToast(msg="✅ 資料已儲存同步") { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
-    
-    window.saveAll = () => { 
-        set(publicRef, { 
-            tripData: window.tripData, members: window.members, expenses: window.expenses, 
-            hotelData: window.hotelData, checks: window.checks, memo: window.memo,
-            lastUpdated: Date.now() 
-        }).then(() => showToast()); 
-    };
-    
-    window.savePrivate = () => { 
-        if(!privateRef) return;
-        set(privateRef, { expenses: window.privateExpenses, budget: window.privateBudget }).then(() => showToast("🔒 私帳已雲端同步"));
-    };
-    
-    window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
-    window.updateMemo = (val) => { window.memo = val; saveAll(); };
-
-    function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
-
-    async function fetchWeather() {
-        const city = "Fukuoka";
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_tw`;
-        try {
-            const res = await fetch(url);
-            if(res.ok) {
-                const data = await res.json();
-                const temp = Math.round(data.main.temp);
-                const desc = data.weather[0].description;
-                const icon = data.weather[0].icon;
-                document.getElementById('weather-box').innerHTML = `<img src="https://openweathermap.org/img/wn/${icon}.png" style="width:20px; vertical-align:middle; margin-right:2px;"> 福岡 ${temp}°C ${desc}`;
-            } else { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
-        } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
-    }
-
-    // --- 秘密觸發邏輯 ---
-    const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
-
-    window.handleHeaderClick = (type) => {
-        const state = clickStates[type];
-        state.count++;
-        clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000);
-        if (state.count === 3) {
-            state.count = 0;
-            if (type === 'reset') triggerResetFlow();
-            if (type === 'title') triggerPrivateFlow();
-            if (type === 'backup') triggerBackupFlow();
-        }
-    };
-
-    function triggerResetFlow() {
-        if(prompt("⚠️ [危險] 請輸入管理員密碼進行重設：(預設 8888)") === "8888") { forceResetAction(); } 
-        else { alert("❌ 密碼錯誤"); }
-    }
-
-    function triggerPrivateFlow() {
-        const pwd = prompt("請輸入私帳密碼 (此密碼即為您的雲端鑰匙)", "");
-        if(pwd) {
-            privateRef = ref(db, `fukuoka_trip_final_v8/private/${pwd}`);
-            document.getElementById('current-user-id').innerText = pwd;
-            onValue(privateRef, (snapshot) => {
-                const pData = snapshot.val();
-                if(pData) {
-                    window.privateExpenses = pData.expenses || [];
-                    window.privateBudget = pData.budget || 0;
-                } else {
-                    window.privateExpenses = [];
-                    window.privateBudget = 0;
+                if(data.lastUpdated) {
+                    const date = new Date(data.lastUpdated);
+                    document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
                 }
-                renderPrivate();
-                const tab = document.getElementById('tab-private');
-                tab.style.display = 'block'; tab.click(); 
-            });
-            alert(`🔓 私帳同步中... (Key: ${pwd})`);
-        }
-    }
 
-    function triggerBackupFlow() {
-        if(prompt("💾 [備份中心] 請輸入密碼 (預設 8888)：") === "8888") { 
-            document.getElementById('backup-modal').style.display = 'flex';
-        } else { alert("❌ 密碼錯誤"); }
-    }
-
-    window.lockPrivate = () => { 
-        document.getElementById('tab-private').style.display = 'none'; 
-        privateRef = null; window.privateExpenses = []; 
-        document.querySelector('.nav-tab').click(); 
-    };
-    window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
-
-    window.backupData = () => {
-        const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo };
-        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `fukuoka_public_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-    };
-    window.restoreData = (input) => {
-        const file = input.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if(confirm("確定要用備份檔覆蓋現有資料嗎？此操作不可逆。")) {
-                    set(publicRef, data).then(() => { alert("✅ 還原成功！"); location.reload(); });
+                if(window.hotelData[0]) {
+                    document.getElementById('h-name').value = window.hotelData[0].name || "";
+                    document.getElementById('h-addr').value = window.hotelData[0].addr || "";
                 }
-            } catch(err) { alert("❌ 檔案格式錯誤"); }
+                refreshUI();
+                updateCountdown();
+                fetchWeather();
+            } else { refreshUI(); }
+            const splash = document.getElementById('splash-screen');
+            if(splash) { setTimeout(() => { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; }, 1000); }
+        });
+
+        // 函數綁定到 window (因為是 module 範圍)
+        window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
+        window.savePrivate = () => { if(privateRef) set(privateRef, { expenses: window.privateExpenses, budget: window.privateBudget }).then(() => showToast("🔒 私帳已同步")); };
+        window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
+        window.updateMemo = (val) => { window.memo = val; saveAll(); };
+        window.addMember = () => { window.members.push({n: "", v: 0}); saveAll(); };
+        window.addExpense = () => { window.expenses.push({n: "", v: 0}); saveAll(); };
+        window.addPrivateExpense = () => { window.privateExpenses.push({n: "", v: 0}); savePrivate(); };
+        window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
+        window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
+        window.addItemUI = () => {
+            const t = document.getElementById('new-t').value;
+            const title = document.getElementById('new-title').value;
+            if(!title) { alert("請輸入地點"); return; }
+            let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit';
+            if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
+            window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode });
+            saveAll();
+            document.getElementById('new-title').value = "";
         };
-        reader.readAsText(file);
+        window.deleteItem = (idx) => { if(confirm("確定刪除？")) { let items = window.tripData[window.currentDay]; items.sort((a,b)=>a.t.localeCompare(b.t)); items.splice(idx, 1); window.tripData[window.currentDay] = items; saveAll(); } };
+        
+        // 隱藏觸發
+        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
+        window.handleHeaderClick = (type) => {
+            const state = clickStates[type]; state.count++; clearTimeout(state.timer);
+            state.timer = setTimeout(() => { state.count = 0; }, 1000);
+            if (state.count === 3) {
+                state.count = 0;
+                if (type === 'reset') { if(prompt("⚠️ 重設資料？輸入密碼(8888)")==="8888") forceResetAction(); }
+                if (type === 'title') {
+                    const pwd = prompt("請輸入私帳密碼 (雲端金鑰)");
+                    if(pwd) {
+                        privateRef = ref(db, `fukuoka_trip_final_v8/private/${pwd}`);
+                        document.getElementById('current-user-id').innerText = pwd;
+                        onValue(privateRef, (s) => {
+                            const p = s.val();
+                            window.privateExpenses = p ? (p.expenses || []) : [];
+                            window.privateBudget = p ? (p.budget || 0) : 0;
+                            renderPrivate();
+                            const tab = document.getElementById('tab-private'); tab.style.display='block'; tab.click();
+                        });
+                        alert("🔓 私帳同步中...");
+                    }
+                }
+                if (type === 'backup') { if(prompt("💾 備份中心？輸入密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; }
+            }
+        };
+
+        window.forceResetAction = () => {
+            set(publicRef, { 
+                hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
+                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, 
+                checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}, {n: "行動電源", c: false}],
+                members:[], expenses:[], memo:"" 
+            }).then(() => location.reload());
+        };
+
+        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
+        window.restoreData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=(e)=>{ try{ const d=JSON.parse(e.target.result); if(confirm("還原資料？")) set(publicRef, d).then(()=>{alert("✅ 完成");location.reload();}); }catch(err){alert("❌ 錯誤");} }; r.readAsText(f); };
+
+        async function fetchWeather() {
+            try {
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Fukuoka&appid=${WEATHER_API_KEY}&units=metric&lang=zh_tw`);
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('weather-box').innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" style="width:20px;vertical-align:middle;"> 福岡 ${Math.round(data.main.temp)}°C ${data.weather[0].description}`;
+                }
+            } catch(e) {}
+        }
     };
 
+    // 其他 UI 輔助函式
+    window.showToast = (msg="✅ 資料已同步") => { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); };
+    window.lockPrivate = () => { document.getElementById('tab-private').style.display = 'none'; document.querySelector('.nav-tab').click(); };
+    window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
+    window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); refreshUI(); };
     window.syncEx = (el, type) => {
         const val = parseFloat(el.value); if(isNaN(val)) return;
-        const jpyInputs = document.querySelectorAll('.ex-jpy');
-        const twdInputs = document.querySelectorAll('.ex-twd');
-        if(type === 'jpy') {
-            const res = (val * window.currentRate).toFixed(0);
-            jpyInputs.forEach(i => i.value = val); twdInputs.forEach(i => i.value = res);
-        } else {
-            const res = (val / window.currentRate).toFixed(0);
-            twdInputs.forEach(i => i.value = val); jpyInputs.forEach(i => i.value = res);
-        }
+        const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0);
+        document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res);
+        document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val);
     };
-    window.updateGlobalRate = (newRate) => {
-        window.currentRate = parseFloat(newRate);
-        document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate);
-        const firstJpy = document.querySelector('.ex-jpy').value;
-        if(firstJpy) window.syncEx({value: firstJpy}, 'jpy');
-    };
+    window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); };
+    
+    function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
+    function updateCountdown() { const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24)); document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`; }
 
+    // 渲染函式群
     window.renderItinerary = (day) => {
         window.currentDay = day;
         const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
-        for(let i=1; i<=7; i++) tabs.innerHTML += `<button class="btn-sm" style="margin-right:5px; padding:8px 15px; ${i===day?'background:var(--wood-dark);color:white;border-color:var(--wood-dark);':''}" onclick="renderItinerary(${i})">D${i}</button>`;
+        for(let i=1; i<=7; i++) tabs.innerHTML += `<button class="btn-sm" style="margin-right:5px; padding:8px 15px; ${i===day?'background:var(--wood-dark);color:white;':''}" onclick="renderItinerary(${i})">D${i}</button>`;
         const list = document.getElementById('itinerary-list');
         let items = window.tripData[day] || [];
         items.sort((a, b) => a.t.localeCompare(b.t));
         const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
         list.innerHTML = "";
         if(items.length === 0) { list.innerHTML = `<div style="text-align:center; color:#ccc; padding:30px;">📭 本日尚無行程</div>`; return; }
-
         items.forEach((item, idx) => {
             let title = item.title;
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
             if(item.map === 'HOTEL_REF') title = title.replace(/飯店/g, hotel.name);
-            let originName = "目前位置", originAddr = "My+Location";
-            if (idx > 0) {
-                const prev = items[idx - 1];
-                originName = prev.title.replace(/飯店/g, hotel.name); 
-                originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
-            }
+            let originAddr = "My+Location";
+            if (idx > 0) { const prev = items[idx - 1]; originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; }
             const isDriving = item.mode === 'driving';
-            const travelMode = isDriving ? 'driving' : 'transit';
-            const btnClass = isDriving ? 'driving' : 'transit';
-            const btnText = isDriving ? '🚗 開車導航' : '🚍 大眾運輸導航';
-            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelMode}`;
-            list.innerHTML += `<div style="border-left:3px solid ${isDriving?'var(--accent-blue)':'var(--accent-green)'}; padding-left:15px; margin-bottom:20px; position:relative;"><div style="position:absolute; left:-9px; top:0; width:15px; height:15px; background:${isDriving?'var(--accent-blue)':'var(--accent-green)'}; border-radius:50%; border:3px solid var(--paper);"></div><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div><div style="background:#f1f3ee; padding:8px; border-radius:6px; font-size:0.8rem; color:#555;"><span>🚩 從 <b>${originName}</b> 出發</span><a href="${navUrl}" target="_blank" class="map-btn ${btnClass}" style="display:block; text-align:center; margin-top:5px;">${btnText}</a></div></div>`;
+            const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${isDriving?'driving':'transit'}`;
+            list.innerHTML += `<div style="border-left:3px solid ${isDriving?'var(--accent-blue)':'var(--accent-green)'}; padding-left:15px; margin-bottom:20px; position:relative;"><div style="position:absolute; left:-9px; top:0; width:15px; height:15px; background:${isDriving?'var(--accent-blue)':'var(--accent-green)'}; border-radius:50%; border:3px solid var(--paper);"></div><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div><div style="background:#f1f3ee; padding:8px; border-radius:6px; font-size:0.8rem; color:#555;"><a href="${navUrl}" target="_blank" class="map-btn ${isDriving?'driving':'transit'}" style="display:block; text-align:center;">${isDriving?'🚗 開車導航':'🚍 大眾運輸'}</a></div></div>`;
         });
     };
-
-    window.renderCheck = () => {
-        const list = document.getElementById('checklist-area');
-        list.innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join('');
-    };
-    window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
-
-    window.addItemUI = () => {
-        const t = document.getElementById('new-t').value;
-        const title = document.getElementById('new-title').value;
-        if(!title) { alert("請輸入地點名稱"); return; }
-        let mode = 'transit';
-        if(title.includes('開車') || title.includes('機場')) mode = 'driving';
-        if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
-        window.tripData[window.currentDay].push({ t: t, title: title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode: mode });
-        saveAll();
-        document.getElementById('new-title').value = "";
-    };
-
-    window.deleteItem = (idx) => { if(confirm("確定刪除此行程？")) { let items = window.tripData[window.currentDay]; items.sort((a, b) => a.t.localeCompare(b.t)); items.splice(idx, 1); window.tripData[window.currentDay] = items; saveAll(); } };
-
+    window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); };
     window.renderMoney = () => {
         let inc = 0, exp = 0;
         document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join('');
         document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join('');
         document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
     };
-
     window.renderPrivate = () => {
-        const budgetInput = document.getElementById('private-budget');
-        if(budgetInput && document.activeElement !== budgetInput) { budgetInput.value = window.privateBudget || ""; }
+        if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || "";
         let total = 0;
         document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join('');
         document.getElementById('private-total').innerText = total.toLocaleString();
         const balance = window.privateBudget - total;
-        const balEl = document.getElementById('private-balance');
-        balEl.innerText = `¥ ${balance.toLocaleString()}`;
-        balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+        const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
     };
-
-    window.addMember = () => { window.members.push({n: "", v: 0}); saveAll(); };
-    window.addExpense = () => { window.expenses.push({n: "", v: 0}); saveAll(); };
-    window.addPrivateExpense = () => { window.privateExpenses.push({n: "", v: 0}); savePrivate(); };
-    window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
-    window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); refreshUI(); };
-    function updateCountdown() { const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24)); document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`; }
-
-    function forceResetAction() {
-        set(publicRef, { 
-            hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
-            tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, 
-            checks: [{n: "護照 (有效期限6個月以上)", c: false}, {n: "Visit Japan Web (VJW) QR Code 截圖", c: false}, {n: "日幣現鈔 & 信用卡", c: false}, {n: "網卡 / 原號漫遊開通", c: false}, {n: "行動電源 & 充電線", c: false}],
-            members:[], expenses:[], memo:"" 
-        }).then(() => location.reload());
-    }
 </script>
 </body>
 </html>
