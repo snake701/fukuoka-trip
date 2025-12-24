@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <title>福岡行旅 2026 | 旗艦版</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/201/201623.png">
+    
+    <title>福岡行旅 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
@@ -19,7 +21,38 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 100px; user-select: none; }
         
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        /* --- 🌸 PWA 啟動動畫 (Splash Screen) --- */
+        #splash-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
+            background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); /* 櫻花粉漸層 */
+            z-index: 99999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+        }
+        
+        /* 飛機動畫 */
+        .plane-icon { font-size: 4rem; animation: flyIn 1.5s ease-out forwards; opacity: 0; transform: translateX(-50px) translateY(20px); }
+        @keyframes flyIn {
+            0% { opacity: 0; transform: translateX(-50px) translateY(20px) rotate(-10deg); }
+            100% { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg); }
+        }
+
+        /* 標題動畫 */
+        .splash-title {
+            margin-top: 20px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; color: var(--wood-dark); letter-spacing: 3px;
+            animation: fadeInText 2s ease-in-out forwards; opacity: 0;
+        }
+        @keyframes fadeInText { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        /* 載入中圓圈 */
+        .spinner {
+            margin-top: 30px; width: 30px; height: 30px; border: 3px solid rgba(93, 64, 55, 0.2); 
+            border-radius: 50%; border-top-color: var(--wood-dark); 
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* --------------------------------------- */
+
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
         #toast.show { visibility: visible; opacity: 1; }
 
@@ -65,10 +98,13 @@
 </head>
 <body>
 
-<div id="loading-screen">
-    <div style="font-size: 3rem;">✈️</div>
-    <div style="margin-top: 15px; font-weight: bold; color: #5D4037;">福岡行旅資料載入中...</div>
+<div id="splash-screen">
+    <div class="plane-icon">✈️</div>
+    <div class="splash-title">福岡行旅 2026</div>
+    <div style="font-size: 0.8rem; color: #8D8273; margin-top: 5px; letter-spacing: 1px;">FUKUOKA TRIP</div>
+    <div class="spinner"></div>
 </div>
+
 <div id="toast">✅ 資料已儲存同步</div>
 
 <header onclick="triggerSecret()">
@@ -90,6 +126,7 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
+        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
@@ -157,23 +194,11 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-
-        <div class="info-card" style="border: 1px solid #78909C; background: #f0f7f9;">
-            <h3 style="color:#78909C; margin-top:0;">💾 資料備份與還原</h3>
-            <p style="font-size:0.75rem; color:#666;">防止資料遺失，建議出發前備份。</p>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-sm" style="flex:1; background:#fff; border-color:#78909C; color:#78909C;" onclick="backupData()">📥 下載備份檔</button>
-                <button class="btn-sm" style="flex:1; background:#fff; border-color:#78909C; color:#78909C;" onclick="document.getElementById('file-input').click()">📤 匯入還原</button>
-                <input type="file" id="file-input" style="display:none;" onchange="restoreData(this)">
-            </div>
-        </div>
-
         <div style="text-align: center; margin-top: 30px;">
             <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有資料 (含日本清單)</button>
         </div>
@@ -232,13 +257,20 @@
             updateCountdown();
             fetchWeather();
         } else { refreshUI(); }
-        const loader = document.getElementById('loading-screen');
-        if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 500); }
+        
+        // 資料載入完成，延遲一點點時間讓動畫跑完，再淡出
+        const splash = document.getElementById('splash-screen');
+        if(splash) { 
+            setTimeout(() => {
+                splash.style.opacity = '0'; 
+                splash.style.visibility = 'hidden';
+            }, 1000); // 確保至少顯示1秒
+        }
     });
 
-    function showToast(msg = "✅ 資料已儲存同步") { const t = document.getElementById('toast'); t.innerText = msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
+    function showToast() { const t = document.getElementById('toast'); t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
     window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
-    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast("🔒 私帳已更新"); };
+    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast(); };
     window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); localStorage.setItem('fukuoka_private_budget', window.privateBudget); renderPrivate(); };
 
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
@@ -258,7 +290,6 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 🕵️‍♂️ 秘密觸發邏輯 ---
     let clickCount = 0;
     let clickTimer = null;
     window.triggerSecret = () => {
@@ -281,35 +312,6 @@
         document.querySelector('.nav-tab').click(); 
     };
 
-    // --- 備份與還原功能 ---
-    window.backupData = () => {
-        const data = {
-            tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks
-        };
-        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `fukuoka_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-    };
-
-    window.restoreData = (input) => {
-        const file = input.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if(confirm("確定要用備份檔覆蓋現有資料嗎？此操作不可逆。")) {
-                    set(dbRef, data).then(() => { alert("✅ 還原成功！"); location.reload(); });
-                }
-            } catch(err) { alert("❌ 檔案格式錯誤"); }
-        };
-        reader.readAsText(file);
-    };
-
-    // --- 匯率與其他邏輯 ---
     window.syncEx = (el, type) => {
         const val = parseFloat(el.value);
         if(isNaN(val)) return;
