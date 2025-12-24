@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 交通優化版</title>
+    <title>福岡行旅 2026 | 全功能清單整合版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -21,7 +21,7 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
-        .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; transform: scale(1.02); }
         
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
@@ -40,12 +40,16 @@
         .ex-input-group label { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
         
         .map-btn { display: inline-block; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
-        /* 不同交通模式的按鈕顏色 */
         .map-btn.transit { background: var(--accent-green); }
         .map-btn.driving { background: var(--accent-blue); }
         
         .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
         .delete-btn:hover { color: var(--accent-red); }
+        
+        /* 清單專用樣式 */
+        .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #eee; transition: 0.2s; }
+        .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
+        .checkbox-lg { transform: scale(1.3); cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -65,7 +69,7 @@
 
 <nav class="main-nav">
     <div class="nav-tab active" onclick="switchSection('itinerary', this)">📅 行程</div>
-    <div class="nav-tab" onclick="switchSection('money', this)">💰 公積金</div>
+    <div class="nav-tab" onclick="switchSection('check', this)">✅ 清單</div> <div class="nav-tab" onclick="switchSection('money', this)">💰 公積金</div>
     <div class="nav-tab" style="color:var(--private-gold); font-weight:bold;" onclick="switchSection('private', this)">🔒 私帳</div>
     <div class="nav-tab" onclick="switchSection('tools', this)">🔧 工具</div>
 </nav>
@@ -73,7 +77,6 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
-        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
@@ -82,6 +85,15 @@
             </div>
         </div>
         <div id="itinerary-list"></div>
+    </section>
+    
+    <section id="check-sec" class="content-section">
+        <div class="info-card" style="border-top: 3px solid var(--accent-green);">
+            <h3 style="color:var(--accent-green); margin-top:0;">🧳 日本旅遊攜帶清單</h3>
+            <div id="checklist-area"></div>
+            <button class="btn-wood" style="background:var(--accent-green); margin-top:10px;" onclick="addCheck()">+ 新增項目</button>
+        </div>
+        <div style="text-align:center; font-size:0.8rem; color:#999;">此清單為全體共用，勾選狀態會同步</div>
     </section>
 
     <section id="money-sec" class="content-section">
@@ -121,7 +133,7 @@
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
         <div style="text-align: center; margin-top: 30px;">
-            <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有行程與設定</button>
+            <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有資料 (含日本清單)</button>
         </div>
     </section>
 </div>
@@ -142,14 +154,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_final_v2'); 
+    // 使用新的節點版本以確保結構更新
+    const dbRef = ref(db, 'fukuoka_trip_final_v3'); 
 
     window.currentDay = 1;
-    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = [];
+    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = [];
     window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
     window.currentRate = 0.215;
 
-    // 匯率 UI 模板
+    // 匯率模板
     const exHTML = `
         <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
         <div class="ex-grid">
@@ -168,6 +181,8 @@
             window.members = data.members || [];
             window.expenses = data.expenses || [];
             window.hotelData = data.hotelData || [{name:"", addr:""}];
+            window.checks = data.checks || []; // 載入清單
+            
             if(window.hotelData[0]) {
                 document.getElementById('h-name').value = window.hotelData[0].name || "";
                 document.getElementById('h-addr').value = window.hotelData[0].addr || "";
@@ -180,10 +195,10 @@
     });
 
     function showToast() { const t = document.getElementById('toast'); t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
-    window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData }).then(() => showToast()); };
+    window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
     window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast(); };
 
-    function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); }
+    function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
     window.syncEx = (el, type) => {
         const val = parseFloat(el.value);
@@ -207,7 +222,6 @@
         if(firstJpy) window.syncEx({value: firstJpy}, 'jpy');
     };
 
-    // --- 核心行程渲染 (含開車/大眾運輸切換) ---
     window.renderItinerary = (day) => {
         window.currentDay = day;
         const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
@@ -233,12 +247,10 @@
                 originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
             }
 
-            // 判斷交通模式
             const isDriving = item.mode === 'driving';
             const travelMode = isDriving ? 'driving' : 'transit';
             const btnClass = isDriving ? 'driving' : 'transit';
             const btnText = isDriving ? '🚗 開車導航' : '🚍 大眾運輸導航';
-
             const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelMode}`;
 
             list.innerHTML += `
@@ -257,19 +269,27 @@
         });
     };
 
+    // --- 清單功能 (New) ---
+    window.renderCheck = () => {
+        const list = document.getElementById('checklist-area');
+        list.innerHTML = window.checks.map((c, i) => `
+            <div class="check-item ${c.c ? 'checked' : ''}">
+                <input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()">
+                <input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()">
+                <span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span>
+            </div>
+        `).join('');
+    };
+    window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
+
     window.addItemUI = () => {
         const t = document.getElementById('new-t').value;
         const title = document.getElementById('new-title').value;
         if(!title) { alert("請輸入地點名稱"); return; }
-        
-        // 智慧判斷：如果標題包含 "開車" 或 "機場"，預設為開車模式
         let mode = 'transit';
         if(title.includes('開車') || title.includes('機場')) mode = 'driving';
-
         if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
-        window.tripData[window.currentDay].push({ 
-            t: t, title: title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode: mode 
-        });
+        window.tripData[window.currentDay].push({ t: t, title: title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode: mode });
         saveAll();
         document.getElementById('new-title').value = "";
     };
@@ -305,22 +325,23 @@
 
     function updateCountdown() { const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24)); document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`; }
 
-    // 重設功能：包含 Day1 和 Day7 的開車預設
+    // 重設功能 (包含預設的日本清單)
     window.forceReset = () => {
-        if(confirm("確定重設為預設資料？")) {
+        if(confirm("確定重設為預設資料？(會自動載入行程範本與檢查清單)")) {
             set(dbRef, { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
                 tripData:{
-                    1:[
-                        {t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},
-                        {t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},
-                        {t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}
-                    ],
-                    7:[
-                        {t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},
-                        {t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}
-                    ]
-                }, 
+                    1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],
+                    7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]
+                },
+                checks: [
+                    {n: "護照 (有效期限6個月以上)", c: false},
+                    {n: "Visit Japan Web (VJW) QR Code 截圖", c: false},
+                    {n: "日幣現鈔 & 信用卡 (海外回饋高)", c: false},
+                    {n: "網卡 / 原號漫遊開通", c: false},
+                    {n: "行動電源 & 充電線 (Type-C/Lightning)", c: false},
+                    {n: "個人常備藥品 (胃藥/止痛藥)", c: false}
+                ],
                 members:[], expenses:[] 
             }).then(() => location.reload());
         }
