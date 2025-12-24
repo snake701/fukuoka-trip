@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 完整版手帖</title>
+    <title>福岡行旅 2026 | 完美同步版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,54 +12,55 @@
             --border: #D7CCC8; --shadow: 0 4px 12px rgba(93, 64, 55, 0.08);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light);
-            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
-            color: var(--wood-dark); margin: 0; line-height: 1.6; padding-bottom: 50px;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 80px; }
+        
+        /* Loading 畫面 */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
-        h1 { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; margin: 0; letter-spacing: 2px; }
         .status-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         .status-item { background: rgba(255,255,255,0.6); padding: 3px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.8rem; }
-
-        .main-nav {
-            max-width: 800px; margin: 0 auto 15px; display: flex; 
-            background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border);
-            overflow-x: auto; scrollbar-width: none;
-        }
-        .nav-tab { flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+        
+        .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
+        .nav-tab { flex: 1; min-width: 80px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
-
+        
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
         .content-section { display: none; }
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+        
         .info-card { background: var(--paper); padding: 18px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow); }
-        
-        .input-wood { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; }
-        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: 700; margin-top: 10px; }
-        .btn-sm { font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--wood-dark); }
+        .input-wood { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; }
+        .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: 700; width: 100%; }
+        .btn-sm { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--wood-dark); }
 
-        /* 行程項目 */
-        .itinerary-item { position: relative; padding: 12px; border: 1px solid var(--border); background: #fff; border-radius: 6px; margin-bottom: 12px; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; }
-        .time-input { font-size: 0.8rem; font-weight: 700; border: none; background: #eee; padding: 2px 5px; border-radius: 3px; width: 60px; }
-        .title-input { font-size: 1rem; font-weight: 700; border: none; width: 100%; margin: 5px 0; border-bottom: 1px solid transparent; }
-        .title-input:focus { border-bottom: 1px solid var(--accent-blue); outline: none; }
-        .memo-input { font-size: 0.8rem; color: #666; border: none; width: 100%; background: transparent; }
+        /* 行程列表樣式 */
+        .itinerary-item { position: relative; padding-left: 20px; border-left: 2px solid var(--border); margin-left: 10px; padding-bottom: 15px; }
+        .itinerary-item::before { content: ""; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent-green); border-radius: 50%; }
         
-        .list-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-        .map-btn { display: inline-block; margin-top: 8px; font-size: 0.75rem; color: var(--accent-blue); text-decoration: none; border: 1px solid var(--accent-blue); padding: 2px 10px; border-radius: 15px; }
+        /* 交通時間樣式 */
+        .travel-time { margin-left: 20px; margin-bottom: 15px; font-size: 0.8rem; color: #888; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.02); padding: 5px; border-radius: 4px; }
+        .travel-time::before { content: "↓"; font-weight: bold; color: var(--accent-blue); }
+        .btn-query { color: var(--accent-blue); cursor: pointer; text-decoration: underline; }
+        
+        .map-btn { display: inline-block; margin-top: 5px; font-size: 0.75rem; color: var(--accent-blue); text-decoration: none; border: 1px solid var(--accent-blue); padding: 2px 10px; border-radius: 12px; }
+        .map-btn:hover { background: var(--accent-blue); color: white; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<div id="loading-screen">
+    <div style="font-size: 3rem;">✈️</div>
+    <div style="margin-top: 15px; font-weight: bold; color: #5D4037;">福岡行旅資料同步中...</div>
+</div>
+
 <header>
     <h1>福岡行旅 2026</h1>
     <div class="status-bar">
-        <div class="status-item" id="countdown-text">載入中...</div>
-        <div class="status-item">福岡 🌤️ 15°C</div>
+        <div class="status-item" id="countdown-text">計算中...</div>
+        <div class="status-item">福岡 🌤️ 交通規劃模式</div>
     </div>
 </header>
 
@@ -74,53 +75,52 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
-        <div id="itinerary-list"></div>
-        <button class="btn-wood" onclick="addItem()">+ 新增行程</button>
+        <div id="itinerary-list" class="info-card" style="padding-bottom: 5px;"></div>
+        
+        <div class="info-card" style="background: #fff; border: 2px dashed var(--border);">
+            <div style="display:flex; gap:5px; align-items: center;">
+                <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="輸入景點/飯店">
+                <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
+            </div>
+            <div style="font-size:0.75rem; color:#999; margin-top:5px; text-align:center;">* 輸入「飯店」會自動關聯住宿地址</div>
+        </div>
     </section>
 
     <section id="money-sec" class="content-section">
         <div class="info-card">
-            <h3>👥 成員繳費 (¥)</h3>
+            <h3>👥 成員繳費</h3>
             <div id="member-list"></div>
             <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
         </div>
         <div class="info-card">
-            <h3>💸 公共支出 (¥)</h3>
+            <h3>💸 公共支出</h3>
             <div id="expense-list"></div>
-            <button class="btn-sm" onclick="addExpense()">+ 新增支出</button>
-            <div style="margin-top:15px; text-align:right; font-weight:700;">餘額：¥ <span id="balance-val">0</span></div>
+            <button class="btn-sm" onclick="addExpense()">+ 新增項目</button>
+            <div style="margin-top:15px; text-align:right; border-top:1px dashed var(--border); padding-top:10px;">
+                餘額：¥ <span id="balance-val" style="font-weight:700; font-size:1.2rem; color:var(--accent-green);">0</span>
+            </div>
         </div>
     </section>
 
-    <section id="food-sec" class="content-section">
-        <div id="food-list"></div>
-        <button class="btn-wood" onclick="addFood()">+ 新增美食名單</button>
-    </section>
-
-    <section id="check-sec" class="content-section">
-        <div class="info-card">
-            <h3>🧳 物品檢查清單</h3>
-            <div id="checklist-area"></div>
-            <button class="btn-sm" onclick="addCheck()">+ 新增項目</button>
-        </div>
-    </section>
+    <section id="food-sec" class="content-section"><div id="food-list"></div><button class="btn-wood" onclick="addFood()">+ 新增口袋名單</button></section>
+    <section id="check-sec" class="content-section"><div class="info-card"><h3>🧳 物品檢查</h3><div id="checklist-area"></div><button class="btn-sm" onclick="addCheck()">+ 新增檢查項</button></div></section>
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
-            <h3>🏨 飯店資訊管理</h3>
-            <label style="font-size:0.7rem;">飯店名稱</label>
-            <input id="h-name" class="input-wood" onchange="updateHotel()">
-            <label style="font-size:0.7rem;">飯店地址 (導航用)</label>
-            <input id="h-addr" class="input-wood" onchange="updateHotel()">
-            <label style="font-size:0.7rem;">飯店電話</label>
-            <input id="h-tel" class="input-wood" onchange="updateHotel()">
+            <h3>🏨 飯店資訊設定</h3>
+            <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
+            <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
+            <input id="h-tel" class="input-wood" placeholder="電話" onchange="updateHotel()">
         </div>
         <div class="info-card">
             <h3>🚨 緊急聯絡</h3>
             <div id="emergency-list"></div>
-            <button class="btn-sm" onclick="addEmergency()">+ 新增聯絡</button>
+            <button class="btn-sm" onclick="addEmergency()">+ 聯絡資訊</button>
         </div>
-        <button class="btn-sm" style="width:100%; color:var(--accent-red); margin-top:20px;" onclick="forceReset()">⚠️ 重設初始資料</button>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn-sm" style="background:#ffebee; color:#c62828; border:1px solid #ef9a9a; padding:10px 20px;" onclick="forceReset()">⚠️ 重設為初始預設值</button>
+        </div>
     </section>
 </div>
 
@@ -140,29 +140,19 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_v2026_full');
+    const dbRef = ref(db, 'fukuoka_trip_v22_optimized');
 
-    // 全域變數
     window.currentDay = 1;
-    window.tripData = {}; window.hotelData = []; window.members = [];
-    window.expenses = []; window.foods = []; window.checks = []; window.emergencyInfo = [];
+    window.tripData = {}; window.members = []; window.expenses = [];
+    window.foods = []; window.checks = []; window.hotelData = []; window.emergencyInfo = [];
 
-    // --- 核心功能 ---
-    window.openNav = (dest) => {
-        const hotel = window.hotelData[0] || { addr: "福岡" };
-        const finalDest = (dest === 'HOTEL_REF') ? hotel.addr : dest;
-        window.open(`https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D%E9%BC%8E%E6%B3%B0%E8%B1%90%2B%E4%BF%A1%E7%BE%A9%E5%BA%97{encodeURIComponent(finalDest)}&travelmode=transit`, '_blank');
-    };
-
-    window.saveAll = () => set(dbRef, {
-        tripData: window.tripData, hotelData: window.hotelData, members: window.members,
-        expenses: window.expenses, foods: window.foods, checks: window.checks, emergencyInfo: window.emergencyInfo
-    });
-
+    // --- Firebase 監聽與同步 ---
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             Object.assign(window, data);
+            
+            // 填入工具頁的飯店欄位
             if(window.hotelData[0]) {
                 document.getElementById('h-name').value = window.hotelData[0].name || "";
                 document.getElementById('h-addr').value = window.hotelData[0].addr || "";
@@ -171,112 +161,163 @@
             refreshUI();
             updateCountdown();
         }
+        
+        // 資料載入完成，隱藏 Loading
+        const loader = document.getElementById('loading-screen');
+        if(loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 500);
+        }
     });
 
-    window.refreshUI = () => {
-        renderItinerary();
-        renderMoney();
-        renderFood();
-        renderCheck();
-        renderEmergency();
-    };
+    window.saveAll = () => set(dbRef, {
+        tripData: window.tripData, members: window.members, expenses: window.expenses,
+        foods: window.foods, checks: window.checks, hotelData: window.hotelData, emergencyInfo: window.emergencyInfo
+    });
 
-    // --- 1. 行程渲染 (含排序) ---
-    function renderItinerary() {
+    // --- UI 渲染核心 ---
+    function refreshUI() {
+        renderItinerary(window.currentDay);
+        renderMoney(); renderFood(); renderCheck(); renderEmergency();
+    }
+
+    // --- 行程渲染 (含自動排序) ---
+    window.renderItinerary = (day) => {
+        window.currentDay = day;
         const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
         for(let i=1; i<=7; i++) {
-            tabs.innerHTML += `<button class="btn-sm" style="${i===window.currentDay?'background:var(--wood-dark);color:white;':''}" onclick="window.currentDay=${i};refreshUI();">D${i}</button>`;
+            tabs.innerHTML += `<button class="btn-sm" style="padding:6px 12px; margin-right:5px; font-weight:bold; ${i===day?'background:var(--wood-dark);color:white;border:none;':''}" onclick="renderItinerary(${i})">D${i}</button>`;
         }
+        
         const list = document.getElementById('itinerary-list');
-        const items = window.tripData[window.currentDay] || [];
-        list.innerHTML = `<h3>Day ${window.currentDay}</h3>`;
+        // ★ 優化3: 自動依照時間排序
+        let items = window.tripData[day] || [];
+        items.sort((a, b) => a.t.localeCompare(b.t));
+
+        const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
+        list.innerHTML = `<h3 style="margin-top:0;">Day ${day} 行程表</h3>`;
+        if(items.length === 0) list.innerHTML += `<div style="text-align:center;color:#ccc;padding:20px;">📭 本日尚無行程，請下方新增</div>`;
+
         items.forEach((item, idx) => {
+            let title = item.title;
+            const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
+            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
+
+            // 行程本體
             list.innerHTML += `
                 <div class="itinerary-item">
-                    <div class="item-header">
-                        <input class="time-input" value="${item.t}" onchange="tripData[currentDay][${idx}].t=this.value;saveAll()">
-                        <div>
-                            <button class="btn-sm" onclick="moveItem(${idx}, -1)">🔼</button>
-                            <button class="btn-sm" onclick="moveItem(${idx}, 1)">🔽</button>
-                            <button class="btn-sm" style="color:red" onclick="deleteItem(${idx})">×</button>
-                        </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:1rem; font-weight:700; color:var(--wood-dark);">${item.t}</span>
+                        <span onclick="deleteItem(${idx})" style="color:#ccc; cursor:pointer; font-size:1.2rem;">×</span>
                     </div>
-                    <input class="title-input" value="${item.title}" onchange="updateItemTitle(${idx}, this.value)">
-                    <input class="memo-input" value="${item.memo}" onchange="tripData[currentDay][${idx}].memo=this.value;saveAll()">
-                    <a href="javascript:void(0)" class="map-btn" onclick="openNav('${item.map}')">🗺️ 大眾交通導航</a>
+                    <div style="font-weight:700; font-size:1.05rem; margin:5px 0;">${title}</div>
+                    <a href="https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D%E5%9C%8B%E7%AB%8B%E6%95%85%E5%AE%AE%E5%8D%9A%E7%89%A9%E9%99%A2{encodeURIComponent(dest)}&dirflg=r" target="_blank" class="map-btn">🗺️ 大眾運輸導航</a>
                 </div>`;
+
+            // 點對點交通時間
+            if (idx < items.length - 1) {
+                const nextItem = items[idx + 1];
+                const nextDest = (nextItem.map === 'HOTEL_REF') ? hotel.addr : nextItem.map;
+                list.innerHTML += `
+                    <div class="travel-time">
+                        <span>預估車程：</span>
+                        <input style="border:none; background:transparent; border-bottom:1px solid #ccc; width:40px; text-align:center; color:var(--wood-dark);" 
+                               value="${item.driveTime || ''}" placeholder="?" 
+                               onchange="updateDriveTime(${idx}, this.value)"> 分
+                        <span class="btn-query" onclick="queryTravel('${dest}', '${nextDest}')">🔍 查交通</span>
+                    </div>`;
+            }
         });
-    }
-    window.moveItem = (idx, step) => {
-        const arr = window.tripData[window.currentDay];
-        const newIdx = idx + step;
-        if(newIdx >= 0 && newIdx < arr.length) {
-            [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
-            saveAll();
-        }
     };
-    window.updateItemTitle = (idx, val) => {
-        window.tripData[window.currentDay][idx].title = val;
-        window.tripData[window.currentDay][idx].map = val.includes("飯店") ? "HOTEL_REF" : val;
-        saveAll();
-    };
-    window.addItem = () => {
+
+    // --- 功能邏輯區 ---
+    // 新的 UI 新增邏輯 (取代 prompt)
+    window.addItemUI = () => {
+        const tInput = document.getElementById('new-t');
+        const titleInput = document.getElementById('new-title');
+        
+        if(!titleInput.value) { alert("請輸入地點名稱"); return; }
+        
         if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = [];
-        window.tripData[window.currentDay].push({t: "10:00", title: "新景點", memo: "備註", map: "新景點"});
+        window.tripData[window.currentDay].push({ 
+            t: tInput.value, 
+            title: titleInput.value, 
+            map: titleInput.value.includes("飯店") ? "HOTEL_REF" : titleInput.value, 
+            driveTime: "" 
+        });
+        
+        saveAll();
+        titleInput.value = ""; // 清空輸入框方便下一筆
+        // 時間不需清空，方便連續輸入
+    };
+
+    window.deleteItem = (idx) => { if(confirm("確定刪除此行程？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); } };
+    
+    window.updateDriveTime = (idx, val) => {
+        // 因為有排序，需先排序才能找到正確的 index 存回 (或是簡單處理：排序是顯示層，儲存時建議也排序)
+        // 為了簡單穩定，這裡我們先不重排資料庫陣列，而是直接更新。
+        // *注意：如果用戶頻繁插入時間，這個簡易版可能會有對應問題。
+        // 但考慮到這是個人手帖，最穩定的方式是：讀取->排序->修改->存回。
+        let items = window.tripData[window.currentDay];
+        items.sort((a, b) => a.t.localeCompare(b.t));
+        items[idx].driveTime = val;
+        window.tripData[window.currentDay] = items;
         saveAll();
     };
-    window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx,1); saveAll(); }};
 
-    // --- 2. 公積金渲染 ---
-    function renderMoney() {
-        let inc = 0, exp = 0;
-        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div class="list-row"><input class="input-wood" style="margin:0;flex:2" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="margin:0;flex:1" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"></div>`; }).join('');
-        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div class="list-row"><input class="input-wood" style="margin:0;flex:2" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="margin:0;flex:1" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"></div>`; }).join('');
-        document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
-    }
-    window.addMember = () => { window.members.push({n: "成員", v: 0}); saveAll(); };
-    window.addExpense = () => { window.expenses.push({n: "支出項目", v: 0}); saveAll(); };
-
-    // --- 3. 美食渲染 ---
-    function renderFood() {
-        document.getElementById('food-list').innerHTML = window.foods.map((f, i) => `
-            <div class="info-card">
-                <input class="title-input" value="${f.n}" onchange="foods[${i}].n=this.value;saveAll()">
-                <input class="memo-input" value="${f.d}" onchange="foods[${i}].d=this.value;saveAll()">
-                <div style="margin-top:10px;"><button class="btn-sm" onclick="openNav('${f.n}')">🗺️ 地圖導航</button> <button class="btn-sm" style="color:red" onclick="foods.splice(${i},1);saveAll()">× 刪除</button></div>
-            </div>`).join('');
-    }
-    window.addFood = () => { window.foods.push({n: "餐廳名", d: "心得備註"}); saveAll(); };
-
-    // --- 4. 檢查清單 ---
-    function renderCheck() {
-        document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="list-row"><input type="checkbox" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"> <input class="memo-input" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"></div>`).join('');
-    }
-    window.addCheck = () => { window.checks.push({n: "待辦事項", c: false}); saveAll(); };
-
-    // --- 5. 其他功能 ---
-    function renderEmergency() {
-        document.getElementById('emergency-list').innerHTML = window.emergencyInfo.map((e, i) => `<div class="list-row"><input class="input-wood" style="margin:0" value="${e.label}" onchange="emergencyInfo[${i}].label=this.value;saveAll()"> <input class="input-wood" style="margin:0" value="${e.val}" onchange="emergencyInfo[${i}].val=this.value;saveAll()"></div>`).join('');
-    }
-    window.addEmergency = () => { window.emergencyInfo.push({label: "標籤", val: "號碼"}); saveAll(); };
-    window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value, tel: document.getElementById('h-tel').value}]; saveAll(); };
-    window.switchSection = (id, el) => {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id + '-sec').classList.add('active');
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+    window.queryTravel = (start, end) => {
+        const url = `https://www.google.com/search?q=https://www.google.com/maps/search/%3Fapi%3D1%26query%3D%E5%A3%AB%E6%9E%97%E5%A4%9C%E5%B8%82{encodeURIComponent(start)}&daddr=${encodeURIComponent(end)}&dirflg=r`;
+        window.open(url, '_blank');
     };
+
+    window.updateHotel = () => {
+        window.hotelData = [{
+            name: document.getElementById('h-name').value,
+            addr: document.getElementById('h-addr').value,
+            tel: document.getElementById('h-tel').value
+        }];
+        saveAll();
+    };
+
+    window.renderMoney = () => {
+        let inc = 0, exp = 0;
+        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join('');
+        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join('');
+        document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
+    };
+    window.addMember = () => { window.members.push({n: "姓名", v: 0}); saveAll(); };
+    window.addExpense = () => { window.expenses.push({n: "項目", v: 0}); saveAll(); };
+
+    window.renderFood = () => { document.getElementById('food-list').innerHTML = window.foods.map((f, i) => `<div class="info-card" style="padding:10px;"><div style="display:flex;justify-content:space-between;"><b>${f.n}</b><span onclick="foods.splice(${i},1);saveAll()">×</span></div><input class="input-wood" style="font-size:0.8rem;margin:5px 0;" value="${f.d}" placeholder="備註" onchange="foods[${i}].d=this.value;saveAll()"><a href="javascript:void(0)" class="map-btn" onclick="queryTravel('目前位置', '${f.n}')">🗺️ 導航</a></div>`).join(''); };
+    window.addFood = () => { window.foods.push({n: "餐廳名稱", d: ""}); saveAll(); };
+
+    window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div style="margin-bottom:8px; display:flex; align-items:center;"><input type="checkbox" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()" style="transform:scale(1.2);margin-right:8px;"> <input style="border:none;background:transparent;width:100%;text-decoration:${c.c?'line-through':'none'};color:${c.c?'#aaa':'#5D4037'}" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"> <span onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); };
+    window.addCheck = () => { window.checks.push({n: "新物品", c: false}); saveAll(); };
+    
+    window.renderEmergency = () => { document.getElementById('emergency-list').innerHTML = window.emergencyInfo.map((e, i) => `<div style="margin-bottom:5px;display:flex;gap:5px;"><input class="input-wood" style="margin:0;flex:1" value="${e.label}" onchange="emergencyInfo[${i}].label=this.value;saveAll()"> <input class="input-wood" style="margin:0;flex:1.5" value="${e.val}" onchange="emergencyInfo[${i}].val=this.value;saveAll()"> <a href="tel:${e.val}" style="font-size:1.2rem;text-decoration:none;">📞</a></div>`).join(''); };
+    window.addEmergency = () => { window.emergencyInfo.push({label: "名稱", val: ""}); saveAll(); };
+
+    window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); };
+    
     function updateCountdown() {
-        const diff = Math.ceil((new Date('2026-10-03') - new Date()) / (1000*60*60*24));
-        document.getElementById('countdown-text').innerText = diff > 0 ? `⏳ 出發倒數 ${diff} 天` : `🌸 旅程中`;
+        const start = new Date('2026-10-03T00:00:00');
+        const now = new Date();
+        const diff = Math.ceil((start - now) / (1000 * 60 * 60 * 24));
+        const el = document.getElementById('countdown-text');
+        el.innerText = diff > 0 ? `⏳ 還剩 ${diff} 天` : `✈️ 旅程中`;
     }
+
     window.forceReset = () => {
-        if(confirm("確定要重設所有資料嗎？")) {
-            set(dbRef, {
+        if(confirm("這將清除所有資料並還原為初始設定。確定嗎？")) {
+            const init = {
                 hotelData: [{name: "Fukuoka U-BELL Hotel", addr: "福岡市中央區警固 1-9-3", tel: "092-751-0011"}],
-                tripData: { 1: [{t: "12:00", title: "飯店寄行李", memo: "U-BELL", map: "HOTEL_REF"}] },
-                members: [{n: "成員A", v: 0}], expenses: [], foods: [], checks: [], emergencyInfo: [{label: "報警", val: "110"}]
-            }).then(() => location.reload());
+                tripData: { 
+                    1: [{t: "04:00", title: "吉林路26巷出發", map: "吉林路26巷"}, {t: "08:10", title: "BR106 起飛", map: "桃園機場"}, {t: "12:00", title: "飯店寄放行李", map: "HOTEL_REF"}],
+                    7: [{t: "15:30", title: "前往機場回台", map: "福岡機場"}]
+                },
+                members: [{n: "你的名字", v: 20000}], emergencyInfo: [{label:"報警",val:"110"}], expenses: [], foods: [], checks: []
+            };
+            set(dbRef, init).then(() => location.reload());
         }
     };
 </script>
