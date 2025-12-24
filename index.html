@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 隱私強化版</title>
+    <title>福岡行旅 2026 | 隱形帳本版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,13 +13,13 @@
             --private-gold: #D4AF37;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 100px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 100px; user-select: none; }
         
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
         #toast.show { visibility: visible; opacity: 1; }
 
-        header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
+        header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; cursor: default; }
         
         .status-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
         .status-item { background: rgba(255,255,255,0.6); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.85rem; color: #555; display: flex; align-items: center; gap: 5px; }
@@ -68,7 +68,7 @@
 </div>
 <div id="toast">✅ 資料已儲存同步</div>
 
-<header>
+<header onclick="triggerSecret()">
     <h1 style="margin:0; font-family: 'Noto Serif TC', serif;">福岡行旅 2026</h1>
     <div class="status-bar">
         <div class="status-item" id="countdown-text">計算中...</div>
@@ -130,7 +130,7 @@
         <div class="info-card" style="border: 1px solid var(--private-gold);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
-                <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🔒 隱藏並上鎖</button>
+                <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 隱藏並上鎖</button>
             </div>
             
             <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--private-gold);">
@@ -156,21 +156,13 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
-        <div class="info-card" style="border: 2px solid var(--private-gold); background: #fffcf5;">
-            <h3 style="color:var(--private-gold); margin-top:0;">🔒 私帳功能</h3>
-            <p style="font-size:0.8rem; color:#666;">私帳分頁目前為隱藏狀態，請點擊下方按鈕解鎖。</p>
-            <button class="btn-wood" style="background:var(--private-gold);" onclick="unlockPrivate()">🔓 解鎖私密分頁</button>
-            <div style="margin-top:10px; font-size:0.75rem; color:#999; text-align:center;">預設密碼：8888 (僅存於本地)</div>
-        </div>
-
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
         <div style="text-align: center; margin-top: 30px;">
-            <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有資料</button>
+            <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有資料 (含日本清單)</button>
         </div>
     </section>
 </div>
@@ -254,22 +246,35 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 🔐 私帳解鎖邏輯 (New) ---
-    window.unlockPrivate = () => {
-        const pwd = prompt("請輸入私帳密碼 (預設: 8888)", "");
-        if(pwd === "8888") { // 您可以在這裡修改密碼
-            document.getElementById('tab-private').style.display = 'block';
-            document.getElementById('tab-private').click(); // 自動跳轉
-            alert("🔓 私密帳本已解鎖！");
-        } else {
-            alert("❌ 密碼錯誤");
+    // --- 🕵️‍♂️ 秘密觸發邏輯 ---
+    let clickCount = 0;
+    let clickTimer = null;
+    
+    window.triggerSecret = () => {
+        clickCount++;
+        
+        // 1秒後重置點擊數
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+
+        if(clickCount === 3) {
+            clickCount = 0; // 重置
+            const pwd = prompt("請輸入私帳通行碼 (預設 8888)", "");
+            if(pwd === "8888") {
+                const tab = document.getElementById('tab-private');
+                tab.style.display = 'block'; // 顯示分頁
+                tab.click(); // 自動切換過去
+                alert("🔓 歡迎進入私密空間");
+            } else if (pwd !== null) {
+                alert("❌ 密碼錯誤");
+            }
         }
     };
 
     window.lockPrivate = () => {
-        document.getElementById('tab-private').style.display = 'none';
-        document.querySelector('.nav-tab').click(); // 跳回首頁
-        alert("🔒 私密帳本已隱藏");
+        const tab = document.getElementById('tab-private');
+        tab.style.display = 'none'; // 隱藏分頁
+        document.querySelector('.nav-tab').click(); // 跳回第一頁
     };
 
     window.syncEx = (el, type) => {
@@ -309,13 +314,14 @@
         items.forEach((item, idx) => {
             let title = item.title;
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-            // 智能顯示：替換"飯店"字眼
+            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
+            // 智能名稱替換
             if(item.map === 'HOTEL_REF') title = title.replace(/飯店/g, hotel.name);
 
             let originName = "目前位置", originAddr = "My+Location";
             if (idx > 0) {
                 const prev = items[idx - 1];
-                originName = prev.title.replace(/飯店/g, hotel.name); 
+                originName = prev.title.replace(/飯店/g, hotel.name);
                 originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
             }
 
