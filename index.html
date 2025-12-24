@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 匯率與私帳整合版</title>
+    <title>福岡行旅 2026 | 全方位匯率同步版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,17 +16,27 @@
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--wood-light); background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); color: var(--wood-dark); margin: 0; padding-bottom: 100px; }
         
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--wood-light); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
         .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; }
+        
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
         .content-section { display: none; }
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+        
         .info-card { background: var(--paper); padding: 18px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow); }
         .input-wood { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; }
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: 700; }
         .btn-sm { font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; }
+
+        /* 匯率工具專用樣式 */
+        .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 12px !important; margin-bottom: 15px; }
+        .ex-grid { display: flex; gap: 8px; align-items: center; }
+        .ex-input-group { flex: 1; }
+        .ex-input-group label { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -37,14 +47,12 @@
     <div style="margin-top: 15px; font-weight: bold;">福岡行旅同步中...</div>
 </div>
 
-<header>
-    <h1>福岡行旅 2026</h1>
-</header>
+<header><h1>福岡行旅 2026</h1></header>
 
 <nav class="main-nav">
     <div class="nav-tab active" onclick="switchSection('itinerary', this)">📅 行程</div>
     <div class="nav-tab" onclick="switchSection('money', this)">💰 公積金</div>
-    <div class="nav-tab" style="color:var(--private-gold); font-weight:bold;" onclick="switchSection('private', this)">🔒 私帳/匯率</div>
+    <div class="nav-tab" style="color:var(--private-gold);" onclick="switchSection('private', this)">🔒 私帳</div>
     <div class="nav-tab" onclick="switchSection('tools', this)">🔧 工具</div>
 </nav>
 
@@ -52,49 +60,37 @@
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px;"></div>
         <div id="itinerary-list"></div>
-        <div class="info-card">
-            <div style="display:flex; gap:5px;">
-                <input type="time" id="new-t" class="input-wood" style="width:110px;" value="09:00">
-                <input type="text" id="new-title" class="input-wood" style="flex:1;" placeholder="輸入景點">
-                <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">+</button>
-            </div>
-        </div>
     </section>
 
     <section id="money-sec" class="content-section">
+        <div class="info-card ex-tool" id="ex-container-money"></div>
+        
         <div class="info-card"><h3>👥 公積金繳費</h3><div id="member-list"></div><button class="btn-sm" onclick="addMember()">+ 成員</button></div>
-        <div class="info-card"><h3>💸 公共支出</h3><div id="expense-list"></div><button class="btn-sm" onclick="addExpense()">+ 支出</button>
-            <div style="margin-top:10px; text-align:right;">餘額：¥ <span id="balance-val">0</span></div>
+        <div class="info-card"><h3>💸 公共支出</h3><div id="expense-list"></div><button class="btn-sm" onclick="addExpense()">+ 支出項目</button>
+            <div style="margin-top:10px; text-align:right;">餘額：¥ <span id="balance-val" style="font-weight:700;">0</span></div>
         </div>
     </section>
 
     <section id="private-sec" class="content-section">
-        <div class="info-card" style="border: 2px solid var(--accent-blue); background: #f0f4f7;">
-            <h3 style="margin-top:0; color:var(--accent-blue);">💱 匯率換算 (日幣 ➔ 台幣)</h3>
-            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-                <div style="flex:1;">
-                    <label style="font-size:0.75rem;">日幣 JPY</label>
-                    <input type="number" id="ex-jpy" class="input-wood" placeholder="輸入金額" oninput="convertCurrency('jpy')">
-                </div>
-                <div style="font-size:1.5rem; padding-top:10px;">➔</div>
-                <div style="flex:1;">
-                    <label style="font-size:0.75rem;">台幣 TWD</label>
-                    <input type="number" id="ex-twd" class="input-wood" placeholder="結果" oninput="convertCurrency('twd')">
-                </div>
-            </div>
-            <div style="font-size:0.7rem; color:#888;">目前匯率設定：1 JPY = <input type="number" id="ex-rate" value="0.21" step="0.001" style="width:50px; border:none; background:transparent; border-bottom:1px solid #ccc;" onchange="convertCurrency('jpy')"> TWD</div>
-        </div>
-
+        <div class="info-card ex-tool" id="ex-container-private"></div>
+        
         <div class="info-card" style="border: 1px solid var(--private-gold);">
             <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
             <div id="private-expense-list"></div>
             <button class="btn-wood" style="background:var(--private-gold);" onclick="addPrivateExpense()">+ 紀錄個人消費</button>
-            <div style="margin-top:15px; text-align:right;">個人總計：¥ <span id="private-total">0</span></div>
+            <div style="margin-top:15px; text-align:right;">個人總花費：¥ <span id="private-total" style="font-weight:bold;">0</span></div>
         </div>
     </section>
 
     <section id="tools-sec" class="content-section">
-        <div class="info-card"><h3>🏨 飯店設定</h3><input id="h-name" class="input-wood" placeholder="名稱"><input id="h-addr" class="input-wood" placeholder="地址"></div>
+        <div class="info-card ex-tool" id="ex-container-tools"></div>
+
+        <div class="info-card">
+            <h3>🏨 飯店資訊設定</h3>
+            <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
+            <input id="h-addr" class="input-wood" placeholder="地址" onchange="updateHotel()">
+        </div>
+        <button class="btn-sm" style="color:red; border-color:red; width:100%; padding:10px;" onclick="forceReset()">⚠️ 重設同步資料</button>
     </section>
 </div>
 
@@ -119,13 +115,60 @@
     window.currentDay = 1;
     window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = [];
     window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v1')) || [];
+    window.currentRate = 0.21; // 預設匯率
 
+    // --- 匯率 HTML 模版 ---
+    const exHTML = `
+        <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 匯率換算</h3>
+        <div class="ex-grid">
+            <div class="ex-input-group">
+                <label>日幣 JPY</label>
+                <input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="金額" oninput="syncEx(this, 'jpy')">
+            </div>
+            <div style="padding-top:15px; font-weight:bold;">→</div>
+            <div class="ex-input-group">
+                <label>台幣 TWD</label>
+                <input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="結果" oninput="syncEx(this, 'twd')">
+            </div>
+        </div>
+        <div style="font-size:0.7rem; color:#888; margin-top:8px;">
+            匯率：1 JPY = <input type="number" class="ex-rate-input" value="0.21" step="0.001" style="width:45px; border:none; border-bottom:1px solid #ccc; background:transparent;" onchange="updateGlobalRate(this.value)"> TWD
+        </div>
+    `;
+
+    // 渲染匯率到三個容器
+    document.getElementById('ex-container-money').innerHTML = exHTML;
+    document.getElementById('ex-container-private').innerHTML = exHTML;
+    document.getElementById('ex-container-tools').innerHTML = exHTML;
+
+    // --- 匯率同步邏輯 ---
+    window.syncEx = (el, type) => {
+        const val = el.value;
+        const jpyInputs = document.querySelectorAll('.ex-jpy');
+        const twdInputs = document.querySelectorAll('.ex-twd');
+        
+        if(type === 'jpy') {
+            const twdResult = (val * window.currentRate).toFixed(0);
+            jpyInputs.forEach(i => i.value = val);
+            twdInputs.forEach(i => i.value = twdResult);
+        } else {
+            const jpyResult = (val / window.currentRate).toFixed(0);
+            twdInputs.forEach(i => i.value = val);
+            jpyInputs.forEach(i => i.value = jpyResult);
+        }
+    };
+
+    window.updateGlobalRate = (newRate) => {
+        window.currentRate = newRate;
+        document.querySelectorAll('.ex-rate-input').forEach(i => i.value = newRate);
+        const firstJpy = document.querySelector('.ex-jpy').value;
+        if(firstJpy) syncEx({value: firstJpy}, 'jpy');
+    };
+
+    // Firebase 監聽與其他渲染 (與前版相同)
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-            Object.assign(window, data);
-            refreshUI();
-        }
+        if (data) { Object.assign(window, data); refreshUI(); }
         document.getElementById('loading-screen').style.opacity = '0';
         setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
     });
@@ -133,25 +176,13 @@
     window.saveAll = () => set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData });
     window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); };
 
-    // --- 💱 匯率換算邏輯 ---
-    window.convertCurrency = (type) => {
-        const rate = document.getElementById('ex-rate').value;
-        const jpyInput = document.getElementById('ex-jpy');
-        const twdInput = document.getElementById('ex-twd');
-        if(type === 'jpy') {
-            twdInput.value = (jpyInput.value * rate).toFixed(0);
-        } else {
-            jpyInput.value = (twdInput.value / rate).toFixed(0);
-        }
-    };
-
     function refreshUI() {
         renderItinerary(window.currentDay);
         renderMoney();
         renderPrivate();
     }
 
-    // 行程、公積金、私帳的渲染邏輯 (同前版)
+    // 行程渲染 (簡化版邏輯)
     window.renderItinerary = (day) => {
         window.currentDay = day;
         const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
@@ -159,38 +190,25 @@
         const list = document.getElementById('itinerary-list');
         let items = window.tripData[day] || [];
         items.sort((a, b) => a.t.localeCompare(b.t));
-        const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
-        list.innerHTML = items.map((item, idx) => {
-            const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-            let originAddr = "My+Location";
-            if (idx > 0) originAddr = (items[idx-1].map === 'HOTEL_REF') ? hotel.addr : items[idx-1].map;
-            const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
-            return `<div style="border-left:2px solid #ddd; padding-left:15px; margin-bottom:15px; position:relative;">
-                <div style="font-weight:700; color:var(--accent-green);">${item.t}</div>
-                <div style="font-weight:700;">${item.title}</div>
-                <a href="${transitUrl}" target="_blank" style="font-size:0.7rem; color:var(--accent-blue);">🚍 導航</a>
-                <span onclick="deleteItem(${idx})" style="float:right; color:#ccc;">×</span>
-            </div>`;
-        }).join('');
+        list.innerHTML = items.map((item, idx) => `<div style="border-left:2px solid var(--accent-green); padding-left:15px; margin-bottom:10px;"><b>${item.t}</b> ${item.title}</div>`).join('');
+    };
+
+    window.renderMoney = () => {
+        let inc = 0, exp = 0;
+        document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"></div>`; }).join('');
+        document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"></div>`; }).join('');
+        document.getElementById('balance-val').innerText = (inc - exp).toLocaleString();
     };
 
     window.renderPrivate = () => {
         let total = 0;
-        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => {
-            total += Number(e.v);
-            return `<div style="display:flex; gap:5px; margin-bottom:5px;">
-                <input class="input-wood" style="flex:2; margin:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()">
-                <input type="number" class="input-wood" style="flex:1; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()">
-                <span onclick="privateExpenses.splice(${i},1);savePrivate()">×</span>
-            </div>`;
-        }).join('');
+        document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:5px;"><input class="input-wood" style="flex:2;margin:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1;margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"></div>`; }).join('');
         document.getElementById('private-total').innerText = total.toLocaleString();
     };
 
-    window.addItemUI = () => { /* 同前 */ };
     window.addMember = () => { window.members.push({n: "姓名", v: 0}); saveAll(); };
-    window.addExpense = () => { window.expenses.push({n: "項目", v: 0}); saveAll(); };
-    window.addPrivateExpense = () => { window.privateExpenses.push({n: "個人消費", v: 0}); savePrivate(); };
+    window.addExpense = () => { window.expenses.push({n: "支出", v: 0}); saveAll(); };
+    window.addPrivateExpense = () => { window.privateExpenses.push({n: "購物/吃飯", v: 0}); savePrivate(); };
     window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); };
 </script>
 </body>
