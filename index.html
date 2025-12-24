@@ -3,62 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" id="dynamic-favicon">
-    <link rel="apple-touch-icon" id="dynamic-apple-icon">
+    <link rel="icon" href="https://placehold.co/192x192/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
     
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://placehold.co/512x512/5D4037/FAF9F6.png?text=%E6%97%85&font=serif","sizes":"512x512","type":"image/png"}]}'>
+
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script>
-        (function() {
-            // 1. 定義圖示來源 (日本鳥居)
-            const iconSource = 'https://cdn-icons-png.flaticon.com/512/5253/5253966.png';
-            
-            // 2. 建立畫布
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-
-            // 3. 載入圖片並合成
-            const img = new Image();
-            img.crossOrigin = "Anonymous";
-            img.src = iconSource;
-            img.onload = function() {
-                // A. 填滿實心背景 (重要！解決全黑問題)
-                ctx.fillStyle = '#5D4037'; // 深木色
-                ctx.fillRect(0, 0, 512, 512);
-
-                // B. 畫上鳥居圖案 (縮小一點留白邊，比較好看)
-                const padding = 80;
-                ctx.drawImage(img, padding, padding, 512 - padding*2, 512 - padding*2);
-
-                // C. 輸出並設定
-                const iconUrl = canvas.toDataURL('image/png');
-                document.getElementById('dynamic-favicon').href = iconUrl;
-                document.getElementById('dynamic-apple-icon').href = iconUrl;
-            };
-            
-            // 4. 如果圖片載入失敗，至少給一個純色方塊備案
-            img.onerror = function() {
-                ctx.fillStyle = '#5D4037';
-                ctx.fillRect(0, 0, 512, 512);
-                ctx.fillStyle = '#FFF';
-                ctx.font = 'bold 250px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('旅', 256, 256);
-                const backupUrl = canvas.toDataURL('image/png');
-                document.getElementById('dynamic-favicon').href = backupUrl;
-                document.getElementById('dynamic-apple-icon').href = backupUrl;
-            };
-        })();
-    </script>
-
     <style>
         :root {
             --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
