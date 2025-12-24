@@ -2,8 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福岡行旅 2026 | 隱形帳本版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="福岡行旅">
+    
+    <title>福岡行旅 2026 | 旗艦版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -28,7 +32,6 @@
         .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; transform: scale(1.02); }
         
-        /* 私帳分頁預設隱藏 */
         #tab-private { display: none; }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
@@ -87,11 +90,10 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
-        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
-                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'會自動顯示全名)">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'顯示全名)">
                 <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
             </div>
         </div>
@@ -126,7 +128,6 @@
 
     <section id="private-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-private"></div>
-        
         <div class="info-card" style="border: 1px solid var(--private-gold);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
@@ -156,11 +157,23 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
+        
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
+
+        <div class="info-card" style="border: 1px solid #78909C; background: #f0f7f9;">
+            <h3 style="color:#78909C; margin-top:0;">💾 資料備份與還原</h3>
+            <p style="font-size:0.75rem; color:#666;">防止資料遺失，建議出發前備份。</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-sm" style="flex:1; background:#fff; border-color:#78909C; color:#78909C;" onclick="backupData()">📥 下載備份檔</button>
+                <button class="btn-sm" style="flex:1; background:#fff; border-color:#78909C; color:#78909C;" onclick="document.getElementById('file-input').click()">📤 匯入還原</button>
+                <input type="file" id="file-input" style="display:none;" onchange="restoreData(this)">
+            </div>
+        </div>
+
         <div style="text-align: center; margin-top: 30px;">
             <button class="btn-sm" style="color:red; border-color:red; padding:10px 20px;" onclick="forceReset()">⚠️ 重設所有資料 (含日本清單)</button>
         </div>
@@ -192,7 +205,6 @@
     window.privateBudget = Number(localStorage.getItem('fukuoka_private_budget')) || 0;
     window.currentRate = 0.215;
 
-    // 匯率模板
     const exHTML = `
         <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
         <div class="ex-grid">
@@ -224,9 +236,9 @@
         if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.style.display = 'none', 500); }
     });
 
-    function showToast() { const t = document.getElementById('toast'); t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
+    function showToast(msg = "✅ 資料已儲存同步") { const t = document.getElementById('toast'); t.innerText = msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
     window.saveAll = () => { set(dbRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks }).then(() => showToast()); };
-    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast(); };
+    window.savePrivate = () => { localStorage.setItem('fukuoka_private_v1', JSON.stringify(window.privateExpenses)); renderPrivate(); showToast("🔒 私帳已更新"); };
     window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); localStorage.setItem('fukuoka_private_budget', window.privateBudget); renderPrivate(); };
 
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
@@ -249,34 +261,55 @@
     // --- 🕵️‍♂️ 秘密觸發邏輯 ---
     let clickCount = 0;
     let clickTimer = null;
-    
     window.triggerSecret = () => {
         clickCount++;
-        
-        // 1秒後重置點擊數
         clearTimeout(clickTimer);
         clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
-
         if(clickCount === 3) {
-            clickCount = 0; // 重置
+            clickCount = 0;
             const pwd = prompt("請輸入私帳通行碼 (預設 8888)", "");
             if(pwd === "8888") {
                 const tab = document.getElementById('tab-private');
-                tab.style.display = 'block'; // 顯示分頁
-                tab.click(); // 自動切換過去
+                tab.style.display = 'block'; 
+                tab.click(); 
                 alert("🔓 歡迎進入私密空間");
-            } else if (pwd !== null) {
-                alert("❌ 密碼錯誤");
-            }
+            } else if (pwd !== null) { alert("❌ 密碼錯誤"); }
         }
     };
-
     window.lockPrivate = () => {
-        const tab = document.getElementById('tab-private');
-        tab.style.display = 'none'; // 隱藏分頁
-        document.querySelector('.nav-tab').click(); // 跳回第一頁
+        document.getElementById('tab-private').style.display = 'none'; 
+        document.querySelector('.nav-tab').click(); 
     };
 
+    // --- 備份與還原功能 ---
+    window.backupData = () => {
+        const data = {
+            tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks
+        };
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fukuoka_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+    };
+
+    window.restoreData = (input) => {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(confirm("確定要用備份檔覆蓋現有資料嗎？此操作不可逆。")) {
+                    set(dbRef, data).then(() => { alert("✅ 還原成功！"); location.reload(); });
+                }
+            } catch(err) { alert("❌ 檔案格式錯誤"); }
+        };
+        reader.readAsText(file);
+    };
+
+    // --- 匯率與其他邏輯 ---
     window.syncEx = (el, type) => {
         const val = parseFloat(el.value);
         if(isNaN(val)) return;
@@ -314,14 +347,12 @@
         items.forEach((item, idx) => {
             let title = item.title;
             const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-            if(item.map === 'HOTEL_REF') title = title.includes('飯店') ? title : `回到飯店 (${hotel.name})`;
-            // 智能名稱替換
             if(item.map === 'HOTEL_REF') title = title.replace(/飯店/g, hotel.name);
 
             let originName = "目前位置", originAddr = "My+Location";
             if (idx > 0) {
                 const prev = items[idx - 1];
-                originName = prev.title.replace(/飯店/g, hotel.name);
+                originName = prev.title.replace(/飯店/g, hotel.name); 
                 originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
             }
 
