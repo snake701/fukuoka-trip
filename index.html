@@ -8,51 +8,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" id="dynamic-icon">
-    <link rel="apple-touch-icon" id="dynamic-apple-icon">
+    <link rel="icon" href="https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1">
     
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://ui-avatars.com/api/?name=%E6%97%85&background=5D4037&color=FAF9F6&size=512&font-size=0.6&length=1","sizes":"512x512","type":"image/png"}]}'>
+
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script>
-        (function() {
-            // 建立一個 512x512 的畫布
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-
-            // 1. 填滿背景色 (深木色，解決 iOS 變黑問題)
-            ctx.fillStyle = '#5D4037';
-            ctx.fillRect(0, 0, 512, 512);
-
-            // 2. 畫上文字 (白色)
-            ctx.fillStyle = '#FAF9F6';
-            ctx.font = 'bold 300px "Noto Serif TC", serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('旅', 256, 270); // 稍微調整垂直置中
-
-            // 3. 轉成圖片網址
-            const iconUrl = canvas.toDataURL('image/png');
-
-            // 4. 設定給瀏覽器
-            const link = document.createElement('link');
-            link.type = 'image/x-icon';
-            link.rel = 'shortcut icon';
-            link.href = iconUrl;
-            document.getElementsByTagName('head')[0].appendChild(link);
-
-            // 設定 iOS 主畫面圖示
-            const appleLink = document.getElementById('dynamic-apple-icon');
-            appleLink.href = iconUrl;
-            
-            // 設定一般圖示
-            const normalLink = document.getElementById('dynamic-icon');
-            normalLink.href = iconUrl;
-        })();
-    </script>
-
     <style>
         :root {
             --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; 
@@ -85,8 +47,6 @@
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; cursor: default; position: relative; }
         
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 15px; }
-        
-        /* 隱藏觸發按鈕 */
         .secret-trigger { font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; user-select: none; opacity: 0.8; }
         .secret-trigger:active { transform: scale(0.9); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
