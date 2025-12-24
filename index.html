@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5253/5253966.png">
     
+    <link rel="icon" type="image/png" href="https://placehold.co/512/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
+    <link rel="apple-touch-icon" href="https://placehold.co/512/5D4037/FAF9F6.png?text=%E6%97%85&font=serif">
+    
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://placehold.co/512/5D4037/FAF9F6.png?text=%E6%97%85&font=serif","sizes":"512x512","type":"image/png"}]}'>
+
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -38,12 +43,12 @@
 
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
         #toast.show { visibility: visible; opacity: 1; }
-        
-        /* 斷線提示 */
-        #offline-alert { display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; font-size:0.8rem; z-index:10002; }
 
         header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; cursor: default; position: relative; }
+        
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        
+        /* 隱藏觸發按鈕 */
         .secret-trigger { font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; user-select: none; opacity: 0.8; }
         .secret-trigger:active { transform: scale(0.9); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
@@ -54,6 +59,7 @@
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
         .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; transform: scale(1.02); }
+        
         #tab-private { display: none; }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
@@ -82,7 +88,7 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
         
-        /* 備忘錄樣式 */
+        /* Memo */
         textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
         .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
 
@@ -98,14 +104,14 @@
     <div class="spinner"></div>
 </div>
 
-<div id="offline-alert">⚠️ 網路已斷線，目前為離線模式</div>
+<div id="offline-alert" style="display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; z-index:10002;">⚠️ 離線模式</div>
 <div id="toast">✅ 資料已儲存同步</div>
 
 <div id="backup-modal" class="modal-overlay">
     <div class="modal-content">
         <h3 style="margin-top:0; color:var(--wood-dark);">💾 資料備份中心</h3>
-        <p style="font-size:0.8rem; color:#666;">下載備份可防止雲端資料遺失。</p>
-        <button class="modal-btn primary" onclick="backupData()">📥 下載備份檔 (JSON)</button>
+        <p style="font-size:0.8rem; color:#666;">備份檔案 (JSON) 可用來還原公用資料。</p>
+        <button class="modal-btn primary" onclick="backupData()">📥 下載備份</button>
         <button class="modal-btn" onclick="document.getElementById('file-input').click()">📤 匯入還原</button>
         <input type="file" id="file-input" style="display:none;" onchange="restoreData(this)">
         <button class="modal-btn close" onclick="closeBackupModal()">關閉</button>
@@ -216,9 +222,7 @@
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
         
-        <div class="footer-info">
-            ☁️ 資料最後同步於：<span id="last-updated">讀取中...</span>
-        </div>
+        <div class="footer-info">☁️ 資料最後同步於：<span id="last-updated">讀取中...</span></div>
     </section>
 </div>
 
@@ -238,19 +242,17 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    // V7: 包含 memo 與 lastUpdated
-    const publicRef = ref(db, 'fukuoka_trip_final_v7/public');
+    // V8 結構：包含 memo, lastUpdated
+    const publicRef = ref(db, 'fukuoka_trip_final_v8/public');
     let privateRef = null;
     
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
-    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = [];
-    window.memo = ""; // 新增備忘錄變數
+    window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = []; window.memo = "";
     window.privateExpenses = []; window.privateBudget = 0;
     window.currentRate = 0.215;
 
-    // 斷線偵測
     window.addEventListener('offline', () => document.getElementById('offline-alert').style.display='block');
     window.addEventListener('online', () => document.getElementById('offline-alert').style.display='none');
 
@@ -273,16 +275,14 @@
             window.expenses = data.expenses || [];
             window.hotelData = data.hotelData || [{name:"", addr:""}];
             window.checks = data.checks || []; 
-            window.memo = data.memo || ""; // 載入 Memo
+            window.memo = data.memo || "";
             
-            // 更新 Memo UI
             const memoArea = document.getElementById('group-memo');
             if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
 
-            // 更新時間戳記
             if(data.lastUpdated) {
                 const date = new Date(data.lastUpdated);
-                document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+                document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
             }
 
             if(window.hotelData[0]) {
@@ -299,7 +299,6 @@
 
     function showToast(msg="✅ 資料已儲存同步") { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); }
     
-    // 更新並儲存 (含時間戳)
     window.saveAll = () => { 
         set(publicRef, { 
             tripData: window.tripData, members: window.members, expenses: window.expenses, 
@@ -314,7 +313,7 @@
     };
     
     window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
-    window.updateMemo = (val) => { window.memo = val; saveAll(); }; // Memo 更新
+    window.updateMemo = (val) => { window.memo = val; saveAll(); };
 
     function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
@@ -333,14 +332,14 @@
         } catch(e) { document.getElementById('weather-box').innerText = "天氣讀取失敗"; }
     }
 
-    // --- 秘密觸發邏輯 ---
+    // --- 秘密觸發 (連按 3 下) ---
     const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
     window.handleHeaderClick = (type) => {
         const state = clickStates[type];
         state.count++;
         clearTimeout(state.timer);
-        state.timer = setTimeout(() => { state.count = 0; }, 1000);
+        state.timer = setTimeout(() => { state.count = 0; }, 1000); // 1秒內
         if (state.count === 3) {
             state.count = 0;
             if (type === 'reset') triggerResetFlow();
@@ -357,17 +356,12 @@
     function triggerPrivateFlow() {
         const pwd = prompt("請輸入私帳密碼 (此密碼即為您的雲端鑰匙)", "");
         if(pwd) {
-            privateRef = ref(db, `fukuoka_trip_final_v7/private/${pwd}`);
+            privateRef = ref(db, `fukuoka_trip_final_v8/private/${pwd}`);
             document.getElementById('current-user-id').innerText = pwd;
             onValue(privateRef, (snapshot) => {
                 const pData = snapshot.val();
-                if(pData) {
-                    window.privateExpenses = pData.expenses || [];
-                    window.privateBudget = pData.budget || 0;
-                } else {
-                    window.privateExpenses = [];
-                    window.privateBudget = 0;
-                }
+                if(pData) { window.privateExpenses = pData.expenses || []; window.privateBudget = pData.budget || 0; }
+                else { window.privateExpenses = []; window.privateBudget = 0; }
                 renderPrivate();
                 const tab = document.getElementById('tab-private');
                 tab.style.display = 'block'; tab.click(); 
@@ -389,7 +383,7 @@
     };
     window.closeBackupModal = () => { document.getElementById('backup-modal').style.display = 'none'; };
 
-    // --- 備份功能 ---
+    // --- 備份功能 (僅備份公用資料) ---
     window.backupData = () => {
         const data = { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo };
         const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
