@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/201/201623.png">
     
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/5253/5253966.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5253/5253966.png">
+    
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"福岡行旅 2026","short_name":"福岡行旅","display":"standalone","start_url":".","background_color":"#EFEBE9","theme_color":"#5D4037","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/5253/5253966.png","sizes":"512x512","type":"image/png"}]}'>
+
     <title>福岡行旅 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -202,6 +207,7 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
+        
         <div class="info-card">
             <h3>🏨 飯店資訊設定</h3>
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
@@ -229,7 +235,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dbRef = ref(db, 'fukuoka_trip_final_v5'); // Version bump for safety
+    const dbRef = ref(db, 'fukuoka_trip_final_v5'); 
     const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
     window.currentDay = 1;
