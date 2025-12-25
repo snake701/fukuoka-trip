@@ -35,7 +35,7 @@
     <style>
         :root { --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; --accent-green: #8D9977; --accent-red: #B06B6B; --accent-blue: #78909C; --border: #D7CCC8; --private-gold: #D4AF37; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; touch-action: manipulation; }
+        html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
@@ -91,23 +91,22 @@
         .copy-btn { margin-left: 5px; cursor: pointer; color: #888; font-size: 0.9rem; }
         .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
         
-        /* 拖曳與卡片樣式修正 */
+        /* ★★★ 拖曳卡片優化 ★★★ */
         .itinerary-card { 
             background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); 
             border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; 
-            touch-action: none; /* 重要：防止拖曳時觸發頁面捲動 */
+            touch-action: pan-y; /* 允許垂直捲動，但禁止水平手勢干擾 */
+            transition: background-color 0.2s;
         }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
         
-        /* 拖曳時的樣式 */
-        .sortable-chosen { background-color: #fdfaf3; transform: scale(1.02); box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-color: var(--private-gold); }
-        .sortable-ghost { opacity: 0.4; }
+        /* 拖曳中的樣式 */
+        .sortable-ghost { opacity: 0.4; background: #e0e0e0; }
+        .sortable-drag { background: #fffcf5; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: scale(1.02); }
 
-        /* 拖曳手把加大 */
         .drag-handle { 
             color: #bbb; margin-right: 15px; font-size: 1.5rem; 
-            padding: 10px 15px 10px 5px; /* 加大觸控區 */
-            cursor: grab; 
+            cursor: grab; padding: 10px; /* 加大觸控範圍 */
         }
         
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
@@ -195,6 +194,7 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
+        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px; margin-bottom: 5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
@@ -207,7 +207,8 @@
                 <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留(如:1小時)">
             </div>
         </div>
-        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按左方「☰」不放，卡片浮起後可拖曳排序</div>
+        
+        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按左方「☰」不放，卡片變色後可拖曳排序</div>
         <div id="itinerary-list"></div>
     </section>
     
@@ -262,6 +263,7 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
+        
         <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
             <h3 style="margin-top:0; color:#c62828;">🚨 福岡急用工具包</h3>
             <div class="link-grid">
@@ -273,6 +275,7 @@
                 <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
             </div>
         </div>
+
         <div class="info-card" style="border: 1px solid #aaa; background: #fffdf5;">
             <h3 style="margin-top:0; color:#666;">📝 公用備忘錄</h3>
             <textarea id="group-memo" class="memo-area" oninput="updateMemo(this.value)"></textarea>
@@ -282,7 +285,10 @@
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span></div>
+        <div class="footer-info">
+            ☁️ 最後同步：<span id="last-updated">--</span>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
+        </div>
     </section>
 </div>
 
@@ -320,6 +326,7 @@
         window.privateExpenses = []; window.privateBudget = 0;
         window.currentRate = 0.215;
         let selectedSpot = null;
+        let sortableInstance = null; // 儲存拖曳實例
 
         const exHTML = `
             <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
@@ -385,6 +392,10 @@
             const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
             for(let i=1; i<=7; i++) tabs.innerHTML += `<button class="btn-sm" style="margin-right:5px; padding:8px 15px; ${i===day?'background:var(--wood-dark);color:white;':''}" onclick="renderItinerary(${i})">D${i}</button>`;
             const list = document.getElementById('itinerary-list');
+            
+            // 清除舊的 Sortable 實例，防止記憶體洩漏或衝突
+            if(sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+
             list.innerHTML = "";
             let items = window.tripData[day] || [];
             if(items.length === 0) { list.innerHTML = `<div style="text-align:center; color:#ccc; padding:30px;">📭 本日尚無行程</div>`; return; }
@@ -423,12 +434,17 @@
                     </div>`;
                 list.appendChild(div);
             });
-            // 修正 SortableJS 參數，增加 delay 防止與點擊衝突
-            new Sortable(list, { 
+            
+            // 重新初始化 Sortable，加入延遲設定優化手機體驗
+            sortableInstance = new Sortable(list, { 
                 handle: '.drag-handle', 
                 animation: 250,
-                delay: 200, // 延遲 200ms
+                delay: 200, 
                 delayOnTouchOnly: true,
+                onStart: function(evt) {
+                    // 手機震動回饋 (如果支援)
+                    if (navigator.vibrate) navigator.vibrate(50);
+                },
                 onEnd: function (evt) { 
                     const movedItem = items.splice(evt.oldIndex, 1)[0]; 
                     items.splice(evt.newIndex, 0, movedItem); 
@@ -473,7 +489,13 @@
             if(!title) { alert("請輸入地點"); return; } 
             let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
             if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
-            window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode, travel, stay }); 
+            window.tripData[window.currentDay].push({ 
+                t, title, 
+                map: title.includes("飯店") ? "HOTEL_REF" : title, 
+                mode,
+                travel: travel, 
+                stay: stay      
+            }); 
             saveAll(); 
             document.getElementById('new-title').value = ""; 
             document.getElementById('new-travel').value = "";
