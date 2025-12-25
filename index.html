@@ -38,7 +38,6 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
         @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
@@ -47,7 +46,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -154,8 +152,8 @@
         
         <div class="expense-type-selector">
             <label>
-                <input type="radio" name="exp-type" value="private" checked> 
-                <span>🔒 私帳</span>
+                <input type="radio" name="exp-type" value="purchased" checked> 
+                <span>📝 記帳</span>
             </label>
             <label>
                 <input type="radio" name="exp-type" value="public"> 
@@ -210,7 +208,7 @@
                 <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留(如:1小時)">
             </div>
         </div>
-        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按卡片拖曳排序 / 點擊卡片記帳</div>
+        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按左方「☰」不放，卡片變色後可拖曳排序</div>
         <div id="itinerary-list"></div>
     </section>
     
@@ -224,11 +222,13 @@
 
     <section id="money-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-money"></div>
+        
         <div class="info-card">
             <h3>👥 成員繳費 (公款)</h3>
             <div id="member-list"></div>
             <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
         </div>
+        
         <div class="info-card">
             <h3>💸 公共支出</h3>
             <div id="expense-list"></div>
@@ -237,6 +237,12 @@
                 公款餘額：¥ <span id="balance-val" style="font-weight:700;">0</span>
                 <div style="color:#666; font-size:0.85rem;">(約 NT$ <span id="balance-val-twd">0</span>)</div>
             </div>
+        </div>
+
+        <div class="info-card" style="border-left: 5px solid var(--accent-blue);">
+            <h3>🛒 已購買 (個人/記帳)</h3>
+            <div id="purchased-list"></div>
+            <button class="btn-sm" onclick="addPurchasedManual()">+ 新增紀錄</button>
         </div>
     </section>
 
@@ -247,7 +253,7 @@
                 <h3 style="color: var(--private-gold); margin-top:0;">🔒 我的私密帳本</h3>
                 <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 上鎖</button>
             </div>
-            <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">* 資料儲存於本機 (Local Only)</p>
+            <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">* 同步金鑰：<span id="current-user-id" style="font-weight:bold;"></span></p>
             <div style="background:#fffaf0; padding:10px; border-radius:6px; margin-bottom:15px;">
                 <label style="font-size:0.75rem; color:#888;">💰 預算 (JPY)</label>
                 <input type="number" id="private-budget" class="input-wood" style="margin:0; font-weight:bold;" placeholder="輸入金額..." onchange="updatePrivateBudget(this.value)">
@@ -265,7 +271,6 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
         <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
             <h3 style="margin-top:0; color:#c62828;">🚨 福岡急用工具包</h3>
             <div class="link-grid">
@@ -277,7 +282,6 @@
                 <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
             </div>
         </div>
-
         <div class="info-card" style="border: 1px solid #aaa; background: #fffdf5;">
             <h3 style="margin-top:0; color:#666;">📝 公用備忘錄</h3>
             <textarea id="group-memo" class="memo-area" oninput="updateMemo(this.value)"></textarea>
@@ -287,10 +291,7 @@
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        <div class="footer-info">
-            ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span>
-        </div>
+        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span></div>
     </section>
 </div>
 
@@ -319,13 +320,15 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v10/public');
+        const publicRef = ref(db, 'fukuoka_trip_final_v11/public'); // v11
+        let privateRef = null;
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
-        window.tripData = {}; window.members = []; window.expenses = []; window.hotelData = []; window.checks = []; window.memo = "";
+        window.tripData = {}; window.members = []; window.expenses = []; 
+        window.purchased = []; // 新增：已購買清單 (Public)
+        window.hotelData = []; window.checks = []; window.memo = "";
         
-        // ★ 私帳改為 LocalStorage ★
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v2_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v2_budget')) || 0;
         
@@ -349,6 +352,7 @@
                 window.tripData = data.tripData || {};
                 window.members = data.members || [];
                 window.expenses = data.expenses || [];
+                window.purchased = data.purchased || []; // 載入已購買清單
                 window.hotelData = data.hotelData || [{name:"", addr:""}];
                 window.checks = data.checks || []; 
                 window.memo = data.memo || "";
@@ -369,14 +373,9 @@
             if(splash) { setTimeout(() => { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; }, 800); }
         });
 
-        window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, hotelData: window.hotelData, checks: window.checks, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
-        
-        // ★ 私帳改存 LocalStorage ★
-        window.savePrivate = () => { 
-            localStorage.setItem('fukuoka_private_v2_exp', JSON.stringify(window.privateExpenses));
-            localStorage.setItem('fukuoka_private_v2_budget', window.privateBudget);
-            renderPrivate();
-        };
+        // 包含 purchased 的存檔
+        window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
+        window.savePrivate = () => { localStorage.setItem('fukuoka_private_v2_exp', JSON.stringify(window.privateExpenses)); localStorage.setItem('fukuoka_private_v2_budget', window.privateBudget); renderPrivate(); };
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
@@ -459,6 +458,7 @@
         };
 
         window.openExpenseModal = (spotName) => { 
+            // 允許打開
             selectedSpot = spotName; 
             document.getElementById('expense-spot-name').innerText = `於「${spotName}」消費：`; 
             document.getElementById('expense-item').value = ""; 
@@ -469,6 +469,7 @@
         window.closeExpenseModal = () => { document.getElementById('expense-modal').style.display = 'none'; };
         window.updateExpensePreview = (val) => { document.getElementById('expense-twd-preview').innerText = Math.round(val * window.currentRate).toLocaleString(); };
         
+        // 記帳儲存邏輯 (區分已購買 vs 公款)
         window.saveSpotExpense = () => { 
             const item = document.getElementById('expense-item').value; 
             const amount = document.getElementById('expense-amount').value; 
@@ -476,10 +477,10 @@
             
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            if (type === 'private') {
-                window.privateExpenses.push({ n: `[${selectedSpot}] ${item}`, v: amount }); 
-                savePrivate();
-                showToast("🔒 已存入私帳");
+            if (type === 'purchased') {
+                window.purchased.push({ n: `[${selectedSpot}] ${item}`, v: amount }); 
+                saveAll();
+                showToast("📝 已存入記帳列表");
             } else {
                 window.expenses.push({ n: `[${selectedSpot}] ${item}`, v: amount });
                 saveAll();
@@ -487,6 +488,8 @@
             }
             closeExpenseModal(); 
         };
+
+        window.addPurchasedManual = () => { window.purchased.push({n: "品項", v: 0}); saveAll(); };
 
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
@@ -517,12 +520,34 @@
             document.getElementById('new-stay').value = "";
         };
         window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
-        window.renderMoney = () => { let inc = 0, exp = 0; document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join(''); const balance = inc - exp; document.getElementById('balance-val').innerText = balance.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); };
-        window.renderPrivate = () => { if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || ""; let total = 0; document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join(''); document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); const balance = window.privateBudget - total; const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; };
+        
+        window.renderMoney = () => { 
+            let inc = 0, exp = 0; 
+            document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join(''); 
+            document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join(''); 
+            
+            // 新增：已購買列表渲染
+            document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${p.n}" placeholder="品項" onchange="purchased[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>`; }).join('');
+            
+            const balance = inc - exp; 
+            document.getElementById('balance-val').innerText = balance.toLocaleString(); 
+            document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
+        };
+
+        window.renderPrivate = () => { 
+            if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || ""; 
+            let total = 0; 
+            document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join(''); 
+            document.getElementById('private-total').innerText = total.toLocaleString(); 
+            document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); 
+            const balance = window.privateBudget - total; 
+            const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
+            const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; 
+        };
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         
-        // ★★★ 標題連按 3 下：直接開啟私帳 (不需密碼) ★★★
+        // 標題連按3下，直接開私帳 (Local Storage)
         window.handleHeaderClick = (type) => { 
             const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); 
             if (state.count === 3) { 
@@ -539,13 +564,13 @@
         
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
         window.closeBackupModal = () => { document.getElementById('backup-modal').style.display='none'; };
-        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
+        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=(e)=>{ try{ const d=JSON.parse(e.target.result); if(confirm("還原資料？")) set(publicRef, d).then(()=>{alert("✅ 完成");location.reload();}); }catch(err){alert("❌ 錯誤");} }; r.readAsText(f); };
         window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); window.renderMoney(); window.renderPrivate(); };
         window.syncEx = (el, type) => { const val = parseFloat(el.value); if(isNaN(val)) return; const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0); document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res); document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val); };
         window.showToast = (msg="✅ 資料已儲存同步") => { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); };
         window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
-        function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], memo:"" }).then(() => location.reload()); }
+        function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
     };
     
     // 初始化執行 (延遲 100ms 確保 DOM 就緒)
