@@ -91,11 +91,17 @@
         .map-btn { display: inline-block; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
         .map-btn.transit { background: var(--accent-green); }
         .map-btn.driving { background: var(--accent-blue); }
+        /* 新增：飛機按鈕樣式 */
+        .map-btn.flying { background: #039BE5; } /* 天空藍 */
+
         .copy-btn { margin-left: 5px; cursor: pointer; color: #888; font-size: 0.9rem; }
         .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
+        /* 新增：飛行卡片樣式 */
+        .itinerary-card.flying { border-left-color: #039BE5; }
+        
         .drag-handle { color: #ccc; margin-right: 10px; font-size: 1.2rem; cursor: grab; padding: 10px; }
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
         .time-info { display: flex; gap: 10px; margin-top: 5px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; width: fit-content; }
@@ -307,7 +313,10 @@
             <h3>📊 報表匯出</h3>
             <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
         </div>
-        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span></div>
+        <div class="footer-info">
+            ☁️ 最後同步：<span id="last-updated">--</span>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
+        </div>
     </section>
 </div>
 
@@ -336,14 +345,16 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v12/public');
+        const publicRef = ref(db, 'fukuoka_trip_final_v13/public');
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
         window.purchased = []; window.hotelData = []; window.checks = []; window.memo = "";
+        
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
+        
         window.currentRate = 0.215;
         let selectedSpot = null;
         let sortableInstance = null;
@@ -382,7 +393,6 @@
                 refreshUI();
                 fetchWeather();
             } else { 
-                // ★ 自動初始化：若資料庫是空的，自動填入範本 (不需手動重設)
                 forceResetAction();
             }
             const splash = document.getElementById('splash-screen');
@@ -398,7 +408,6 @@
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
-        // --- 地理位置天氣 (Auto) ---
         function getGeoWeather() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -445,6 +454,10 @@
                 let originAddr = "My+Location";
                 if (idx > 0) { const prev = items[idx - 1]; originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; }
                 const isDriving = item.mode === 'driving';
+                
+                // 自動判斷是否為航班
+                const isFlying = title.includes('起飛') || title.includes('航班') || title.includes('機場') || /^[A-Z]{2}\d{3,4}/.test(title);
+                
                 const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${isDriving?'driving':'transit'}`;
                 
                 let timeInfo = "";
@@ -456,10 +469,16 @@
                 }
 
                 const div = document.createElement('div');
-                div.className = `itinerary-card ${isDriving?'driving':''}`;
+                // 根據是否為航班加上 flying class
+                div.className = `itinerary-card ${isDriving?'driving':''} ${isFlying?'flying':''}`;
                 div.setAttribute('data-id', idx);
                 div.onclick = (e) => { if(e.target.tagName !== 'A' && !e.target.classList.contains('delete-btn') && !e.target.classList.contains('copy-btn')) openExpenseModal(title); };
-                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div><span class="drag-handle">☰</span><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div>${timeInfo}<div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${isDriving?'driving':'transit'}">${isDriving?'🚗 開車':'🚍 搭車'}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div>`;
+                
+                let btnText = isDriving ? '🚗 開車導航' : '🚍 大眾運輸';
+                let btnClass = isDriving ? 'driving' : 'transit';
+                if(isFlying) { btnText = '✈️ 航班資訊'; btnClass = 'flying'; }
+
+                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div><span class="drag-handle">☰</span><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div>${timeInfo}<div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${btnClass}">${btnText}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div>`;
                 list.appendChild(div);
             });
             sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
@@ -508,11 +527,17 @@
             const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency };
 
             if (type === 'private') {
-                window.privateExpenses.push(record); savePrivate(); showToast("🔒 已存入私帳");
+                window.privateExpenses.push(record); 
+                savePrivate();
+                showToast("🔒 已存入私帳");
             } else if (type === 'public') {
-                window.expenses.push({ d: date, n: `[${selectedSpot}] ${item}`, v: amount }); saveAll(); showToast("👥 已存入公款");
+                window.expenses.push({ d: date, n: `[${selectedSpot}] ${item}`, v: amount });
+                saveAll();
+                showToast("👥 已存入公款");
             } else if (type === 'purchased') {
-                window.purchased.push(record); saveAll(); showToast("📝 已存入記帳列表");
+                window.purchased.push(record);
+                saveAll();
+                showToast("📝 已存入記帳列表");
             }
             closeExpenseModal(); 
         };
@@ -527,8 +552,10 @@
         window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
         window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
         window.addItemUI = () => { 
-            const t = document.getElementById('new-t').value; const title = document.getElementById('new-title').value; 
-            const travel = document.getElementById('new-travel').value; const stay = document.getElementById('new-stay').value;
+            const t = document.getElementById('new-t').value; 
+            const title = document.getElementById('new-title').value; 
+            const travel = document.getElementById('new-travel').value;
+            const stay = document.getElementById('new-stay').value;
             if(!title) { alert("請輸入地點"); return; } 
             let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
             if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
@@ -545,10 +572,17 @@
                 exp += Number(e.v); 
                 return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
             }).join(''); 
+            
             let totalJpy = 0, totalTwd = 0;
             document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
                 if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
-                return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${p.d || ''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${p.n}" placeholder="品項" onchange="purchased[${i}].n=this.value;saveAll()"> <select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll();"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;margin:0" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>`; 
+                return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;">
+                    <input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${p.d || ''}" onchange="purchased[${i}].d=this.value;saveAll()">
+                    <input class="input-wood" style="flex:2;margin:0" value="${p.n}" placeholder="品項" onchange="purchased[${i}].n=this.value;saveAll()"> 
+                    <select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll();"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select>
+                    <input type="number" class="input-wood" style="flex:1;margin:0" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"> 
+                    <span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span>
+                </div>`; 
             }).join('');
             document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString();
             document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString();
