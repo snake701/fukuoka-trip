@@ -38,7 +38,6 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
         @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
@@ -47,7 +46,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -96,7 +94,10 @@
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
         .drag-handle { color: #ccc; margin-right: 10px; font-size: 1.2rem; cursor: grab; }
-        
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
+        .time-info { display: flex; gap: 10px; margin-top: 5px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; width: fit-content; }
+        .time-badge { display: flex; align-items: center; gap: 3px; }
+
         .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #eee; }
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
@@ -110,7 +111,6 @@
         .weather-card { min-width: 80px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
         .weather-card img { width: 30px; height: 30px; margin: 5px 0; }
 
-        /* 緊急連結按鈕 */
         .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .link-btn { background: white; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; color: var(--wood-dark); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .link-btn.emergency { background: #ffebee; border-color: #ef9a9a; color: #c62828; font-weight: bold; }
@@ -180,13 +180,21 @@
 <div class="container">
     <section id="itinerary-sec" class="content-section active">
         <div id="day-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:15px; scrollbar-width:none;"></div>
+        
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
-            <div style="display:flex; gap:5px;">
+            <div style="display:flex; gap:5px; margin-bottom: 5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
                 <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'顯示全名)">
                 <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
             </div>
+            
+            <div style="display:flex; gap:5px; align-items: center;">
+                <button onclick="checkGoogleTime()" style="background:var(--accent-blue); color:white; border:none; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; white-space:nowrap;">🔍 查詢</button>
+                <input type="text" id="new-travel" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="交通 (點左側查詢)">
+                <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留(如:1小時)">
+            </div>
         </div>
+        
         <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按卡片拖曳排序 / 點擊卡片記帳</div>
         <div id="itinerary-list"></div>
     </section>
@@ -242,7 +250,6 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-tools"></div>
-        
         <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
             <h3 style="margin-top:0; color:#c62828;">🚨 福岡急用工具包</h3>
             <div class="link-grid">
@@ -254,7 +261,6 @@
                 <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
             </div>
         </div>
-
         <div class="info-card" style="border: 1px solid #aaa; background: #fffdf5;">
             <h3 style="margin-top:0; color:#666;">📝 公用備忘錄</h3>
             <textarea id="group-memo" class="memo-area" oninput="updateMemo(this.value)"></textarea>
@@ -264,10 +270,7 @@
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        <div class="footer-info">
-            ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span>
-        </div>
+        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span></div>
     </section>
 </div>
 
@@ -276,7 +279,6 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        // 安全機制：3秒後強制移除 Splash
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -383,14 +385,45 @@
                 if (idx > 0) { const prev = items[idx - 1]; originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; }
                 const isDriving = item.mode === 'driving';
                 const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${isDriving?'driving':'transit'}`;
+                
+                let timeInfo = "";
+                if(item.travel || item.stay) {
+                    timeInfo = `<div class="time-info">`;
+                    if(item.travel) timeInfo += `<span class="time-badge">🚀 ${item.travel}</span>`;
+                    if(item.stay) timeInfo += `<span class="time-badge" style="border-left:1px solid #ccc; padding-left:5px;">⏳ ${item.stay}</span>`;
+                    timeInfo += `</div>`;
+                }
+
                 const div = document.createElement('div');
                 div.className = `itinerary-card ${isDriving?'driving':''}`;
                 div.setAttribute('data-id', idx);
                 div.onclick = (e) => { if(e.target.tagName !== 'A' && !e.target.classList.contains('delete-btn') && !e.target.classList.contains('copy-btn')) openExpenseModal(title); };
-                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div><span class="drag-handle">☰</span><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div><div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${isDriving?'driving':'transit'}">${isDriving?'🚗 開車':'🚍 搭車'}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div>`;
+                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div><span class="drag-handle">☰</span><span style="font-weight:bold; color:${isDriving?'var(--accent-blue)':'var(--accent-green)'};">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div>
+                <div style="font-size:1.1rem; font-weight:bold; margin:5px 0;">${title}</div>
+                ${timeInfo}
+                <div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${isDriving?'driving':'transit'}">${isDriving?'🚗 開車':'🚍 搭車'}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div>`;
                 list.appendChild(div);
             });
             new Sortable(list, { handle: '.drag-handle', animation: 150, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
+        };
+
+        // ★ 核心功能：交通時間查詢 ★
+        window.checkGoogleTime = () => {
+            const destName = document.getElementById('new-title').value;
+            if(!destName) { alert("請先輸入地點名稱"); return; }
+            
+            // 找出上一站
+            let items = window.tripData[window.currentDay] || [];
+            let origin = "My+Location";
+            if(items.length > 0) {
+                let prev = items[items.length - 1];
+                const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
+                origin = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map;
+            }
+            
+            // 開啟 Google Maps 規劃
+            const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destName)}&travelmode=transit`;
+            window.open(url, '_blank');
         };
 
         window.openExpenseModal = (spotName) => { if(!privateRef) { alert("請先解鎖私帳！(點標題 3 下)"); return; } selectedSpot = spotName; document.getElementById('expense-spot-name').innerText = `於「${spotName}」消費：`; document.getElementById('expense-item').value = ""; document.getElementById('expense-amount').value = ""; document.getElementById('expense-twd-preview').innerText = "0"; document.getElementById('expense-modal').style.display = 'flex'; };
@@ -405,39 +438,30 @@
         window.addPrivateExpense = () => { window.privateExpenses.push({n: "", v: 0}); savePrivate(); };
         window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
         window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
-        window.addItemUI = () => { const t = document.getElementById('new-t').value; const title = document.getElementById('new-title').value; if(!title) { alert("請輸入"); return; } let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode }); saveAll(); document.getElementById('new-title').value = ""; };
+        window.addItemUI = () => { 
+            const t = document.getElementById('new-t').value; 
+            const title = document.getElementById('new-title').value; 
+            const travel = document.getElementById('new-travel').value;
+            const stay = document.getElementById('new-stay').value;
+
+            if(!title) { alert("請輸入地點"); return; } 
+            let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
+            if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
+            window.tripData[window.currentDay].push({ 
+                t, title, 
+                map: title.includes("飯店") ? "HOTEL_REF" : title, 
+                mode,
+                travel: travel, 
+                stay: stay      
+            }); 
+            saveAll(); 
+            document.getElementById('new-title').value = ""; 
+            document.getElementById('new-travel').value = "";
+            document.getElementById('new-stay').value = "";
+        };
         window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
-        window.renderMoney = () => { 
-            let inc = 0, exp = 0; 
-            document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join(''); 
-            document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join(''); 
-            const balance = inc - exp;
-            document.getElementById('balance-val').innerText = balance.toLocaleString(); 
-            // 新增：公積金的台幣顯示
-            document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString();
-        };
-        window.renderPrivate = () => { 
-            if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || ""; 
-            let total = 0; 
-            document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join(''); 
-            
-            // 更新總花費與台幣
-            document.getElementById('private-total').innerText = total.toLocaleString(); 
-            document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString();
-
-            // 更新餘額與台幣
-            const balance = window.privateBudget - total; 
-            const balEl = document.getElementById('private-balance'); 
-            balEl.innerText = `¥ ${balance.toLocaleString()}`; 
-            balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; 
-            document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString();
-
-            const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; 
-            const bar = document.getElementById('budget-bar'); 
-            bar.style.width = Math.min(percent, 100) + '%'; 
-            bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); 
-            document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; 
-        };
+        window.renderMoney = () => { let inc = 0, exp = 0; document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { exp += Number(e.v); return `<div style="display:flex;gap:5px;margin-bottom:8px;"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; }).join(''); const balance = inc - exp; document.getElementById('balance-val').innerText = balance.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); };
+        window.renderPrivate = () => { if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || ""; let total = 0; document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { total += Number(e.v); return `<div style="display:flex; gap:5px; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;"><input class="input-wood" style="flex:2; margin:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5; margin:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; }).join(''); document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); const balance = window.privateBudget - total; const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; };
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         window.handleHeaderClick = (type) => { const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); if (state.count === 3) { state.count = 0; if (type === 'reset') { if(prompt("⚠️ 重設資料？輸入密碼(8888)")==="8888") forceResetAction(); } if (type === 'title') { const pwd = prompt("請輸入私帳密碼"); if(pwd) { privateRef = ref(db, `fukuoka_trip_final_v10/private/${pwd}`); document.getElementById('current-user-id').innerText = pwd; onValue(privateRef, (s) => { const p=s.val(); window.privateExpenses=p?(p.expenses||[]):[]; window.privateBudget=p?(p.budget||0):0; renderPrivate(); const tab=document.getElementById('tab-private'); tab.style.display='block'; tab.click(); }); alert("🔓 私帳同步中..."); } } if (type === 'backup') { if(prompt("💾 備份中心？輸入密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; } } };
@@ -445,12 +469,15 @@
         window.closeBackupModal = () => { document.getElementById('backup-modal').style.display='none'; };
         window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=(e)=>{ try{ const d=JSON.parse(e.target.result); if(confirm("還原資料？")) set(publicRef, d).then(()=>{alert("✅ 完成");location.reload();}); }catch(err){alert("❌ 錯誤");} }; r.readAsText(f); };
-        window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); window.renderMoney(); window.renderPrivate(); }; // 更新匯率時重繪介面
+        window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); window.renderMoney(); window.renderPrivate(); };
         window.syncEx = (el, type) => { const val = parseFloat(el.value); if(isNaN(val)) return; const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0); document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res); document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val); };
         window.showToast = (msg="✅ 資料已儲存同步") => { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); };
         window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
         function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving"},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving"},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit"},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving"}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], memo:"" }).then(() => location.reload()); }
     };
+    
+    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
+    setTimeout(window.initApp, 100);
 </script>
 </body>
 </html>
