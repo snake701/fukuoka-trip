@@ -91,17 +91,16 @@
         .map-btn { display: inline-block; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
         .map-btn.transit { background: var(--accent-green); }
         .map-btn.driving { background: var(--accent-blue); }
-        /* 新增：飛機按鈕樣式 */
-        .map-btn.flying { background: #039BE5; } /* 天空藍 */
-
+        /* 飛機樣式 */
+        .map-btn.flying { background: #039BE5; }
+        
         .copy-btn { margin-left: 5px; cursor: pointer; color: #888; font-size: 0.9rem; }
         .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
-        /* 新增：飛行卡片樣式 */
         .itinerary-card.flying { border-left-color: #039BE5; }
-        
+
         .drag-handle { color: #ccc; margin-right: 10px; font-size: 1.2rem; cursor: grab; padding: 10px; }
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
         .time-info { display: flex; gap: 10px; margin-top: 5px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; width: fit-content; }
@@ -345,7 +344,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v13/public');
+        const publicRef = ref(db, 'fukuoka_trip_final_v12/public');
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -454,10 +453,7 @@
                 let originAddr = "My+Location";
                 if (idx > 0) { const prev = items[idx - 1]; originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; }
                 const isDriving = item.mode === 'driving';
-                
-                // 自動判斷是否為航班
                 const isFlying = title.includes('起飛') || title.includes('航班') || title.includes('機場') || /^[A-Z]{2}\d{3,4}/.test(title);
-                
                 const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${isDriving?'driving':'transit'}`;
                 
                 let timeInfo = "";
@@ -469,7 +465,6 @@
                 }
 
                 const div = document.createElement('div');
-                // 根據是否為航班加上 flying class
                 div.className = `itinerary-card ${isDriving?'driving':''} ${isFlying?'flying':''}`;
                 div.setAttribute('data-id', idx);
                 div.onclick = (e) => { if(e.target.tagName !== 'A' && !e.target.classList.contains('delete-btn') && !e.target.classList.contains('copy-btn')) openExpenseModal(title); };
@@ -526,11 +521,7 @@
 
             const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency };
 
-            if (type === 'private') {
-                window.privateExpenses.push(record); 
-                savePrivate();
-                showToast("🔒 已存入私帳");
-            } else if (type === 'public') {
+            if (type === 'public') {
                 window.expenses.push({ d: date, n: `[${selectedSpot}] ${item}`, v: amount });
                 saveAll();
                 showToast("👥 已存入公款");
@@ -635,7 +626,7 @@
         function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
     };
     
-    // 初始化執行
+    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
     setTimeout(window.initApp, 100);
 </script>
 </body>
