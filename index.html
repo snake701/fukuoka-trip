@@ -96,20 +96,16 @@
         .copy-btn { margin-left: 5px; cursor: pointer; color: #888; font-size: 0.9rem; }
         .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
         
-        .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; touch-action: pan-y; }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
         .itinerary-card.flying { border-left-color: #039BE5; }
-
-        .drag-handle { color: #ccc; margin-right: 10px; font-size: 1.2rem; cursor: grab; padding: 10px; }
+        
+        .drag-handle { color: #ccc; margin-right: 15px; font-size: 1.5rem; cursor: grab; padding: 10px; }
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
         .time-info { display: flex; gap: 10px; margin-top: 5px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; width: fit-content; }
         .time-badge { display: flex; align-items: center; gap: 3px; }
+        .time-edit-btn { font-weight: bold; margin-left: 5px; color: #555; cursor: pointer; padding: 5px; border-radius: 4px; transition: 0.2s; }
 
-        /* 時間按鈕樣式 (New) */
-        .time-edit-btn { font-weight: bold; margin-left: 5px; color: #555; cursor: pointer; padding: 5px; border-radius: 4px; border: 1px solid transparent; transition: 0.2s; }
-        .time-edit-btn:hover { background: #eee; border-color: #ccc; }
-        
-        /* 交通模式切換按鈕 */
         .mode-toggle { display: inline-flex; justify-content: center; align-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; font-size: 0.8rem; margin-right: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .mode-toggle.transit { background: var(--accent-green); }
         .mode-toggle.driving { background: var(--accent-blue); }
@@ -118,6 +114,10 @@
         .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #eee; }
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
+        
+        /* 願望清單模式 (灰色) */
+        .check-item.wishlist input[type="text"] { color: #888; font-style: italic; }
+        .check-item.wishlist input[type="number"] { color: #888; }
         
         textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
         .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
@@ -176,14 +176,11 @@
     <div class="modal-content">
         <h3 style="margin-top:0; color:#5D4037;">💰 新增消費</h3>
         <p id="expense-spot-name" style="font-size:0.9rem; font-weight:bold; margin-bottom:10px;">地點名稱</p>
-        
         <input type="date" id="expense-date" class="input-wood" style="margin-bottom:10px;">
-
         <div class="expense-type-selector">
             <label><input type="radio" name="exp-type" value="purchased" checked> <span>📝 記帳(已購買)</span></label>
             <label><input type="radio" name="exp-type" value="public"> <span>👥 公款</span></label>
         </div>
-        
         <div style="display:flex; gap:5px; margin-bottom:8px;">
             <select id="expense-currency" class="input-wood" style="flex:1;">
                 <option value="JPY">¥ JPY</option>
@@ -191,13 +188,8 @@
             </select>
             <input type="number" id="expense-amount" class="input-wood" style="flex:2;" placeholder="金額" oninput="updateExpensePreview(this.value)">
         </div>
-
         <input type="text" id="expense-item" class="input-wood" placeholder="消費項目 (如: 門票)">
-        
-        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">
-            約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span>
-        </div>
-        
+        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span></div>
         <button class="modal-btn primary" onclick="saveSpotExpense()">💾 儲存</button>
         <button class="modal-btn close" onclick="closeExpenseModal()">取消</button>
     </div>
@@ -209,7 +201,6 @@
         <h1 style="margin:0; font-family: 'Noto Serif TC', serif;" onclick="handleHeaderClick('title')">福岡行旅 2026</h1>
         <span id="backup-plane" class="secret-trigger" onclick="handleHeaderClick('backup')">✈️</span>
     </div>
-    
     <div style="max-width: 800px; margin: 15px auto 0; padding: 0 15px;">
         <div id="weather-scroll">
             <div style="font-size:0.8rem; padding:10px; color:#999; text-align:center;">福岡 🌤️ 載入中...</div>
@@ -240,7 +231,10 @@
                 <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留(如:1小時)">
             </div>
         </div>
-        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px;">長按左方「☰」不放，卡片變色後可拖曳排序 / 點時間修改</div>
+        <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px; display:flex; justify-content:space-between; padding:0 5px;">
+            <span>長按「☰」拖曳排序</span>
+            <button onclick="openDayMap()" style="border:none; background:none; color:var(--accent-blue); font-weight:bold; cursor:pointer;">🗺️ 全日路徑</button>
+        </div>
         <div id="itinerary-list"></div>
     </section>
     
@@ -254,30 +248,25 @@
 
     <section id="money-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-money"></div>
-        
         <div class="info-card">
             <h3>👥 成員繳費 (公款)</h3>
             <div id="member-list"></div>
             <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
         </div>
-        
         <div class="info-card">
             <h3>💸 公共支出 (公款)</h3>
             <div id="expense-list"></div>
             <button class="btn-sm" onclick="addExpense()">+ 新增支出</button>
-            <div style="margin-top:15px; text-align:right;">
-                公款餘額：¥ <span id="balance-val" style="font-weight:700;">0</span>
-                <div style="color:#666; font-size:0.85rem;">(約 NT$ <span id="balance-val-twd">0</span>)</div>
-            </div>
+            <div style="margin-top:15px; text-align:right;">公款餘額：¥ <span id="balance-val" style="font-weight:700;">0</span><div style="color:#666; font-size:0.85rem;">(約 NT$ <span id="balance-val-twd">0</span>)</div></div>
         </div>
-
         <div class="info-card" style="border-left: 5px solid var(--accent-blue);">
-            <h3>🛒 已購買 (個人/記帳)</h3>
+            <h3>🛒 已購買 (願望清單/記帳)</h3>
             <div id="purchased-list"></div>
             <button class="btn-sm" onclick="openExpenseModal('手動新增')">+ 新增紀錄</button>
             <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #ccc; text-align:right; font-size:0.9rem;">
-                <div>日幣總計：<span style="font-weight:bold; color:var(--wood-dark);">¥ <span id="purchased-total-jpy">0</span></span></div>
-                <div>台幣總計：<span style="font-weight:bold; color:var(--wood-dark);">NT$ <span id="purchased-total-twd">0</span></span></div>
+                <div>已購日幣：<span style="font-weight:bold; color:var(--wood-dark);">¥ <span id="purchased-total-jpy">0</span></span></div>
+                <div>已購台幣：<span style="font-weight:bold; color:var(--wood-dark);">NT$ <span id="purchased-total-twd">0</span></span></div>
+                <div style="font-size:0.75rem; color:#aaa; margin-top:5px;">(未勾選項目不列入計算)</div>
             </div>
         </div>
     </section>
@@ -326,14 +315,8 @@
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        <div class="info-card">
-            <h3>📊 報表匯出</h3>
-            <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
-        </div>
-        <div class="footer-info">
-            ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-        </div>
+        <div class="info-card"><h3>📊 報表匯出</h3><button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button></div>
+        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span></div>
     </section>
 </div>
 
@@ -367,15 +350,14 @@
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
-        window.purchased = []; window.hotelData = []; window.checks = []; window.memo = "";
+        window.purchased = []; // {d, n, v, c, done}
+        window.hotelData = []; window.checks = []; window.memo = "";
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
         let selectedSpot = null;
         let sortableInstance = null;
-        // 新增：暫存編輯的索引
-        let currentEditingDay = null;
-        let currentEditingIndex = null;
+        let currentEditingDay = null, currentEditingIndex = null;
 
         const exHTML = `
             <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
@@ -430,7 +412,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude); },
-                    (error) => { fetchWeather(33.5902, 130.4017); } // 預設福岡
+                    (error) => { fetchWeather(33.5902, 130.4017); }
                 );
             } else { fetchWeather(33.5902, 130.4017); }
         }
@@ -466,9 +448,8 @@
             if(items.length === 0) { list.innerHTML = `<div style="text-align:center; color:#ccc; padding:30px;">📭 本日尚無行程</div>`; return; }
             const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
             items.forEach((item, idx) => {
-                // ... (省略 mode 判斷邏輯，保持原樣)
-                if(!item.mode) item.mode = 'transit';
                 let title = item.title;
+                if(!item.mode) item.mode = 'transit';
                 const isFlying = title.includes('起飛') || title.includes('航班') || title.includes('機場') || /^[A-Z]{2}\d{3,4}/.test(title);
                 if (isFlying && item.mode === 'transit' && !item.manualMode) item.mode = 'flying';
 
@@ -491,10 +472,7 @@
                 let btnClass = isDriving ? 'driving' : 'transit';
                 let iconClass = isDriving ? 'driving' : 'transit';
                 let iconChar = isDriving ? '🚗' : '🚌';
-                
-                if(item.mode === 'flying') {
-                     btnText = '✈️ 航班資訊'; btnClass = 'flying'; iconClass = 'flying'; iconChar = '✈️';
-                }
+                if(item.mode === 'flying') { btnText = '✈️ 航班資訊'; btnClass = 'flying'; iconClass = 'flying'; iconChar = '✈️'; }
 
                 const div = document.createElement('div');
                 div.className = `itinerary-card ${iconClass}`;
@@ -524,63 +502,35 @@
                     </div>`;
                 list.appendChild(div);
             });
-            
-            sortableInstance = new Sortable(list, { 
-                handle: '.drag-handle', 
-                animation: 250, 
-                delay: 200, 
-                delayOnTouchOnly: true, 
-                onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, 
-                onEnd: function (evt) { 
-                    const movedItem = items.splice(evt.oldIndex, 1)[0]; 
-                    items.splice(evt.newIndex, 0, movedItem); 
-                    window.tripData[window.currentDay] = items; 
-                    saveAll(); 
-                    refreshUI(); 
-                } 
-            });
+            sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
         };
 
-        // ★ 新增：時間修改相關函式 ★
-        window.openTimeEditModal = (day, idx) => {
-            currentEditingDay = day;
-            currentEditingIndex = idx;
-            const item = window.tripData[day][idx];
-            document.getElementById('edit-time-input').value = item.t;
-            document.getElementById('time-edit-modal').style.display = 'flex';
-        };
-
-        window.closeTimeEditModal = () => {
-            document.getElementById('time-edit-modal').style.display = 'none';
-            currentEditingDay = null;
-            currentEditingIndex = null;
-        };
-
-        window.saveNewTime = () => {
-            const newTime = document.getElementById('edit-time-input').value;
-            if (newTime && currentEditingDay !== null && currentEditingIndex !== null) {
-                // 更新時間
-                window.tripData[currentEditingDay][currentEditingIndex].t = newTime;
-                
-                // 自動重新排序
-                window.tripData[currentEditingDay].sort((a, b) => a.t.localeCompare(b.t));
-                
-                saveAll();
-                refreshUI();
-                closeTimeEditModal();
-                showToast("⏰ 時間已更新並重新排序");
-            }
-        };
-
+        // 交通模式切換
         window.toggleTransportMode = (day, idx) => {
             const item = window.tripData[day][idx];
             if (item.mode === 'transit') item.mode = 'driving';
             else if (item.mode === 'driving') item.mode = 'flying';
             else item.mode = 'transit';
             item.manualMode = true; 
-            saveAll();
-            renderItinerary(day); 
+            saveAll(); renderItinerary(day); 
         };
+
+        // 一鍵全日路徑
+        window.openDayMap = () => {
+            let items = window.tripData[window.currentDay] || [];
+            if(items.length === 0) return;
+            const hotel = window.hotelData[0] || { name: "飯店", addr: "" };
+            let origin = (items[0].map === 'HOTEL_REF') ? hotel.addr : items[0].map;
+            let dest = (items[items.length-1].map === 'HOTEL_REF') ? hotel.addr : items[items.length-1].map;
+            let waypoints = items.slice(1, -1).map(i => (i.map === 'HOTEL_REF') ? hotel.addr : i.map).join('|');
+            let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+            if(waypoints) url += `&waypoints=${encodeURIComponent(waypoints)}`;
+            window.open(url, '_blank');
+        };
+
+        window.openTimeEditModal = (day, idx) => { currentEditingDay = day; currentEditingIndex = idx; document.getElementById('edit-time-input').value = window.tripData[day][idx].t; document.getElementById('time-edit-modal').style.display = 'flex'; };
+        window.closeTimeEditModal = () => { document.getElementById('time-edit-modal').style.display = 'none'; currentEditingDay = null; currentEditingIndex = null; };
+        window.saveNewTime = () => { const newTime = document.getElementById('edit-time-input').value; if (newTime && currentEditingDay !== null) { window.tripData[currentEditingDay][currentEditingIndex].t = newTime; window.tripData[currentEditingDay].sort((a, b) => a.t.localeCompare(b.t)); saveAll(); refreshUI(); closeTimeEditModal(); showToast("⏰ 時間已更新"); } };
 
         window.checkGoogleTime = () => {
             const destName = document.getElementById('new-title').value;
@@ -622,7 +572,8 @@
 
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency };
+            // done: true (記帳預設已完成)
+            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency, done: true };
 
             if (type === 'private') {
                 window.privateExpenses.push(record); 
@@ -640,7 +591,13 @@
             closeExpenseModal(); 
         };
 
-        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY"}); saveAll(); };
+        window.addPurchasedManual = () => { 
+            const today = new Date().toISOString().split('T')[0]; 
+            // done: false (手動新增預設為願望清單)
+            window.purchased.push({d: today, n: "品項", v: 0, c: "JPY", done: false}); 
+            saveAll(); 
+        };
+        
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
         window.updateMemo = (val) => { window.memo = val; saveAll(); };
@@ -650,24 +607,14 @@
         window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
         window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
         window.addItemUI = () => { 
-            const t = document.getElementById('new-t').value; 
-            const title = document.getElementById('new-title').value; 
-            const travel = document.getElementById('new-travel').value;
-            const stay = document.getElementById('new-stay').value;
+            const t = document.getElementById('new-t').value; const title = document.getElementById('new-title').value; 
+            const travel = document.getElementById('new-travel').value; const stay = document.getElementById('new-stay').value;
             if(!title) { alert("請輸入地點"); return; } 
             let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
             if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
-            window.tripData[window.currentDay].push({ 
-                t, title, 
-                map: title.includes("飯店") ? "HOTEL_REF" : title, 
-                mode,
-                travel: travel, 
-                stay: stay      
-            }); 
+            window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode, travel, stay }); 
             saveAll(); 
-            document.getElementById('new-title').value = ""; 
-            document.getElementById('new-travel').value = "";
-            document.getElementById('new-stay').value = "";
+            document.getElementById('new-title').value = ""; document.getElementById('new-travel').value = ""; document.getElementById('new-stay').value = "";
         };
         window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
         
@@ -679,11 +626,16 @@
                 return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
             }).join(''); 
             
+            // 已購買 (含 Checkbox)
             let totalJpy = 0, totalTwd = 0;
             document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
-                if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
-                return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;">
-                    <input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${p.d || ''}" onchange="purchased[${i}].d=this.value;saveAll()">
+                if(p.done) {
+                    if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
+                }
+                const isWishlist = !p.done;
+                return `<div class="check-item ${isWishlist ? 'wishlist' : ''}" style="gap:5px; margin-bottom:8px;">
+                    <input type="checkbox" class="checkbox-lg" ${p.done ? 'checked' : ''} onchange="purchased[${i}].done=this.checked; saveAll();">
+                    <input type="date" class="input-wood" style="width:105px;font-size:0.8rem;" value="${p.d || ''}" onchange="purchased[${i}].d=this.value;saveAll()">
                     <input class="input-wood" style="flex:2;margin:0" value="${p.n}" placeholder="品項" onchange="purchased[${i}].n=this.value;saveAll()"> 
                     <select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll();"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select>
                     <input type="number" class="input-wood" style="flex:1;margin:0" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"> 
@@ -692,6 +644,7 @@
             }).join('');
             document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString();
             document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString();
+
             const balance = inc - exp; 
             document.getElementById('balance-val').innerText = balance.toLocaleString(); 
             document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
