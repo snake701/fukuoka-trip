@@ -60,7 +60,7 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.8; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
+        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
         .secret-trigger:active { transform: scale(1.3); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
         
@@ -147,9 +147,11 @@
         <p id="expense-spot-name" style="font-size:0.9rem; font-weight:bold; margin-bottom:10px;">地點名稱</p>
         <input type="text" id="expense-item" class="input-wood" placeholder="消費項目">
         <input type="number" id="expense-amount" class="input-wood" placeholder="金額 (日幣)" oninput="updateExpensePreview(this.value)">
-        <div style="text-align:right; font-size:0.8rem; color:#888; margin-bottom:10px;">
-            約 NT$ <span id="expense-twd-preview">0</span>
+        
+        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">
+            約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span>
         </div>
+
         <button class="modal-btn gold" onclick="saveSpotExpense()">📝 加入私帳</button>
         <button class="modal-btn close" onclick="closeExpenseModal()">取消</button>
     </div>
@@ -393,7 +395,9 @@
 
         window.openExpenseModal = (spotName) => { if(!privateRef) { alert("請先解鎖私帳！(點標題 3 下)"); return; } selectedSpot = spotName; document.getElementById('expense-spot-name').innerText = `於「${spotName}」消費：`; document.getElementById('expense-item').value = ""; document.getElementById('expense-amount').value = ""; document.getElementById('expense-twd-preview').innerText = "0"; document.getElementById('expense-modal').style.display = 'flex'; };
         window.closeExpenseModal = () => { document.getElementById('expense-modal').style.display = 'none'; };
+        // ★★★ 記帳預覽功能 (補回) ★★★
         window.updateExpensePreview = (val) => { document.getElementById('expense-twd-preview').innerText = Math.round(val * window.currentRate).toLocaleString(); };
+        
         window.saveSpotExpense = () => { const item = document.getElementById('expense-item').value; const amount = document.getElementById('expense-amount').value; if(!item || !amount) { alert("請輸入"); return; } window.privateExpenses.push({ n: `[${selectedSpot}] ${item}`, v: amount }); savePrivate(); closeExpenseModal(); };
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
