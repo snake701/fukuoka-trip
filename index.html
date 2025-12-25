@@ -168,10 +168,6 @@
                 <input type="radio" name="exp-type" value="public"> 
                 <span>👥 公款</span>
             </label>
-            <label>
-                <input type="radio" name="exp-type" value="private"> 
-                <span>🔒 私帳</span>
-            </label>
         </div>
         
         <div style="display:flex; gap:5px; margin-bottom:8px;">
@@ -305,6 +301,7 @@
                 <a href="tel:119" class="link-btn emergency">🚑 救護 119</a>
                 <a href="https://www.vjw.digital.go.jp/" target="_blank" class="link-btn">🇯🇵 VJW 入境</a>
                 <a href="https://subway.city.fukuoka.lg.jp/cha/route/" target="_blank" class="link-btn">🚇 地鐵圖</a>
+                <a href="https://www.roc-taiwan.org/jpfuk/index.html" target="_blank" class="link-btn">🇹🇼 辦事處</a>
                 <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
             </div>
         </div>
@@ -321,7 +318,10 @@
             <h3>📊 報表匯出</h3>
             <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
         </div>
-        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span></div>
+        <div class="footer-info">
+            ☁️ 最後同步：<span id="last-updated">--</span>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span>
+        </div>
     </section>
 </div>
 
@@ -411,7 +411,6 @@
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
-        // 省略 fetchWeather, renderItinerary, checkGoogleTime (保持原樣)
         async function fetchWeather() {
             try {
                 const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Fukuoka&appid=${WEATHER_API_KEY}&units=metric&lang=zh_tw`);
@@ -477,6 +476,7 @@
             });
             sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
         };
+
         window.checkGoogleTime = () => {
             const destName = document.getElementById('new-title').value;
             if(!destName) { alert("請先輸入地點名稱"); return; }
@@ -490,9 +490,7 @@
             const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destName)}&travelmode=transit`;
             window.open(url, '_blank');
         };
-        let sortableInstance = null;
 
-        // 記帳 Modal 邏輯 (升級版)
         window.openExpenseModal = (spotName, typePref) => { 
             selectedSpot = spotName; 
             document.getElementById('expense-spot-name').innerText = `於「${spotName}」消費：`; 
@@ -547,6 +545,8 @@
             }
             closeExpenseModal(); 
         };
+
+        window.addPurchasedManual = () => { window.purchased.push({n: "品項", v: 0}); saveAll(); };
 
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
@@ -648,7 +648,22 @@
         };
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
-        window.handleHeaderClick = (type) => { const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); if (state.count === 3) { state.count = 0; if (type === 'reset') { if(prompt("⚠️ 重設資料？輸入密碼(8888)")==="8888") forceResetAction(); } if (type === 'title') { const tab = document.getElementById('tab-private'); tab.style.display='block'; tab.click(); alert("🔓 私密空間已開啟"); } if (type === 'backup') { if(prompt("💾 備份中心？輸入密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; } } };
+        
+        // 標題連按3下，直接開私帳 (Local Storage)
+        window.handleHeaderClick = (type) => { 
+            const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); 
+            if (state.count === 3) { 
+                state.count = 0; 
+                if (type === 'reset') { if(prompt("⚠️ 重設資料？輸入密碼(8888)")==="8888") forceResetAction(); } 
+                if (type === 'title') { 
+                    const tab = document.getElementById('tab-private'); 
+                    tab.style.display='block'; tab.click(); 
+                    alert("🔓 私密空間已開啟"); 
+                } 
+                if (type === 'backup') { if(prompt("💾 備份中心？輸入密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; } 
+            } 
+        };
+        
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
         window.closeBackupModal = () => { document.getElementById('backup-modal').style.display='none'; };
         window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
@@ -657,7 +672,7 @@
         window.syncEx = (el, type) => { const val = parseFloat(el.value); if(isNaN(val)) return; const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0); document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res); document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val); };
         window.showToast = (msg="✅ 資料已儲存同步") => { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); };
         window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
-        function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], memo:"" }).then(() => location.reload()); }
+        function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
 
         // ★ Excel 匯出功能 ★
         window.exportToExcel = () => {
