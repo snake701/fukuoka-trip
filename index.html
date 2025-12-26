@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://images.unsplash.com/photo-1558862107-d49ef2a04d72?q=80&w=192&h=192&auto=format&fit=crop">
-    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1558862107-d49ef2a04d72?q=80&w=192&h=192&auto=format&fit=crop">
+    <link rel="icon" href="https://images.unsplash.com/photo-1571736076838-29566eb32707?q=80&w=192&h=192&auto=format&fit=crop">
+    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1571736076838-29566eb32707?q=80&w=192&h=192&auto=format&fit=crop">
     
     <title>福岡行旅 2026</title>
     
@@ -169,7 +169,7 @@
 
 <div id="expense-modal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#5D4037;">💰 新增消費</h3>
+        <h3 style="margin-top:0;">💰 新增消費</h3>
         <p id="expense-spot-name" style="font-size:0.9rem; font-weight:bold; margin-bottom:10px;">地點名稱</p>
         
         <input type="date" id="expense-date" class="input-wood" style="margin-bottom:10px;">
@@ -625,6 +625,7 @@
             const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
             const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; 
         };
+        
         window.renderCheck = () => { 
             // 行李清單
             document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); 
