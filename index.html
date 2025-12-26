@@ -19,14 +19,12 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#5D4037'; ctx.fillRect(0, 0, 512, 512);
-            ctx.fillStyle = '#FAF9F6'; ctx.font = 'bold 300px "Noto Serif TC", serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('旅', 256, 270);
-            const iconUrl = canvas.toDataURL('image/png');
+            // 🟢 【修改這裡更換圖片】 🟢
+            // 這裡是一張棕色飛機圖示的 Base64 編碼。
+            // 如果要換成您自己的圖片，請將下面引號中的長字串替換成您的圖片 URL 或 Base64 編碼。
+            const iconUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAnFBMVEUAAADXVCjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyg2H1uOAAAAM3RSTlMAmA8fD1iA3yRj2P3iGWHc54Zc1v7l3ySGj8zY9vFv/eP16eTq2PjG/sWc69X6qJt0q+82X4QAAAFPSURBVFjD7ddXToQwFIXhU2eYGWbGAWwFld4bCqiIdP/b1I2YkNBQ7/97wG0+Tgh8tS80tZ2e9U1D+8B7S79x+07vB2n9wF0g5QOBkH+ge2T8P2n5gUgg5Qe6R44fCITSx4877v70X7p94L3n709fF7z3/L3F957t216C947n/X+n+A4sX3t7vHfc573jvXvHe8d93jvuee+4z3vHPe8d97x33PPecc97x33eO+5577jnvf9cQZ58tJz1lGgGZ72H5aCnBFOt56g37240Zz0hmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5qHeg9Lqef0Z60Xv896caznRDPrOdHMeo7/pPUEOetp0fT1nHhGPadz1jPifd473jvued+e/4573rv7+N5x79n+/7h87/3nClL+/gA0X4u2aQ3P9AAAAABJRU5ErkJggg==";
+
+            // 將設定好的圖片應用到網頁圖示
             document.getElementById('dynamic-favicon').href = iconUrl;
             document.getElementById('dynamic-apple-icon').href = iconUrl;
         });
