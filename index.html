@@ -18,16 +18,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // 🟢 【修改這裡更換圖片】 🟢
-            // 這裡是一張棕色飛機圖示的 Base64 編碼。
-            // 如果要換成您自己的圖片，請將下面引號中的長字串替換成您的圖片 URL 或 Base64 編碼。
-            const iconUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAnFBMVEUAAADXVCjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyjcVyg2H1uOAAAAM3RSTlMAmA8fD1iA3yRj2P3iGWHc54Zc1v7l3ySGj8zY9vFv/eP16eTq2PjG/sWc69X6qJt0q+82X4QAAAFPSURBVFjD7ddXToQwFIXhU2eYGWbGAWwFld4bCqiIdP/b1I2YkNBQ7/97wG0+Tgh8tS80tZ2e9U1D+8B7S79x+07vB2n9wF0g5QOBkH+ge2T8P2n5gUgg5Qe6R44fCITSx4877v70X7p94L3n709fF7z3/L3F957t216C947n/X+n+A4sX3t7vHfc573jvXvHe8d93jvuee+4z3vHPe8d97x33PPecc97x33eO+5577jnvf9cQZ58tJz1lGgGZ72H5aCnBFOt56g37240Zz0hmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5pTPSeaUz0nmlM9J5qHeg9Lqef0Z60Xv896caznRDPrOdHMeo7/pPUEOetp0fT1nHhGPadz1jPifd473jvued+e/4573rv7+N5x79n+/7h87/3nClL+/gA0X4u2aQ3P9AAAAABJRU5ErkJggg==";
+        window.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
 
-            // 將設定好的圖片應用到網頁圖示
+            // 1. 繪製深木色背景
+            ctx.fillStyle = '#5D4037'; 
+            ctx.fillRect(0, 0, 512, 512);
+
+            // 2. 定義飛機 SVG 路徑
+            const planePath = new Path2D("M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z");
+
+            // 3. 繪製白色飛機
+            ctx.save();
+            ctx.translate(256, 256); // 移動到中心
+            ctx.scale(15, 15);       // 放大圖案
+            ctx.translate(-12, -12); // 修正中心點 (icon 大小約 24x24)
+            ctx.fillStyle = '#FAF9F6';
+            ctx.fill(planePath);
+            ctx.restore();
+
+            // 4. 輸出圖片
+            const iconUrl = canvas.toDataURL('image/png');
             document.getElementById('dynamic-favicon').href = iconUrl;
             document.getElementById('dynamic-apple-icon').href = iconUrl;
-        });
+            
+            initApp();
+        };
     </script>
 
     <style>
@@ -56,11 +74,12 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.4; color: var(--wood-dark); transition: all 0.2s; padding: 5px; }
+        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
         .secret-trigger:active { transform: scale(1.3); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
         
         .status-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .status-item { background: rgba(255,255,255,0.6); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.85rem; color: #555; display: flex; align-items: center; gap: 5px; }
 
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
         .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
@@ -111,8 +130,8 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
         
-        /* 願望清單樣式 */
-        .check-item.shopping input[type="text"] { font-weight: bold; color: var(--wood-dark); }
+        .check-item.wishlist input[type="text"] { color: #888; font-style: italic; }
+        .check-item.wishlist input[type="number"] { color: #888; }
         
         textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
         .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
@@ -376,7 +395,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v17/public'); // v17 for new structure
+        const publicRef = ref(db, 'fukuoka_trip_final_v17/public');
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -409,7 +428,7 @@
                 window.purchased = data.purchased || [];
                 window.hotelData = data.hotelData || [{name:"", addr:""}];
                 window.checks = data.checks || []; 
-                window.shoppingList = data.shoppingList || []; // 新增
+                window.shoppingList = data.shoppingList || []; 
                 window.memo = data.memo || "";
                 const memoArea = document.getElementById('group-memo');
                 if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
@@ -439,7 +458,6 @@
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
-        // 天氣 & 行程渲染 (省略以節省篇幅，保持與 v16 相同)
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
         function getGeoWeather() {
@@ -555,16 +573,12 @@
 
             const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency }; // Removed 'done: true'
 
-            if (type === 'private') {
-                window.privateExpenses.push(record); 
-                savePrivate();
-                showToast("🔒 已存入私帳");
-            } else if (type === 'public') {
+            if (type === 'public') {
                 window.expenses.push({ d: date, n: `[${selectedSpot}] ${item}`, v: amount });
                 saveAll();
                 showToast("👥 已存入公款");
             } else if (type === 'purchased') {
-                window.purchased.push(record); // Just push, no done state logic needed for Money tab
+                window.purchased.push(record);
                 saveAll();
                 showToast("📝 已存入記帳列表");
             }
@@ -601,7 +615,6 @@
                 return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
             }).join(''); 
             
-            // 已購買 (無 Checkbox, 純記帳)
             let totalJpy = 0, totalTwd = 0;
             document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
                 if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
