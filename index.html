@@ -59,7 +59,7 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
+        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.8; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
         .secret-trigger:active { transform: scale(1.3); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
         
@@ -124,10 +124,31 @@
         .budget-bar-bg { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         .budget-bar-fill { height: 100%; background: var(--accent-green); width: 0%; transition: width 0.5s, background 0.5s; }
         
-        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
+        /* 天氣容器 (含按鈕空間) */
+        .weather-container-wrapper { position: relative; max-width: 800px; margin: 15px auto 0; padding: 0 35px; }
+        
+        /* 左右切換按鈕 */
+        .weather-scroll-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(93, 64, 55, 0.8); color: #fff;
+            border: none; border-radius: 50%; width: 30px; height: 30px;
+            cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-weight: bold; font-family: monospace;
+        }
+        .weather-btn-left { left: 0; }
+        .weather-btn-right { right: 0; }
+
+        /* 天氣列表 */
+        #weather-scroll { 
+            display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; 
+            scroll-behavior: smooth; /* 平滑捲動 */
+            scrollbar-width: none; /* 隱藏捲軸 (Firefox) */
+        }
+        #weather-scroll::-webkit-scrollbar { display: none; /* 隱藏捲軸 (Chrome/Safari) */ }
+        
         .weather-card { min-width: 85px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
         .weather-card img { width: 40px; height: 40px; margin: 5px 0; }
-        .weather-location { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.8rem; }
+        .weather-location { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.8rem; text-align: center; }
 
         .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .link-btn { background: white; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; color: var(--wood-dark); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -211,10 +232,13 @@
         <span id="backup-plane" class="secret-trigger" onclick="handleHeaderClick('backup')">✈️</span>
     </div>
     
-    <div style="max-width: 800px; margin: 15px auto 0; padding: 0 15px;">
+    <div class="weather-container-wrapper">
+        <button class="weather-scroll-btn weather-btn-left" onclick="scrollWeather(-150)">‹</button>
+        <div id="weather-title" class="weather-location">定位中...</div>
         <div id="weather-scroll">
-            <div style="font-size:0.8rem; padding:10px; color:#999; text-align:center;">福岡 🌤️ 載入中...</div>
+            <div style="font-size:0.8rem; padding:10px; color:#999; text-align:center;">載入天氣中...</div>
         </div>
+        <button class="weather-scroll-btn weather-btn-right" onclick="scrollWeather(150)">›</button>
     </div>
 </header>
 
@@ -337,7 +361,7 @@
         </div>
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
         </div>
     </section>
 </div>
@@ -347,6 +371,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
+        // 安全機制：3秒後強制移除 Splash
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -368,8 +393,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const publicRef = ref(db, 'fukuoka_trip_final_v14/public');
-        const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
-
+        
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
         window.purchased = []; window.hotelData = []; window.checks = []; window.memo = "";
@@ -412,7 +436,7 @@
                     document.getElementById('h-addr').value = window.hotelData[0].addr || "";
                 }
                 refreshUI();
-                fetchWeather();
+                getGeoWeather();
             } else { 
                 forceResetAction();
             }
@@ -429,6 +453,9 @@
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
+        // --- 天氣功能 (左右切換) ---
+        window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
+
         function getGeoWeather() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -441,20 +468,19 @@
         async function fetchWeather(lat, lon) {
             if(!lat) { getGeoWeather(); return; }
             try {
-                // 改用 Open-Meteo (免費、免 Key、7天，改參數到14天)
+                // Open-Meteo (14天)
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=14`);
                 if(res.ok) {
                     const data = await res.json();
-                    let html = `<div style="font-size:0.8rem;text-align:center;color:#555;margin-bottom:5px;">📍 當地天氣 (14日)</div><div style="display:flex;gap:10px;">`;
+                    // 顯示地點名稱 (使用 Open-Meteo 時無法直接取得城市名，這裡簡化顯示 "當地")
+                    // 如果是預設座標，我們可以手動顯示福岡
+                    let locName = "當地";
+                    if(Math.abs(lat - 33.5902) < 0.1) locName = "福岡";
                     
-                    const wmoIcons = {
-                        0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 
-                        45: '🌫️', 48: '🌫️', 
-                        51: '🌧️', 53: '🌧️', 55: '🌧️', 
-                        61: '☔', 63: '☔', 65: '☔', 
-                        80: '🌦️', 81: '🌦️', 82: '🌦️',
-                        95: '⛈️'
-                    };
+                    document.getElementById('weather-title').innerText = `📍 ${locName}天氣 (14日)`;
+
+                    let html = `<div style="display:flex;gap:10px;">`;
+                    const wmoIcons = { 0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️', 55: '🌧️', 61: '☔', 63: '☔', 65: '☔', 80: '🌦️', 81: '🌦️', 82: '🌦️', 95: '⛈️' };
 
                     for(let i=0; i<data.daily.time.length; i++) {
                         const dateStr = data.daily.time[i];
@@ -492,6 +518,8 @@
             items.forEach((item, idx) => {
                 let title = item.title;
                 if(!item.mode) item.mode = 'transit';
+                
+                // 自動判斷航班 (僅初始化)
                 const isFlying = title.includes('起飛') || title.includes('航班') || title.includes('機場') || /^[A-Z]{2}\d{3,4}/.test(title);
                 if (isFlying && item.mode === 'transit' && !item.manualMode) item.mode = 'flying';
 
@@ -544,7 +572,21 @@
                     </div>`;
                 list.appendChild(div);
             });
-            sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
+            
+            sortableInstance = new Sortable(list, { 
+                handle: '.drag-handle', 
+                animation: 250, 
+                delay: 200, 
+                delayOnTouchOnly: true, 
+                onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, 
+                onEnd: function (evt) { 
+                    const movedItem = items.splice(evt.oldIndex, 1)[0]; 
+                    items.splice(evt.newIndex, 0, movedItem); 
+                    window.tripData[window.currentDay] = items; 
+                    saveAll(); 
+                    refreshUI(); 
+                } 
+            });
         };
 
         window.toggleTransportMode = (day, idx) => {
@@ -614,11 +656,7 @@
 
             const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency, done: true };
 
-            if (type === 'private') {
-                window.privateExpenses.push(record); 
-                savePrivate();
-                showToast("🔒 已存入私帳");
-            } else if (type === 'public') {
+            if (type === 'public') {
                 window.expenses.push({ d: date, n: `[${selectedSpot}] ${item}`, v: amount });
                 saveAll();
                 showToast("👥 已存入公款");
@@ -645,13 +683,7 @@
             if(!title) { alert("請輸入地點"); return; } 
             let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
             if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
-            window.tripData[window.currentDay].push({ 
-                t, title, 
-                map: title.includes("飯店") ? "HOTEL_REF" : title, 
-                mode,
-                travel: travel, 
-                stay: stay      
-            }); 
+            window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode, travel, stay }); 
             saveAll(); 
             document.getElementById('new-title').value = ""; document.getElementById('new-travel').value = ""; document.getElementById('new-stay').value = "";
         };
@@ -713,15 +745,6 @@
         };
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
         window.closeBackupModal = () => { document.getElementById('backup-modal').style.display='none'; };
-        
-        window.exportToExcel = () => {
-            const wb = XLSX.utils.book_new();
-            const wsPublic = XLSX.utils.json_to_sheet(window.expenses.map(e => ({日期: e.d, 項目: e.n, 金額: e.v}))); XLSX.utils.book_append_sheet(wb, wsPublic, "公款支出");
-            const wsPurchased = XLSX.utils.json_to_sheet(window.purchased.map(p => ({日期: p.d, 品項: p.n, 幣別: p.c||'JPY', 金額: p.v}))); XLSX.utils.book_append_sheet(wb, wsPurchased, "已購買");
-            const wsPrivate = XLSX.utils.json_to_sheet(window.privateExpenses.map(e => ({日期: e.d, 項目: e.n, 金額: e.v}))); XLSX.utils.book_append_sheet(wb, wsPrivate, "私帳");
-            XLSX.writeFile(wb, "福岡行旅2026_財務報表.xlsx");
-        };
-
         window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=(e)=>{ try{ const d=JSON.parse(e.target.result); if(confirm("還原資料？")) set(publicRef, d).then(()=>{alert("✅ 完成");location.reload();}); }catch(err){alert("❌ 錯誤");} }; r.readAsText(f); };
         window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); window.renderMoney(); window.renderPrivate(); };
@@ -731,7 +754,7 @@
         function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
     };
     
-    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
+    // 初始化執行
     setTimeout(window.initApp, 100);
 </script>
 </body>
