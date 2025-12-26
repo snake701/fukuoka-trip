@@ -115,7 +115,6 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
         
-        /* 願望清單模式 (灰色) */
         .check-item.wishlist input[type="text"] { color: #888; font-style: italic; }
         .check-item.wishlist input[type="number"] { color: #888; }
         
@@ -124,9 +123,11 @@
         
         .budget-bar-bg { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 10px; overflow: hidden; }
         .budget-bar-fill { height: 100%; background: var(--accent-green); width: 0%; transition: width 0.5s, background 0.5s; }
+        
         #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
-        .weather-card { min-width: 80px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
-        .weather-card img { width: 30px; height: 30px; margin: 5px 0; }
+        .weather-card { min-width: 85px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
+        .weather-card img { width: 40px; height: 40px; margin: 5px 0; }
+        .weather-location { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.8rem; }
 
         .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .link-btn { background: white; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; color: var(--wood-dark); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -176,11 +177,14 @@
     <div class="modal-content">
         <h3 style="margin-top:0; color:#5D4037;">💰 新增消費</h3>
         <p id="expense-spot-name" style="font-size:0.9rem; font-weight:bold; margin-bottom:10px;">地點名稱</p>
+        
         <input type="date" id="expense-date" class="input-wood" style="margin-bottom:10px;">
+
         <div class="expense-type-selector">
             <label><input type="radio" name="exp-type" value="purchased" checked> <span>📝 記帳(已購買)</span></label>
             <label><input type="radio" name="exp-type" value="public"> <span>👥 公款</span></label>
         </div>
+        
         <div style="display:flex; gap:5px; margin-bottom:8px;">
             <select id="expense-currency" class="input-wood" style="flex:1;">
                 <option value="JPY">¥ JPY</option>
@@ -188,8 +192,13 @@
             </select>
             <input type="number" id="expense-amount" class="input-wood" style="flex:2;" placeholder="金額" oninput="updateExpensePreview(this.value)">
         </div>
+
         <input type="text" id="expense-item" class="input-wood" placeholder="消費項目 (如: 門票)">
-        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span></div>
+        
+        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">
+            約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span>
+        </div>
+        
         <button class="modal-btn primary" onclick="saveSpotExpense()">💾 儲存</button>
         <button class="modal-btn close" onclick="closeExpenseModal()">取消</button>
     </div>
@@ -201,6 +210,7 @@
         <h1 style="margin:0; font-family: 'Noto Serif TC', serif;" onclick="handleHeaderClick('title')">福岡行旅 2026</h1>
         <span id="backup-plane" class="secret-trigger" onclick="handleHeaderClick('backup')">✈️</span>
     </div>
+    
     <div style="max-width: 800px; margin: 15px auto 0; padding: 0 15px;">
         <div id="weather-scroll">
             <div style="font-size:0.8rem; padding:10px; color:#999; text-align:center;">福岡 🌤️ 載入中...</div>
@@ -248,25 +258,30 @@
 
     <section id="money-sec" class="content-section">
         <div class="info-card ex-tool" id="ex-container-money"></div>
+        
         <div class="info-card">
             <h3>👥 成員繳費 (公款)</h3>
             <div id="member-list"></div>
             <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
         </div>
+        
         <div class="info-card">
             <h3>💸 公共支出 (公款)</h3>
             <div id="expense-list"></div>
             <button class="btn-sm" onclick="addExpense()">+ 新增支出</button>
-            <div style="margin-top:15px; text-align:right;">公款餘額：¥ <span id="balance-val" style="font-weight:700;">0</span><div style="color:#666; font-size:0.85rem;">(約 NT$ <span id="balance-val-twd">0</span>)</div></div>
+            <div style="margin-top:15px; text-align:right;">
+                公款餘額：¥ <span id="balance-val" style="font-weight:700;">0</span>
+                <div style="color:#666; font-size:0.85rem;">(約 NT$ <span id="balance-val-twd">0</span>)</div>
+            </div>
         </div>
+
         <div class="info-card" style="border-left: 5px solid var(--accent-blue);">
-            <h3>🛒 已購買 (願望清單/記帳)</h3>
+            <h3>🛒 已購買 (個人/記帳)</h3>
             <div id="purchased-list"></div>
             <button class="btn-sm" onclick="openExpenseModal('手動新增')">+ 新增紀錄</button>
             <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #ccc; text-align:right; font-size:0.9rem;">
-                <div>已購日幣：<span style="font-weight:bold; color:var(--wood-dark);">¥ <span id="purchased-total-jpy">0</span></span></div>
-                <div>已購台幣：<span style="font-weight:bold; color:var(--wood-dark);">NT$ <span id="purchased-total-twd">0</span></span></div>
-                <div style="font-size:0.75rem; color:#aaa; margin-top:5px;">(未勾選項目不列入計算)</div>
+                <div>日幣總計：<span style="font-weight:bold; color:var(--wood-dark);">¥ <span id="purchased-total-jpy">0</span></span></div>
+                <div>台幣總計：<span style="font-weight:bold; color:var(--wood-dark);">NT$ <span id="purchased-total-twd">0</span></span></div>
             </div>
         </div>
     </section>
@@ -303,6 +318,7 @@
                 <a href="tel:119" class="link-btn emergency">🚑 救護 119</a>
                 <a href="https://www.vjw.digital.go.jp/" target="_blank" class="link-btn">🇯🇵 VJW 入境</a>
                 <a href="https://subway.city.fukuoka.lg.jp/cha/route/" target="_blank" class="link-btn">🚇 地鐵圖</a>
+                <a href="https://www.roc-taiwan.org/jpfuk/index.html" target="_blank" class="link-btn">🇹🇼 辦事處</a>
                 <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
             </div>
         </div>
@@ -315,8 +331,14 @@
             <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
             <input id="h-addr" class="input-wood" placeholder="地址 (影響導航)" onchange="updateHotel()">
         </div>
-        <div class="info-card"><h3>📊 報表匯出</h3><button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button></div>
-        <div class="footer-info">☁️ 最後同步：<span id="last-updated">--</span><span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span></div>
+        <div class="info-card">
+            <h3>📊 報表匯出</h3>
+            <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
+        </div>
+        <div class="footer-info">
+            ☁️ 最後同步：<span id="last-updated">--</span>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按行程卡片：拖曳排序')">❓</span>
+        </div>
     </section>
 </div>
 
@@ -350,8 +372,7 @@
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
-        window.purchased = []; // {d, n, v, c, done}
-        window.hotelData = []; window.checks = []; window.memo = "";
+        window.purchased = []; window.hotelData = []; window.checks = []; window.memo = "";
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
@@ -412,7 +433,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude); },
-                    (error) => { fetchWeather(33.5902, 130.4017); }
+                    (error) => { fetchWeather(33.5902, 130.4017); } // 預設福岡
                 );
             } else { fetchWeather(33.5902, 130.4017); }
         }
@@ -420,16 +441,37 @@
         async function fetchWeather(lat, lon) {
             if(!lat) { getGeoWeather(); return; }
             try {
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric&lang=zh_tw`);
+                // 改用 Open-Meteo (免費、免 Key、7天，改參數到14天)
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=14`);
                 if(res.ok) {
                     const data = await res.json();
-                    let html = `<div style="font-size:0.8rem;text-align:center;color:#555;margin-bottom:5px;">📍 ${data.city.name}</div><div style="display:flex;gap:10px;">`;
-                    data.list.forEach(item => {
-                        if (item.dt_txt.includes("12:00:00")) {
-                            const date = new Date(item.dt_txt);
-                            html += `<div class="weather-card"><div>${date.getMonth()+1}/${date.getDate()}</div><img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png"><div>${Math.round(item.main.temp)}°C</div><div>${item.weather[0].description}</div></div>`;
-                        }
-                    });
+                    let html = `<div style="font-size:0.8rem;text-align:center;color:#555;margin-bottom:5px;">📍 當地天氣 (14日)</div><div style="display:flex;gap:10px;">`;
+                    
+                    const wmoIcons = {
+                        0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 
+                        45: '🌫️', 48: '🌫️', 
+                        51: '🌧️', 53: '🌧️', 55: '🌧️', 
+                        61: '☔', 63: '☔', 65: '☔', 
+                        80: '🌦️', 81: '🌦️', 82: '🌦️',
+                        95: '⛈️'
+                    };
+
+                    for(let i=0; i<data.daily.time.length; i++) {
+                        const dateStr = data.daily.time[i];
+                        const date = new Date(dateStr);
+                        const dayName = (date.getMonth()+1) + "/" + date.getDate();
+                        const code = data.daily.weathercode[i];
+                        const icon = wmoIcons[code] || '⛅';
+                        const maxT = Math.round(data.daily.temperature_2m_max[i]);
+                        const minT = Math.round(data.daily.temperature_2m_min[i]);
+
+                        html += `
+                            <div class="weather-card">
+                                <div>${dayName}</div>
+                                <div style="font-size:1.5rem; margin:5px 0;">${icon}</div>
+                                <div>${minT}° - ${maxT}°</div>
+                            </div>`;
+                    }
                     html += `</div>`;
                     document.getElementById('weather-scroll').innerHTML = html;
                 }
@@ -505,7 +547,6 @@
             sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
         };
 
-        // 交通模式切換
         window.toggleTransportMode = (day, idx) => {
             const item = window.tripData[day][idx];
             if (item.mode === 'transit') item.mode = 'driving';
@@ -515,7 +556,6 @@
             saveAll(); renderItinerary(day); 
         };
 
-        // 一鍵全日路徑
         window.openDayMap = () => {
             let items = window.tripData[window.currentDay] || [];
             if(items.length === 0) return;
@@ -572,7 +612,6 @@
 
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            // done: true (記帳預設已完成)
             const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency, done: true };
 
             if (type === 'private') {
@@ -591,13 +630,7 @@
             closeExpenseModal(); 
         };
 
-        window.addPurchasedManual = () => { 
-            const today = new Date().toISOString().split('T')[0]; 
-            // done: false (手動新增預設為願望清單)
-            window.purchased.push({d: today, n: "品項", v: 0, c: "JPY", done: false}); 
-            saveAll(); 
-        };
-        
+        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY", done: false}); saveAll(); };
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
         window.updateMemo = (val) => { window.memo = val; saveAll(); };
@@ -612,7 +645,13 @@
             if(!title) { alert("請輸入地點"); return; } 
             let mode = (title.includes('開車') || title.includes('機場')) ? 'driving' : 'transit'; 
             if(!window.tripData[window.currentDay]) window.tripData[window.currentDay] = []; 
-            window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode, travel, stay }); 
+            window.tripData[window.currentDay].push({ 
+                t, title, 
+                map: title.includes("飯店") ? "HOTEL_REF" : title, 
+                mode,
+                travel: travel, 
+                stay: stay      
+            }); 
             saveAll(); 
             document.getElementById('new-title').value = ""; document.getElementById('new-travel').value = ""; document.getElementById('new-stay').value = "";
         };
@@ -626,7 +665,6 @@
                 return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
             }).join(''); 
             
-            // 已購買 (含 Checkbox)
             let totalJpy = 0, totalTwd = 0;
             document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
                 if(p.done) {
@@ -644,7 +682,6 @@
             }).join('');
             document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString();
             document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString();
-
             const balance = inc - exp; 
             document.getElementById('balance-val').innerText = balance.toLocaleString(); 
             document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
