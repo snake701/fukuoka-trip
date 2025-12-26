@@ -27,16 +27,16 @@
             ctx.fillStyle = '#5D4037'; 
             ctx.fillRect(0, 0, 512, 512);
 
-            // 2. 定義飛機 SVG 路徑
-            const planePath = new Path2D("M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z");
+            // 2. 定義日式鳥居 (Torii) SVG 路徑
+            const toriiPath = new Path2D("M19,6H5V5H19M18,3H6l-1,2h1v15h2v-5h8v5h2V5h1L18,3z M15,11H9V8h6V11z");
 
-            // 3. 繪製白色飛機
+            // 3. 繪製白色鳥居
             ctx.save();
             ctx.translate(256, 256); // 移動到中心
-            ctx.scale(15, 15);       // 放大圖案
-            ctx.translate(-12, -12); // 修正中心點 (icon 大小約 24x24)
+            ctx.scale(18, 18);       // 放大圖案
+            ctx.translate(-12, -12); // 修正中心點 (icon Grid 約 24x24)
             ctx.fillStyle = '#FAF9F6';
-            ctx.fill(planePath);
+            ctx.fill(toriiPath);
             ctx.restore();
 
             // 4. 輸出圖片
@@ -130,8 +130,8 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
         .checkbox-lg { transform: scale(1.3); cursor: pointer; }
         
-        .check-item.wishlist input[type="text"] { color: #888; font-style: italic; }
-        .check-item.wishlist input[type="number"] { color: #888; }
+        /* 願望清單樣式 */
+        .check-item.shopping input[type="text"] { font-weight: bold; color: var(--wood-dark); }
         
         textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
         .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
@@ -395,7 +395,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v17/public');
+        const publicRef = ref(db, 'fukuoka_trip_final_v17/public'); // v17 for new structure
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -458,6 +458,7 @@
 
         function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
 
+        // 天氣 & 行程渲染 (省略以節省篇幅，保持與 v16 相同)
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
         function getGeoWeather() {
@@ -519,7 +520,7 @@
                 if (idx > 0) { const prev = items[idx - 1]; originAddr = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; }
                 const isDriving = item.mode === 'driving';
                 let travelModeParam = 'transit'; if(item.mode === 'driving') travelModeParam = 'driving';
-                const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelModeParam}`;
+                const navUrl = `http://maps.google.com/0{encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${travelModeParam}`;
                 let timeInfo = "";
                 if(item.travel || item.stay) {
                     timeInfo = `<div class="time-info">`;
@@ -578,7 +579,7 @@
                 saveAll();
                 showToast("👥 已存入公款");
             } else if (type === 'purchased') {
-                window.purchased.push(record);
+                window.purchased.push(record); // Just push, no done state logic needed for Money tab
                 saveAll();
                 showToast("📝 已存入記帳列表");
             }
@@ -615,6 +616,7 @@
                 return `<div style="display:flex;gap:5px;margin-bottom:8px; align-items:center;"><input type="date" class="input-wood" style="width:110px;margin:0;font-size:0.8rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;margin:0" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;margin:0" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
             }).join(''); 
             
+            // 已購買 (無 Checkbox, 純記帳)
             let totalJpy = 0, totalTwd = 0;
             document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
                 if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
