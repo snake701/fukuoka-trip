@@ -8,10 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="preload" as="image" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
-
-    <link rel="icon" id="dynamic-favicon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
-    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
     
     <title>福岡行旅 2026</title>
     
@@ -21,35 +19,50 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // ★ 圖片預載邏輯 ★
+            // 定義圖片網址
             const iconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
+            
+            // 建立圖片物件來監聽下載進度
             const img = new Image();
             img.src = iconUrl;
             
-            // 當圖片下載完成時執行
+            const splashIcon = document.getElementById('splash-icon');
+            const startBtn = document.getElementById('start-btn');
+            const loadingText = document.getElementById('loading-text');
+
+            // 圖片載入成功後執行
             img.onload = function() {
-                // 1. 讓 Splash 上的圖示顯現
-                const splashIcon = document.getElementById('splash-icon');
+                // 1. 顯示圖片
                 if(splashIcon) {
                     splashIcon.style.backgroundImage = `url('${iconUrl}')`;
                     splashIcon.style.opacity = "1";
-                    splashIcon.classList.add('loaded'); // 加上特效
+                    splashIcon.classList.add('loaded');
                 }
                 
-                // 2. 更改提示文字
-                const statusText = document.getElementById('loading-status-text');
-                if(statusText) {
-                    statusText.innerHTML = "<span style='color:#2E7D32; font-weight:bold;'>✅ 圖示下載完成</span><br>現在請按「分享」加入主畫面";
-                }
-
-                // 3. 確保 link 標籤也是最新的 (雙重保險)
+                // 2. 更新連結標籤 (雙重確保)
                 document.getElementById('dynamic-favicon').href = iconUrl;
                 document.getElementById('dynamic-apple-icon').href = iconUrl;
+
+                // 3. 顯示進入按鈕
+                if(loadingText) loadingText.style.display = 'none';
+                if(startBtn) {
+                    startBtn.style.display = 'block';
+                    startBtn.classList.add('show');
+                }
             };
 
-            // 啟動主程式
+            // 初始化 App 邏輯
             initApp();
         });
+
+        // 手動進入函式
+        function enterApp() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.visibility = 'hidden';
+            }, 500);
+        }
     </script>
 
     <style>
@@ -58,28 +71,53 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash Screen 優化 */
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        /* Splash Screen (強制覆蓋) */
+        #splash-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
+            background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); 
+            z-index: 99999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            transition: opacity 0.5s ease-out, visibility 0.5s; 
+        }
         
-        /* 中間的預覽圖示 */
+        /* 圖片預覽區 */
         #splash-icon { 
-            width: 120px; height: 120px; 
-            border-radius: 24px; /* iOS 圓角風格 */
-            background-color: #ddd; /* 預設底色 */
+            width: 150px; height: 150px; 
+            border-radius: 30px; 
+            background-color: #ddd; 
             background-size: cover; background-position: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-            opacity: 0.3; /* 一開始半透明 */
+            margin-bottom: 30px;
+            opacity: 0.3; /* 未載入前半透明 */
             transition: all 0.5s ease;
-            border: 2px solid #fff;
+            border: 4px solid #fff;
         }
-        #splash-icon.loaded { transform: scale(1.1); border-color: var(--accent-red); } /* 下載完成後的動畫 */
+        #splash-icon.loaded { opacity: 1; transform: scale(1.05); border-color: var(--wood-dark); }
 
-        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; }
-        .loading-status { font-size: 0.85rem; color: #666; text-align: center; line-height: 1.6; }
-        .spinner { margin-top: 15px; width: 25px; height: 25px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; font-weight: bold; }
+        
+        /* 進入按鈕 (預設隱藏) */
+        #start-btn {
+            display: none;
+            padding: 15px 40px;
+            background-color: var(--wood-dark);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(93, 64, 55, 0.3);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #start-btn:active { transform: scale(0.95); }
 
+        @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        
+        .loading-text { color: #888; font-size: 0.9rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* --- 其他 CSS 保持不變 --- */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -92,7 +130,7 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.4; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
+        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
         .secret-trigger:active { transform: scale(1.3); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
         
@@ -182,9 +220,10 @@
 <body>
 
 <div id="splash-screen">
-    <div id="splash-icon"></div> <div class="splash-title">福岡行旅 2026</div>
-    <div class="loading-status" id="loading-status-text">正在下載圖示...</div>
-    <div class="spinner"></div>
+    <div id="splash-icon"></div>
+    <div class="splash-title">福岡行旅 2026</div>
+    <div class="loading-status" id="loading-text">正在下載圖示...</div>
+    <button id="start-btn" onclick="enterApp()">⛩️ 進入福岡行旅</button>
 </div>
 
 <div id="offline-alert" style="display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; z-index:10002;">⚠️ 離線模式</div>
@@ -392,29 +431,6 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        // --- 1. 等待圖片載入後再隱藏 Splash ---
-        const splash = document.getElementById('splash-screen');
-        const img = new Image();
-        img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
-        
-        // 設定最長等待時間 8 秒 (避免網路太慢卡死)
-        const safetyTimer = setTimeout(() => {
-            if(splash && splash.style.opacity !== '0') {
-                 splash.style.opacity = '0'; splash.style.visibility = 'hidden';
-            }
-        }, 8000);
-
-        // 如果資料庫讀取完成了，且圖片也載入好了，就關閉 splash
-        let isDbReady = false;
-
-        const checkReady = () => {
-            if (isDbReady) { // 不需等待圖片完全 onload，只要 DB 好了就可以進去，圖片讓它背景跑
-                clearTimeout(safetyTimer);
-                splash.style.opacity = '0'; 
-                splash.style.visibility = 'hidden'; 
-            }
-        };
-
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
             authDomain: "fukuoka-trip-2026.firebaseapp.com",
@@ -427,7 +443,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v17/public');
+        const publicRef = ref(db, 'fukuoka_trip_final_v18/public'); // v18
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -477,9 +493,6 @@
             } else { 
                 forceResetAction();
             }
-            
-            isDbReady = true;
-            checkReady();
         });
 
         window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, shoppingList: window.shoppingList, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
@@ -604,7 +617,7 @@
 
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency }; // Removed 'done: true'
+            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency, done: true };
 
             if (type === 'private') {
                 window.privateExpenses.push(record); 
@@ -622,7 +635,7 @@
             closeExpenseModal(); 
         };
 
-        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY"}); saveAll(); };
+        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY", done: false}); saveAll(); };
         window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); }; // 新增預定購買
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
