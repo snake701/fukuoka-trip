@@ -1,85 +1,134 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="福岡行旅">
+<!-- PWA / iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="福岡行旅" />
+<link rel="icon" type="image/png" id="dynamic-favicon" />
+<link rel="apple-touch-icon" sizes="180x180" id="dynamic-apple-icon" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#5D4037" />
 
-    <!-- ✅ iOS icon 必要屬性 -->
-    <link rel="icon" type="image/png" id="dynamic-favicon">
-    <link rel="apple-touch-icon" sizes="180x180" id="dynamic-apple-icon">
+<title>福岡行旅 2026</title>
 
-    <title>福岡行旅 2026</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<style>
+body {
+  margin: 0;
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #FAF9F6;
+  color: #5D4037;
+}
 
-            window.__bootApp__ = true; // ✅ 給 module 確認用
+/* Splash */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #FAF9F6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#splash-icon {
+  width: 160px;
+  height: 160px;
+  border-radius: 32px;
+  background: #eee center/cover no-repeat;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+  margin-bottom: 20px;
+}
+#enter-btn {
+  padding: 12px 40px;
+  border-radius: 30px;
+  border: none;
+  background: #5D4037;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-            const imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/640px-Itsukushima_Gate_Japan.jpg";
+/* Readonly */
+.readonly {
+  opacity: 0.88;
+}
+.readonly::before {
+  content: "🔒 旅伴檢視模式（只讀）";
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #5D4037;
+  color: #fff;
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 4px;
+  z-index: 10000;
+}
+</style>
 
-            const splashIcon = document.getElementById('splash-icon');
-            const statusText = document.getElementById('loading-status-text');
-            const startBtn = document.getElementById('start-btn');
+<script>
+/* ===== 全域狀態 ===== */
+window.IS_READONLY =
+  new URLSearchParams(location.search).get("view") === "readonly";
 
-            fetch(imageUrl, { mode: 'cors' })
-                .then(r => r.blob())
-                .then(blob => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const base64 = reader.result;
+/* Splash icon（照片鎖定） */
+document.addEventListener("DOMContentLoaded", () => {
 
-                        document.getElementById('dynamic-favicon').href = base64;
-                        document.getElementById('dynamic-apple-icon').href = base64;
+  const img =
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/640px-Itsukushima_Gate_Japan.jpg";
 
-                        splashIcon.style.backgroundImage = `url('${base64}')`;
-                        splashIcon.style.opacity = "1";
-                        splashIcon.style.transform = "scale(1.1)";
-                        statusText.innerHTML = "✅ 圖示鎖定完成<br>現在加入主畫面";
-                        startBtn.style.display = "block";
-                    };
-                    reader.readAsDataURL(blob);
-                })
-                .catch(() => {
-                    statusText.innerText = "圖示載入失敗，使用備用圖示";
-                    startBtn.style.display = "block";
-                });
-        });
+  fetch(img).then(r=>r.blob()).then(b=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      document.getElementById("dynamic-favicon").href=fr.result;
+      document.getElementById("dynamic-apple-icon").href=fr.result;
+      document.getElementById("splash-icon").style.backgroundImage=`url(${fr.result})`;
+    };
+    fr.readAsDataURL(b);
+  });
 
-        function enterApp() {
-            const splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(() => splash.style.display = 'none', 500);
-        }
-    </script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
 
-    <!-- ⚠️ 原本 style 全數保留，未動 -->
-    <!-- style 區塊略（與你提供的一致） -->
+  if (window.IS_READONLY) {
+    document.body.classList.add("readonly");
+    alert("👀 目前為只讀模式，無法編輯");
+  }
+});
+
+function enterApp(){
+  document.getElementById("splash").style.display="none";
+}
+</script>
 </head>
 
 <body>
-    <!-- ⚠️ body 內容完全保留（未刪功能） -->
-    <!-- ⚠️ 中間內容與你原始碼一致 -->
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        window.initApp = function () {
-            /* ✅ 你的 Firebase + 全功能程式碼完全保留 */
-        };
+<!-- Splash -->
+<div id="splash">
+  <div id="splash-icon"></div>
+  <h2 style="font-family:'Noto Serif TC',serif">福岡行旅 2026</h2>
+  <button id="enter-btn" onclick="enterApp()">進入行程</button>
+</div>
 
-        // ✅ 安全啟動
-        if (window.__bootApp__) {
-            window.initApp();
-        }
-    </script>
+<!-- 主容器（由 app.js 接管） -->
+<div id="app"></div>
+
+<!-- 核心程式 -->
+<script type="module" src="./app.js"></script>
+
 </body>
 </html>
