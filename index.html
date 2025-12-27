@@ -10,8 +10,8 @@
     
     <link rel="preload" as="image" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
 
-    <link rel="icon" type="image/jpeg" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="icon" id="dynamic-favicon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
     
     <title>福岡行旅 2026</title>
     
@@ -21,17 +21,33 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 監聽圖片載入，確保顯示成功
+            // ★ 圖片預載邏輯 ★
+            const iconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
             const img = new Image();
-            img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
-            img.onload = function() {
-                const statusEl = document.getElementById('icon-status');
-                if(statusEl) {
-                    statusEl.innerHTML = "<span style='color:green'>✅ 圖示下載完成</span><br>現在可以加入主畫面了";
-                    document.getElementById('splash-icon').style.opacity = "1";
-                }
-            };
+            img.src = iconUrl;
             
+            // 當圖片下載完成時執行
+            img.onload = function() {
+                // 1. 讓 Splash 上的圖示顯現
+                const splashIcon = document.getElementById('splash-icon');
+                if(splashIcon) {
+                    splashIcon.style.backgroundImage = `url('${iconUrl}')`;
+                    splashIcon.style.opacity = "1";
+                    splashIcon.classList.add('loaded'); // 加上特效
+                }
+                
+                // 2. 更改提示文字
+                const statusText = document.getElementById('loading-status-text');
+                if(statusText) {
+                    statusText.innerHTML = "<span style='color:#2E7D32; font-weight:bold;'>✅ 圖示下載完成</span><br>現在請按「分享」加入主畫面";
+                }
+
+                // 3. 確保 link 標籤也是最新的 (雙重保險)
+                document.getElementById('dynamic-favicon').href = iconUrl;
+                document.getElementById('dynamic-apple-icon').href = iconUrl;
+            };
+
+            // 啟動主程式
             initApp();
         });
     </script>
@@ -42,24 +58,28 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash Screen */
+        /* Splash Screen 優化 */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         
-        /* Icon Preview in Splash */
+        /* 中間的預覽圖示 */
         #splash-icon { 
-            width: 120px; height: 120px; border-radius: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg');
+            width: 120px; height: 120px; 
+            border-radius: 24px; /* iOS 圓角風格 */
+            background-color: #ddd; /* 預設底色 */
             background-size: cover; background-position: center;
-            opacity: 0.5; transition: opacity 0.5s; margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            opacity: 0.3; /* 一開始半透明 */
+            transition: all 0.5s ease;
+            border: 2px solid #fff;
         }
+        #splash-icon.loaded { transform: scale(1.1); border-color: var(--accent-red); } /* 下載完成後的動畫 */
 
         .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; }
-        .loading-status { font-size: 0.8rem; color: #888; text-align: center; line-height: 1.5; }
+        .loading-status { font-size: 0.85rem; color: #666; text-align: center; line-height: 1.6; }
         .spinner { margin-top: 15px; width: 25px; height: 25px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Modal Overlay */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -72,7 +92,7 @@
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
+        .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.4; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
         .secret-trigger:active { transform: scale(1.3); opacity: 1; }
         #backup-plane { transform: scaleX(-1); }
         
@@ -162,9 +182,8 @@
 <body>
 
 <div id="splash-screen">
-    <div id="splash-icon"></div>
-    <div class="splash-title">福岡行旅 2026</div>
-    <div class="loading-status" id="icon-status">正在下載圖示...<br>請稍候</div>
+    <div id="splash-icon"></div> <div class="splash-title">福岡行旅 2026</div>
+    <div class="loading-status" id="loading-status-text">正在下載圖示...</div>
     <div class="spinner"></div>
 </div>
 
@@ -373,21 +392,28 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        // 安全機制：3秒後強制移除 Splash，或等待圖片載入
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
+        // --- 1. 等待圖片載入後再隱藏 Splash ---
+        const splash = document.getElementById('splash-screen');
+        const img = new Image();
+        img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
+        
+        // 設定最長等待時間 8 秒 (避免網路太慢卡死)
+        const safetyTimer = setTimeout(() => {
             if(splash && splash.style.opacity !== '0') {
-                const statusEl = document.getElementById('icon-status');
-                if(statusEl && statusEl.innerText.includes("下載")) {
-                     // 如果還在下載，顯示提示
-                     statusEl.innerText = "網路連線較慢，請稍候...";
-                } else {
-                     // 否則進入
-                     splash.style.opacity = '0'; 
-                     splash.style.visibility = 'hidden'; 
-                }
+                 splash.style.opacity = '0'; splash.style.visibility = 'hidden';
             }
-        }, 5000); // 延長到5秒等待圖片
+        }, 8000);
+
+        // 如果資料庫讀取完成了，且圖片也載入好了，就關閉 splash
+        let isDbReady = false;
+
+        const checkReady = () => {
+            if (isDbReady) { // 不需等待圖片完全 onload，只要 DB 好了就可以進去，圖片讓它背景跑
+                clearTimeout(safetyTimer);
+                splash.style.opacity = '0'; 
+                splash.style.visibility = 'hidden'; 
+            }
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -451,11 +477,9 @@
             } else { 
                 forceResetAction();
             }
-            // 讓 splash screen 在圖片載入後自動關閉，如果已經載入則在資料載入後關閉
-             const splashIcon = document.getElementById('splash-icon');
-             if(splashIcon && splashIcon.style.opacity === '1') {
-                 setTimeout(() => { document.getElementById('splash-screen').style.opacity = '0'; document.getElementById('splash-screen').style.visibility = 'hidden'; }, 500);
-             }
+            
+            isDbReady = true;
+            checkReady();
         });
 
         window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, shoppingList: window.shoppingList, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
