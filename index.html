@@ -7,9 +7,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
+    
+    <link rel="preload" as="image" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
 
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='sunset' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ff512f;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23dd2476;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='url(%23sunset)'/%3E%3Ccircle cx='256' cy='180' r='80' fill='rgba(255,255,255,0.3)'/%3E%3Cpath d='M116,400V200h-30c-5,0-10-5-10-10s5-20,20-20h30c5-30,50-50,130-50s125,20,130,50h30c15,0,20,10,20,20s-5,10-10,10h-30v200H116z M156,240v-30h200v30H156z M246,240v-60h20v60H246z' fill='%233E2723'/%3E%3Ctext x='50%25' y='460' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='50' fill='white' letter-spacing='5'%3EFUKUOKA%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='sunset' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ff512f;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23dd2476;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='url(%23sunset)'/%3E%3Ccircle cx='256' cy='180' r='80' fill='rgba(255,255,255,0.3)'/%3E%3Cpath d='M116,400V200h-30c-5,0-10-5-10-10s5-20,20-20h30c5-30,50-50,130-50s125,20,130,50h30c15,0,20,10,20,20s-5,10-10,10h-30v200H116z M156,240v-30h200v30H156z M246,240v-60h20v60H246z' fill='%233E2723'/%3E%3Ctext x='50%25' y='460' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='50' fill='white' letter-spacing='5'%3EFUKUOKA%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/jpeg" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
     
     <title>福岡行旅 2026</title>
     
@@ -19,6 +21,17 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // 監聽圖片載入，確保顯示成功
+            const img = new Image();
+            img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
+            img.onload = function() {
+                const statusEl = document.getElementById('icon-status');
+                if(statusEl) {
+                    statusEl.innerHTML = "<span style='color:green'>✅ 圖示下載完成</span><br>現在可以加入主畫面了";
+                    document.getElementById('splash-icon').style.opacity = "1";
+                }
+            };
+            
             initApp();
         });
     </script>
@@ -29,14 +42,24 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
+        /* Splash Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
-        .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
-        @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
-        .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; }
-        .spinner { margin-top: 20px; width: 30px; height: 30px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Icon Preview in Splash */
+        #splash-icon { 
+            width: 120px; height: 120px; border-radius: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.5; transition: opacity 0.5s; margin-bottom: 20px;
+        }
 
+        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; }
+        .loading-status { font-size: 0.8rem; color: #888; text-align: center; line-height: 1.5; }
+        .spinner { margin-top: 15px; width: 25px; height: 25px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Modal Overlay */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -139,10 +162,10 @@
 <body>
 
 <div id="splash-screen">
-    <div class="plane-icon">✈️</div>
+    <div id="splash-icon"></div>
     <div class="splash-title">福岡行旅 2026</div>
+    <div class="loading-status" id="icon-status">正在下載圖示...<br>請稍候</div>
     <div class="spinner"></div>
-    <div class="loading-status" id="loading-msg">正在連線...</div>
 </div>
 
 <div id="offline-alert" style="display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; z-index:10002;">⚠️ 離線模式</div>
@@ -350,13 +373,21 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
+        // 安全機制：3秒後強制移除 Splash，或等待圖片載入
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
-                document.getElementById('loading-msg').innerText = "啟動備用模式...";
-                setTimeout(() => { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; }, 500);
+                const statusEl = document.getElementById('icon-status');
+                if(statusEl && statusEl.innerText.includes("下載")) {
+                     // 如果還在下載，顯示提示
+                     statusEl.innerText = "網路連線較慢，請稍候...";
+                } else {
+                     // 否則進入
+                     splash.style.opacity = '0'; 
+                     splash.style.visibility = 'hidden'; 
+                }
             }
-        }, 3000);
+        }, 5000); // 延長到5秒等待圖片
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -370,7 +401,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v17/public'); // Keep database version
+        const publicRef = ref(db, 'fukuoka_trip_final_v17/public');
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -420,8 +451,11 @@
             } else { 
                 forceResetAction();
             }
-            const splash = document.getElementById('splash-screen');
-            if(splash) { setTimeout(() => { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; }, 800); }
+            // 讓 splash screen 在圖片載入後自動關閉，如果已經載入則在資料載入後關閉
+             const splashIcon = document.getElementById('splash-icon');
+             if(splashIcon && splashIcon.style.opacity === '1') {
+                 setTimeout(() => { document.getElementById('splash-screen').style.opacity = '0'; document.getElementById('splash-screen').style.visibility = 'hidden'; }, 500);
+             }
         });
 
         window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, shoppingList: window.shoppingList, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
