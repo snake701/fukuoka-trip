@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg">
+    <link rel="icon" id="dynamic-favicon">
+    <link rel="apple-touch-icon" id="dynamic-apple-icon">
     
     <title>福岡行旅 2026</title>
     
@@ -19,49 +19,62 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 定義圖片網址
-            const iconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/320px-Itsukushima_Gate_Japan.jpg";
-            
-            // 建立圖片物件來監聽下載進度
-            const img = new Image();
-            img.src = iconUrl;
+            // 定義高解析度鳥居照片 (Wikimedia CORS Friendly)
+            const imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Itsukushima_Gate_Japan.jpg/640px-Itsukushima_Gate_Japan.jpg";
             
             const splashIcon = document.getElementById('splash-icon');
+            const statusText = document.getElementById('loading-status-text');
             const startBtn = document.getElementById('start-btn');
-            const loadingText = document.getElementById('loading-text');
 
-            // 圖片載入成功後執行
-            img.onload = function() {
-                // 1. 顯示圖片
-                if(splashIcon) {
-                    splashIcon.style.backgroundImage = `url('${iconUrl}')`;
-                    splashIcon.style.opacity = "1";
-                    splashIcon.classList.add('loaded');
-                }
-                
-                // 2. 更新連結標籤 (雙重確保)
-                document.getElementById('dynamic-favicon').href = iconUrl;
-                document.getElementById('dynamic-apple-icon').href = iconUrl;
+            // ★★★ 核心技術：將圖片轉為 Data URI，強制瀏覽器認帳 ★★★
+            fetch(imageUrl, { mode: 'cors' })
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const base64data = reader.result;
+                        
+                        // 1. 強制設定 iOS 圖示標籤
+                        document.getElementById('dynamic-favicon').href = base64data;
+                        document.getElementById('dynamic-apple-icon').href = base64data;
+                        
+                        // 2. 更新畫面提示
+                        if(splashIcon) {
+                            splashIcon.style.backgroundImage = `url('${base64data}')`;
+                            splashIcon.style.opacity = "1";
+                            splashIcon.style.transform = "scale(1.1)";
+                        }
+                        if(statusText) {
+                            statusText.innerHTML = "<span style='color:#2E7D32; font-size:1.2rem;'>✅ 圖示鎖定完成</span><br>現在加入主畫面，保證是照片！";
+                        }
+                        if(startBtn) {
+                            startBtn.style.display = "block";
+                        }
+                    }
+                    reader.readAsDataURL(blob);
+                })
+                .catch(error => {
+                    console.error('圖片下載失敗:', error);
+                    statusText.innerText = "圖片下載失敗，將使用備用圖示";
+                    // 備案：畫一個紅圈圈
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 512; canvas.height = 512;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#C62828'; ctx.fillRect(0,0,512,512);
+                    ctx.fillStyle = 'white'; ctx.font='bold 200px serif'; ctx.textAlign='center'; ctx.fillText('旅', 256,300);
+                    const fallbackUrl = canvas.toDataURL();
+                    document.getElementById('dynamic-apple-icon').href = fallbackUrl;
+                    if(startBtn) startBtn.style.display = "block";
+                });
 
-                // 3. 顯示進入按鈕
-                if(loadingText) loadingText.style.display = 'none';
-                if(startBtn) {
-                    startBtn.style.display = 'block';
-                    startBtn.classList.add('show');
-                }
-            };
-
-            // 初始化 App 邏輯
             initApp();
         });
 
-        // 手動進入函式
         function enterApp() {
             const splash = document.getElementById('splash-screen');
+            splash.style.transition = "opacity 0.5s ease";
             splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.visibility = 'hidden';
-            }, 500);
+            setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
         }
     </script>
 
@@ -71,53 +84,50 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash Screen (強制覆蓋) */
+        /* Splash Screen - 強制覆蓋 */
         #splash-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
             background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); 
             z-index: 99999; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            transition: opacity 0.5s ease-out, visibility 0.5s; 
         }
         
-        /* 圖片預覽區 */
         #splash-icon { 
-            width: 150px; height: 150px; 
-            border-radius: 30px; 
-            background-color: #ddd; 
+            width: 160px; height: 160px; 
+            border-radius: 35px; 
+            background-color: #eee; 
             background-size: cover; background-position: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             margin-bottom: 30px;
-            opacity: 0.3; /* 未載入前半透明 */
-            transition: all 0.5s ease;
+            opacity: 0.5;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 4px solid #fff;
         }
-        #splash-icon.loaded { opacity: 1; transform: scale(1.05); border-color: var(--wood-dark); }
 
-        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; font-weight: bold; }
+        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 15px; font-weight: bold; }
         
-        /* 進入按鈕 (預設隱藏) */
+        .loading-status { 
+            font-size: 1rem; color: #666; text-align: center; line-height: 1.6; 
+            background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 10px;
+        }
+        
         #start-btn {
             display: none;
-            padding: 15px 40px;
+            margin-top: 30px;
+            padding: 15px 50px;
             background-color: var(--wood-dark);
             color: #fff;
             border: none;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(93, 64, 55, 0.3);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(93, 64, 55, 0.4);
+            animation: bounceIn 0.8s;
         }
-        #start-btn:active { transform: scale(0.95); }
+        @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
 
-        @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-        
-        .loading-text { color: #888; font-size: 0.9rem; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        /* --- 其他 CSS 保持不變 --- */
+        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
@@ -222,7 +232,7 @@
 <div id="splash-screen">
     <div id="splash-icon"></div>
     <div class="splash-title">福岡行旅 2026</div>
-    <div class="loading-status" id="loading-text">正在下載圖示...</div>
+    <div class="loading-status" id="loading-status-text">正在下載圖示，請稍候...</div>
     <button id="start-btn" onclick="enterApp()">⛩️ 進入福岡行旅</button>
 </div>
 
@@ -441,9 +451,13 @@
             appId: "1:788923341638:web:838629fb9a547648372347"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const publicRef = ref(db, 'fukuoka_trip_final_v18/public'); // v18
+        let app, db, publicRef;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            publicRef = ref(db, 'fukuoka_trip_final_v17/public');
+        } catch(e) { console.error("Firebase Error", e); }
+        
         const WEATHER_API_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
@@ -467,33 +481,35 @@
         `;
         ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
 
-        onValue(publicRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                window.tripData = data.tripData || {};
-                window.members = data.members || [];
-                window.expenses = data.expenses || [];
-                window.purchased = data.purchased || [];
-                window.hotelData = data.hotelData || [{name:"", addr:""}];
-                window.checks = data.checks || []; 
-                window.shoppingList = data.shoppingList || []; 
-                window.memo = data.memo || "";
-                const memoArea = document.getElementById('group-memo');
-                if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
-                if(data.lastUpdated) {
-                    const date = new Date(data.lastUpdated);
-                    document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        if(publicRef) {
+            onValue(publicRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    window.tripData = data.tripData || {};
+                    window.members = data.members || [];
+                    window.expenses = data.expenses || [];
+                    window.purchased = data.purchased || [];
+                    window.hotelData = data.hotelData || [{name:"", addr:""}];
+                    window.checks = data.checks || []; 
+                    window.shoppingList = data.shoppingList || []; 
+                    window.memo = data.memo || "";
+                    const memoArea = document.getElementById('group-memo');
+                    if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
+                    if(data.lastUpdated) {
+                        const date = new Date(data.lastUpdated);
+                        document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                    }
+                    if(window.hotelData[0]) {
+                        document.getElementById('h-name').value = window.hotelData[0].name || "";
+                        document.getElementById('h-addr').value = window.hotelData[0].addr || "";
+                    }
+                    refreshUI();
+                    getGeoWeather();
+                } else { 
+                    forceResetAction();
                 }
-                if(window.hotelData[0]) {
-                    document.getElementById('h-name').value = window.hotelData[0].name || "";
-                    document.getElementById('h-addr').value = window.hotelData[0].addr || "";
-                }
-                refreshUI();
-                getGeoWeather();
-            } else { 
-                forceResetAction();
-            }
-        });
+            });
+        }
 
         window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, shoppingList: window.shoppingList, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
         window.savePrivate = () => { 
@@ -617,7 +633,7 @@
 
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency, done: true };
+            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency }; // Removed 'done: true'
 
             if (type === 'private') {
                 window.privateExpenses.push(record); 
@@ -635,7 +651,7 @@
             closeExpenseModal(); 
         };
 
-        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY", done: false}); saveAll(); };
+        window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY"}); saveAll(); };
         window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); }; // 新增預定購買
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
@@ -735,7 +751,7 @@
     };
     
     // 初始化執行
-    setTimeout(window.initApp, 100);
+    // setTimeout(window.initApp, 100); // 移除這行，改由 DOMContentLoaded 事件觸發，確保與圖片載入流程一致
 </script>
 </body>
 </html>
