@@ -8,19 +8,55 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=33">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=33">
+    <link rel="preload" as="image" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=35.0">
+    <link rel="icon" id="dynamic-favicon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=35.0">
+    <link rel="apple-touch-icon" id="dynamic-apple-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=35.0">
     
     <title>福岡行旅 2026</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <script>
         document.addEventListener("DOMContentLoaded", function() {
+            console.log("🚀 福岡行旅 App - Version 35.0 Loaded");
+            const iconUrl = "https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=35.0";
+            const img = new Image();
+            img.src = iconUrl;
+            
+            const splashIcon = document.getElementById('splash-icon');
+            const startBtn = document.getElementById('start-btn');
+            const loadingText = document.getElementById('loading-status-text');
+
+            img.onload = function() {
+                if(splashIcon) {
+                    splashIcon.style.backgroundImage = `url('${iconUrl}')`;
+                    splashIcon.style.opacity = "1";
+                    splashIcon.classList.add('loaded');
+                }
+                if(loadingText) {
+                    loadingText.innerHTML = "<span style='color:#2E7D32; font-weight:bold;'>✅ 圖示下載完成</span><br>請按「分享」加入主畫面";
+                }
+                document.getElementById('dynamic-favicon').href = iconUrl;
+                document.getElementById('dynamic-apple-icon').href = iconUrl;
+                if(startBtn) {
+                    startBtn.style.display = 'block';
+                    setTimeout(() => startBtn.classList.add('show'), 100);
+                }
+            };
+            img.onerror = function() {
+                if(loadingText) loadingText.innerHTML = "⚠️ 圖示載入失敗，請檢查網路";
+                if(startBtn) startBtn.style.display = 'block';
+            };
             initApp();
         });
+
+        function enterApp() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.transition = "opacity 0.5s ease";
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
+        }
     </script>
 
     <style>
@@ -29,130 +65,84 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; }
         body { padding-bottom: 100px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); }
 
-        /* Splash Screen (自動消失版) */
-        #splash-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
-            background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); 
-            z-index: 99999; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            transition: opacity 0.5s ease-out, visibility 0.5s; 
-        }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        #splash-icon { width: 150px; height: 150px; border-radius: 30px; background-color: #ddd; background-size: cover; background-position: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); margin-bottom: 20px; opacity: 0.3; transition: all 0.5s ease; border: 4px solid #fff; }
+        #splash-icon.loaded { transform: scale(1.05); border-color: var(--wood-dark); }
+        .splash-title { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; margin-bottom: 10px; font-weight: bold; }
+        .loading-status { font-size: 0.9rem; color: #666; text-align: center; line-height: 1.6; margin-bottom: 20px; min-height: 40px; }
+        #start-btn { display: none; padding: 15px 40px; background-color: var(--wood-dark); color: #fff; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(93, 64, 55, 0.3); opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+        #start-btn.show { opacity: 1; transform: translateY(0); }
         
-        .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
-        @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
-
-        .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; }
-        .spinner { margin-top: 20px; width: 30px; height: 30px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; }
         .modal-content { background:white; padding:20px; border-radius:10px; width:85%; max-width:350px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:6px; font-size:1rem; cursor:pointer; }
         .modal-btn.primary { background:var(--accent-blue); color:white; border:none; }
-        .modal-btn.gold { background:var(--private-gold); color:white; border:none; }
         .modal-btn.close { color:#666; border:none; background:transparent; font-size:0.9rem; }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
         #toast.show { visibility: visible; opacity: 1; }
 
         header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
         .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); transition: transform 0.2s; padding: 5px; }
-        .secret-trigger:active { transform: scale(1.3); opacity: 1; }
-        #backup-plane { transform: scaleX(-1); }
-        
-        .status-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .status-item { background: rgba(255,255,255,0.6); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 0.85rem; color: #555; display: flex; align-items: center; gap: 5px; }
-
         .main-nav { max-width: 800px; margin: 0 auto 15px; display: flex; background: rgba(215, 204, 200, 0.3); padding: 5px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
         .nav-tab { flex: 1; min-width: 70px; text-align: center; padding: 10px 5px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; }
         .nav-tab.active { background: var(--paper); box-shadow: var(--shadow); font-weight: 700; transform: scale(1.02); }
         #tab-private { display: none; }
-
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
         .content-section { display: none; animation: fadeIn 0.3s ease; }
         .content-section.active { display: block; }
-        
         .info-card { background: var(--paper); padding: 18px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-shadow: var(--shadow); }
         .input-wood { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; }
-        input[type="date"] { font-family: inherit; font-size: 0.85rem; padding: 8px; color: #555; }
-        
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        .btn-wood:active { transform: scale(0.98); }
         .btn-sm { font-size: 0.75rem; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer; }
 
+        /* 天氣樣式 */
+        .weather-container-wrapper { position: relative; max-width: 800px; margin: 15px auto 0; padding: 0 35px; }
+        .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.8); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
+        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
+        .weather-card { min-width: 85px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
+        .weather-card img { width: 40px; height: 40px; margin: 5px 0; }
+
+        /* 匯率工具 */
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 12px !important; margin-bottom: 15px; }
         .ex-grid { display: flex; gap: 8px; align-items: center; }
         .ex-input-group { flex: 1; }
         .ex-input-group label { font-size: 0.7rem; color: var(--accent-blue); font-weight: bold; }
-        
-        .map-btn { display: inline-block; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
-        .map-btn.transit { background: var(--accent-green); }
-        .map-btn.driving { background: var(--accent-blue); }
-        .map-btn.flying { background: #039BE5; }
-        
-        .copy-btn { margin-left: 5px; cursor: pointer; color: #888; font-size: 0.9rem; }
-        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
-        
-        .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; touch-action: pan-y; }
+        .rate-mode-switch { display: flex; gap: 15px; margin-bottom: 10px; justify-content: flex-end; font-size: 0.8rem; }
+        .rate-mode-switch label { cursor: pointer; display: flex; align-items: center; gap: 3px; }
+
+        /* 行程樣式 */
+        .itinerary-card { background: white; border: 1px solid var(--border); border-left: 4px solid var(--accent-green); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
         .itinerary-card.driving { border-left-color: var(--accent-blue); }
         .itinerary-card.flying { border-left-color: #039BE5; }
-        
-        .drag-handle { color: #ccc; margin-right: 15px; font-size: 1.5rem; cursor: grab; padding: 10px; }
-        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
-        .time-info { display: flex; gap: 10px; margin-top: 5px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; width: fit-content; }
-        .time-badge { display: flex; align-items: center; gap: 3px; }
+        .map-btn { display: inline-block; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; font-weight: bold; }
+        .map-btn.transit { background: var(--accent-green); } .map-btn.driving { background: var(--accent-blue); } .map-btn.flying { background: #039BE5; }
         .time-edit-btn { font-weight: bold; margin-left: 5px; color: #555; cursor: pointer; padding: 5px; border-radius: 4px; transition: 0.2s; }
-
         .mode-toggle { display: inline-flex; justify-content: center; align-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; font-size: 0.8rem; margin-right: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .mode-toggle.transit { background: var(--accent-green); }
-        .mode-toggle.driving { background: var(--accent-blue); }
-        .mode-toggle.flying { background: #039BE5; }
-
-        .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #eee; }
-        .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
-        .checkbox-lg { transform: scale(1.3); cursor: pointer; }
+        .mode-toggle.transit { background: var(--accent-green); } .mode-toggle.driving { background: var(--accent-blue); } .mode-toggle.flying { background: #039BE5; }
         
-        /* 願望清單樣式 */
-        .check-item.shopping input[type="text"] { font-weight: bold; color: var(--wood-dark); }
-        
-        textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
-        .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
-        
-        .budget-bar-bg { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        .budget-bar-fill { height: 100%; background: var(--accent-green); width: 0%; transition: width 0.5s, background 0.5s; }
-        
-        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
-        .weather-card { min-width: 85px; background: rgba(255,255,255,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; font-size: 0.75rem; color: #555; }
-        .weather-card img { width: 40px; height: 40px; margin: 5px 0; }
-        .weather-location { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.8rem; text-align: center; }
-        
-        .weather-container-wrapper { position: relative; max-width: 800px; margin: 15px auto 0; padding: 0 35px; }
-        .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.8); color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-weight: bold; font-family: monospace; }
-        .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
-
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .link-btn { background: white; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; color: var(--wood-dark); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .link-btn.emergency { background: #ffebee; border-color: #ef9a9a; color: #c62828; font-weight: bold; }
-
         .expense-type-selector { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; }
         .expense-type-selector label { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer; padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: #fafafa; }
         .expense-type-selector input:checked + span { font-weight: bold; color: var(--wood-dark); }
         .expense-type-selector label:has(input:checked) { border-color: var(--wood-dark); background: #fff8e1; }
         .currency-select { border:none; background:transparent; font-weight:bold; color:#555; margin-right:5px; }
-
+        textarea.memo-area { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: vertical; background: #fffdf5; }
+        .footer-info { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
+        
+        /* 圓餅圖容器 */
+        .chart-container { position: relative; height: 200px; width: 100%; display: flex; justify-content: center; margin-bottom: 15px; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="splash-screen">
-    <div class="plane-icon">✈️</div>
+    <div id="splash-icon"></div>
     <div class="splash-title">福岡行旅 2026</div>
-    <div class="spinner"></div>
-    <div class="loading-status" id="loading-msg">正在連線...</div>
+    <div class="loading-status" id="loading-status-text">正在下載圖示，請稍候...</div>
+    <button id="start-btn" onclick="enterApp()">⛩️ 進入福岡行旅</button>
 </div>
 
 <div id="offline-alert" style="display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; z-index:10002;">⚠️ 離線模式</div>
@@ -179,16 +169,13 @@
 
 <div id="expense-modal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="margin-top:0;">💰 新增消費</h3>
+        <h3 style="margin-top:0; color:#5D4037;">💰 新增消費</h3>
         <p id="expense-spot-name" style="font-size:0.9rem; font-weight:bold; margin-bottom:10px;">地點名稱</p>
-        
         <input type="date" id="expense-date" class="input-wood" style="margin-bottom:10px;">
-
         <div class="expense-type-selector">
             <label><input type="radio" name="exp-type" value="purchased" checked> <span>📝 記帳 (已購買)</span></label>
             <label><input type="radio" name="exp-type" value="public"> <span>👥 公款</span></label>
         </div>
-        
         <div style="display:flex; gap:5px; margin-bottom:8px;">
             <select id="expense-currency" class="input-wood" style="flex:1;">
                 <option value="JPY">¥ JPY</option>
@@ -196,13 +183,8 @@
             </select>
             <input type="number" id="expense-amount" class="input-wood" style="flex:2;" placeholder="金額" oninput="updateExpensePreview(this.value)">
         </div>
-
         <input type="text" id="expense-item" class="input-wood" placeholder="消費項目 (如: 門票)">
-        
-        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">
-            約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span>
-        </div>
-        
+        <div style="text-align:right; font-size:0.85rem; color:#666; margin-bottom:15px; font-weight:bold;">約 NT$ <span id="expense-twd-preview" style="color:var(--accent-blue);">0</span></div>
         <button class="modal-btn primary" onclick="saveSpotExpense()">💾 儲存</button>
         <button class="modal-btn close" onclick="closeExpenseModal()">取消</button>
     </div>
@@ -239,18 +221,21 @@
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:5px; margin-bottom: 5px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
-                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'顯示全名)">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點">
                 <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
             </div>
             <div style="display:flex; gap:5px; align-items: center;">
                 <button onclick="checkGoogleTime()" style="background:var(--accent-blue); color:white; border:none; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; white-space:nowrap;">🔍 查詢</button>
-                <input type="text" id="new-travel" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="交通 (點左側查詢)">
-                <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留(如:1小時)">
+                <input type="text" id="new-travel" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="交通">
+                <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.85rem;" placeholder="⏳ 停留">
             </div>
         </div>
         <div style="text-align:center; font-size:0.7rem; color:#ccc; margin-top:5px; display:flex; justify-content:space-between; padding:0 5px;">
             <span>長按「☰」拖曳排序</span>
-            <button onclick="openDayMap()" style="border:none; background:none; color:var(--accent-blue); font-weight:bold; cursor:pointer;">🗺️ 全日路徑</button>
+            <div>
+                <button onclick="openDayMap()" style="border:none; background:none; color:var(--accent-blue); font-weight:bold; cursor:pointer; margin-right:10px;">🗺️ 全日路徑</button>
+                <button onclick="copyItineraryText()" style="border:none; background:none; color:var(--accent-green); font-weight:bold; cursor:pointer;">📋 複製文字</button>
+            </div>
         </div>
         <div id="itinerary-list"></div>
     </section>
@@ -270,8 +255,42 @@
     </section>
 
     <section id="money-sec" class="content-section">
-        <div class="info-card ex-tool" id="ex-container-money"></div>
+        <div class="info-card ex-tool" id="ex-container-money">
+            <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue); display:flex; justify-content:space-between; align-items:center;">
+                <span>💱 即時匯率換算</span>
+                <span id="rate-source" style="font-size:0.7rem; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid #ccc;">手動模式</span>
+            </h3>
+            
+            <div class="rate-mode-switch">
+                <label><input type="radio" name="rateMode" value="manual" checked onchange="toggleRateMode(this.value)"> ✋ 手動 (玉山)</label>
+                <label><input type="radio" name="rateMode" value="auto" onchange="toggleRateMode(this.value)"> 🤖 自動 (市價)</label>
+            </div>
+
+            <div class="ex-grid">
+                <div class="ex-input-group"><label>日幣 JPY</label><input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="¥" oninput="syncEx(this, 'jpy')"></div>
+                <div style="padding-top:15px; font-weight:bold;">⇄</div>
+                <div class="ex-input-group"><label>台幣 TWD</label><input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="$" oninput="syncEx(this, 'twd')"></div>
+            </div>
+            
+            <div style="font-size:0.7rem; color:#666; margin-top:5px; text-align:right; display:flex; justify-content:flex-end; align-items:center;">
+                <span id="manual-controls">
+                    1 JPY = <input type="number" class="ex-rate-input" value="0.215" step="0.001" style="width:60px; border:none; border-bottom:1px solid #999; background:transparent; text-align:center;" onchange="updateGlobalRate(this.value)"> TWD
+                    <a href="https://www.esunbank.com/zh-tw/personal/deposit/rate/forex/foreign-exchange-rates" target="_blank" style="margin-left:5px; color:var(--accent-blue); text-decoration:none;">(查玉山)</a>
+                </span>
+                <span id="auto-controls" style="display:none;">
+                    1 JPY ≈ <span id="auto-rate-display">0.215</span> TWD
+                    <button onclick="fetchLiveRate()" style="margin-left:5px; padding:2px 6px; font-size:0.7rem; border-radius:4px; border:1px solid #999; cursor:pointer;">🔄 更新</button>
+                </span>
+            </div>
+        </div>
         
+        <div class="info-card" style="text-align:center;">
+            <h3>📊 消費分析</h3>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
         <div class="info-card">
             <h3>👥 成員繳費 (公款)</h3>
             <div id="member-list"></div>
@@ -351,7 +370,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 33.0 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 35.0 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -361,19 +380,29 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 33.0 Loaded");
-        
-        // 延遲關閉 Splash，確保使用者有時間看圖示 (或等他們加入主畫面後自動進入)
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            // 只有在應用程式模式下(已加入主畫面)才自動隱藏，否則等待使用者手動
-            if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
-                 if(splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.visibility = 'hidden'; }, 500); }
-            } else {
-                // 如果是瀏覽器模式，3秒後自動進入，或者使用者已經看到了圖片
-                setTimeout(() => { if(splash) { splash.style.opacity = '0'; splash.style.visibility = 'hidden'; } }, 3000);
+        console.log("🚀 福岡行旅 App - Version 35.0 Loaded");
+        const userIconUrl = "https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=35.0";
+        const splashIcon = document.getElementById('splash-icon');
+        const startBtn = document.getElementById('start-btn');
+        const loadingText = document.getElementById('loading-status-text');
+
+        const img = new Image();
+        img.src = userIconUrl;
+        img.onload = function() {
+            if(splashIcon) {
+                splashIcon.style.backgroundImage = `url('${userIconUrl}')`;
+                splashIcon.style.opacity = "1";
+                splashIcon.classList.add('loaded');
             }
-        }, 100);
+            if(loadingText) loadingText.innerHTML = "<span style='color:#2E7D32; font-weight:bold;'>✅ 圖示下載完成</span><br>請按「分享」加入主畫面";
+            document.getElementById('dynamic-favicon').href = userIconUrl;
+            document.getElementById('dynamic-apple-icon').href = userIconUrl;
+            if(startBtn) { startBtn.style.display = 'block'; setTimeout(() => startBtn.classList.add('show'), 100); }
+        };
+        img.onerror = function() {
+            if(loadingText) loadingText.innerHTML = "⚠️ 圖示載入失敗";
+            if(startBtn) startBtn.style.display = 'block';
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -396,20 +425,80 @@
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
+        
+        // Chart.js 實例
+        window.myExpenseChart = null;
+
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
 
-        const exHTML = `
-            <h3 style="margin:0 0 10px 0; font-size:1rem; color:var(--accent-blue);">💱 即時匯率換算</h3>
-            <div class="ex-grid">
-                <div class="ex-input-group"><label>日幣 JPY</label><input type="number" class="input-wood ex-jpy" style="margin:0;" placeholder="¥" oninput="syncEx(this, 'jpy')"></div>
-                <div style="padding-top:15px; font-weight:bold;">⇄</div>
-                <div class="ex-input-group"><label>台幣 TWD</label><input type="number" class="input-wood ex-twd" style="margin:0;" placeholder="$" oninput="syncEx(this, 'twd')"></div>
-            </div>
-            <div style="font-size:0.7rem; color:#666; margin-top:5px; text-align:right;">1 JPY = <input type="number" class="ex-rate-input" value="0.215" step="0.001" style="width:60px; border:none; border-bottom:1px solid #999; background:transparent; text-align:center;" onchange="updateGlobalRate(this.value)"> TWD</div>
-        `;
-        ['ex-container-money', 'ex-container-private', 'ex-container-tools'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = exHTML; });
+        // 匯率同步 UI 邏輯
+        window.syncEx = (el, type) => {
+            const val = parseFloat(el.value);
+            if(isNaN(val)) return;
+            const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0);
+            document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res);
+            document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val);
+        };
+        
+        // 更新全域匯率
+        window.updateGlobalRate = (newRate) => {
+            window.currentRate = parseFloat(newRate);
+            document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate);
+            document.getElementById('auto-rate-display').innerText = window.currentRate;
+            window.renderMoney();
+            window.renderPrivate();
+        };
+
+        // ★★★ 匯率模式切換 ★★★
+        window.toggleRateMode = (mode) => {
+            const manualControls = document.getElementById('manual-controls');
+            const autoControls = document.getElementById('auto-controls');
+            const rateSourceLabel = document.getElementById('rate-source');
+            const manualInputs = document.querySelectorAll('.ex-rate-input');
+
+            if (mode === 'auto') {
+                manualControls.style.display = 'none';
+                autoControls.style.display = 'inline-block';
+                rateSourceLabel.innerText = "自動模式 (市價)";
+                rateSourceLabel.style.color = "var(--accent-blue)";
+                rateSourceLabel.style.borderColor = "var(--accent-blue)";
+                // 鎖定所有手動輸入框
+                manualInputs.forEach(input => input.disabled = true);
+                fetchLiveRate();
+            } else {
+                manualControls.style.display = 'inline-block';
+                autoControls.style.display = 'none';
+                rateSourceLabel.innerText = "手動模式 (玉山)";
+                rateSourceLabel.style.color = "#666";
+                rateSourceLabel.style.borderColor = "#ccc";
+                // 解鎖所有手動輸入框
+                manualInputs.forEach(input => input.disabled = false);
+            }
+        };
+
+        // ★★★ 自動抓取匯率 API ★★★
+        window.fetchLiveRate = async () => {
+            const btn = document.querySelector('#auto-controls button');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳...";
+            
+            try {
+                // 使用 ExchangeRate-API (免費、穩定、支援 CORS)
+                const res = await fetch("https://api.exchangerate-api.com/v4/latest/JPY");
+                const data = await res.json();
+                const rate = data.rates.TWD;
+                
+                window.updateGlobalRate(rate); // 更新全域匯率
+                showToast(`✅ 已更新匯率: ${rate}`);
+            } catch (e) {
+                console.error(e);
+                showToast("⚠️ 匯率抓取失敗，請檢查網路");
+            } finally {
+                btn.innerText = originalText;
+            }
+        };
 
         onValue(publicRef, (snapshot) => {
             const data = snapshot.val();
@@ -446,7 +535,13 @@
             renderPrivate();
         };
 
-        function refreshUI() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); }
+        function refreshUI() { 
+            renderItinerary(window.currentDay); 
+            renderMoney(); 
+            renderPrivate(); 
+            renderCheck();
+            updateChart(); // 更新圓餅圖
+        }
 
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
@@ -528,6 +623,22 @@
             sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
         };
 
+        // ★★★ 新增：行程文字複製 ★★★
+        window.copyItineraryText = () => {
+            let items = window.tripData[window.currentDay] || [];
+            if(items.length === 0) { alert("今天沒有行程可以複製喔！"); return; }
+            
+            let text = `📅 福岡行 Day ${window.currentDay}\n`;
+            items.forEach(item => {
+                let icon = item.mode === 'driving' ? '🚗' : (item.mode === 'flying' ? '✈️' : '🚌');
+                text += `${item.t} ${item.title} (${icon})\n`;
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("📋 行程已複製到剪貼簿");
+            });
+        };
+
         window.toggleTransportMode = (day, idx) => { const item = window.tripData[day][idx]; if (item.mode === 'transit') item.mode = 'driving'; else if (item.mode === 'driving') item.mode = 'flying'; else item.mode = 'transit'; item.manualMode = true; saveAll(); renderItinerary(day); };
         window.openDayMap = () => { let items = window.tripData[window.currentDay] || []; if(items.length === 0) return; const hotel = window.hotelData[0] || { name: "飯店", addr: "" }; let origin = (items[0].map === 'HOTEL_REF') ? hotel.addr : items[0].map; let dest = (items[items.length-1].map === 'HOTEL_REF') ? hotel.addr : items[items.length-1].map; let waypoints = items.slice(1, -1).map(i => (i.map === 'HOTEL_REF') ? hotel.addr : i.map).join('|'); let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=driving`; if(waypoints) url += `&waypoints=${encodeURIComponent(waypoints)}`; window.open(url, '_blank'); };
         window.openTimeEditModal = (day, idx) => { currentEditingDay = day; currentEditingIndex = idx; document.getElementById('edit-time-input').value = window.tripData[day][idx].t; document.getElementById('time-edit-modal').style.display = 'flex'; };
@@ -561,7 +672,7 @@
 
             if(!item || !amount) { alert("請輸入項目與金額"); return; } 
 
-            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency }; // Removed 'done: true'
+            const record = { d: date, n: `[${selectedSpot}] ${item}`, v: amount, c: currency };
 
             if (type === 'private') {
                 window.privateExpenses.push(record); 
@@ -580,7 +691,7 @@
         };
 
         window.addPurchasedManual = () => { const today = new Date().toISOString().split('T')[0]; window.purchased.push({d: today, n: "品項", v: 0, c: "JPY"}); saveAll(); };
-        window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); }; // 新增預定購買
+        window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); };
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
         window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
         window.updateMemo = (val) => { window.memo = val; saveAll(); };
@@ -640,6 +751,7 @@
             const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
             const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; 
         };
+        
         window.renderCheck = () => { 
             // 行李清單
             document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); 
@@ -647,6 +759,45 @@
             document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c ? 'checked shopping' : 'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" style="margin:0; border:none; background:transparent;" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join('');
         };
         
+        // ★★★ 更新圓餅圖 (Chart.js) ★★★
+        window.updateChart = () => {
+            const ctx = document.getElementById('expenseChart');
+            if(!ctx) return;
+            
+            // 計算各項總和 (換算為台幣)
+            let publicTotal = window.expenses.reduce((acc, cur) => acc + Number(cur.v), 0);
+            let shoppingTotal = 0;
+            window.purchased.forEach(p => {
+                if(p.c === 'TWD') shoppingTotal += Number(p.v) / window.currentRate; // 統一轉日幣計算比例
+                else shoppingTotal += Number(p.v);
+            });
+            let privateTotal = window.privateExpenses.reduce((acc, cur) => acc + Number(cur.v), 0);
+
+            // 如果已經有圖表，先銷毀舊的
+            if(window.myExpenseChart) {
+                window.myExpenseChart.destroy();
+            }
+
+            window.myExpenseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['公款', '購物', '私帳'],
+                    datasets: [{
+                        data: [publicTotal, shoppingTotal, privateTotal],
+                        backgroundColor: ['#8D9977', '#78909C', '#D4AF37'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        };
+
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         window.handleHeaderClick = (type) => { 
             const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); 
