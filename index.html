@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=47.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=47.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=48.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=48.0">
     
-    <title>福岡行旅 2026 (v47.0)</title>
+    <title>福岡行旅 2026 (v48.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v47.0'; 
+        const CURRENT_VERSION = 'v48.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         function showToast(msg) {
@@ -66,25 +66,67 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // 交通查詢函式 (v47.0 New)
+        // 退稅計算 (v48.0 New)
+        function calcTaxFree() {
+            const inputVal = parseFloat(document.getElementById('tax-input').value);
+            const resultDiv = document.getElementById('tax-result');
+            
+            if (isNaN(inputVal) || inputVal <= 0) {
+                resultDiv.innerHTML = "<span style='color:#ccc;'>請輸入金額...</span>";
+                return;
+            }
+
+            const mode = document.querySelector('input[name="tax-mode"]:checked').value;
+            const RATE = 0.1; // 10%
+            const THRESHOLD = 5500; // 含稅門檻 5500
+
+            let priceWithTax, priceNoTax, gap;
+
+            if (mode === 'inc') { // 輸入含稅價 (税込)
+                priceWithTax = inputVal;
+                priceNoTax = Math.round(inputVal / 1.1);
+            } else { // 輸入未稅價 (税抜)
+                priceNoTax = inputVal;
+                priceWithTax = Math.floor(inputVal * 1.1);
+            }
+
+            const taxAmount = priceWithTax - priceNoTax;
+            const diff = THRESHOLD - priceWithTax;
+
+            let html = "";
+            
+            if (diff > 0) {
+                // 未達標
+                html = `
+                    <div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div>
+                    <div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>
+                `;
+            } else {
+                // 已達標
+                html = `
+                    <div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;">
+                        <span>退稅後價格:</span>
+                        <span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;">
+                        <span>省下稅金:</span>
+                        <span>¥${taxAmount.toLocaleString()}</span>
+                    </div>
+                `;
+            }
+            resultDiv.innerHTML = html;
+        }
+
+        // 交通查詢函式
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
-            
             if(!from || !to) { alert("請輸入出發與到達站名"); return; }
-            
-            let url = "";
-            if (engine === 'yahoo') {
-                // Yahoo 路線情報 (日文介面但漢字可通，車資最準)
-                url = `https://transit.yahoo.co.jp/search/result?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
-            } else {
-                // Google Maps
-                url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=transit`;
-            }
+            let url = engine === 'yahoo' ? `https://transit.yahoo.co.jp/search/result?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}` : `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=transit`;
             window.open(url, '_blank');
         }
 
-        // 快速填入站名
         function fillStation(name, type) {
             const input = document.getElementById(type === 'from' ? 'trans-from' : 'trans-to');
             input.value = name;
@@ -225,6 +267,9 @@
         .station-tags { display:flex; gap:5px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; }
         .station-tag { background:#eee; padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer; white-space:nowrap; color:#555; border:1px solid #ddd; }
         .station-tag:active { background:var(--accent-blue); color:white; }
+        
+        /* Tax Free Styles */
+        .tax-result-box { margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px; border:1px solid #eee; text-align:center; }
     </style>
 </head>
 <body>
@@ -444,11 +489,26 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
+            <h3 style="margin-top:0;">🛍️ 日本購物退稅計算</h3>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+               <input type="number" id="tax-input" class="input-wood" style="margin:0;" placeholder="輸入標價" oninput="calcTaxFree()">
+               <div class="expense-type-selector" style="margin:0; flex-shrink:0;">
+                   <label><input type="radio" name="tax-mode" value="inc" checked onchange="calcTaxFree()"> 税込</label>
+                   <label><input type="radio" name="tax-mode" value="exc" onchange="calcTaxFree()"> 税抜</label>
+               </div>
+            </div>
+            <div id="tax-result" class="tax-result-box">
+                <span style="color:#ccc; font-size:0.9rem;">輸入金額以計算...</span>
+            </div>
+            <div style="font-size:0.75rem; color:#888; margin-top:5px; text-align:center;">* 免稅門檻：5,500円 (含稅)</div>
+        </div>
+
+        <div class="info-card">
             <h3 style="margin-top:0;">🚄 電車轉乘/車資查詢</h3>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input id="trans-from" class="input-wood" placeholder="出發 (如: 博多)" style="margin:0;">
+                <input id="trans-from" class="input-wood" placeholder="出發" style="margin:0;">
                 <div style="align-self:center; color:#888;">➔</div>
-                <input id="trans-to" class="input-wood" placeholder="到達 (如: 由布院)" style="margin:0;">
+                <input id="trans-to" class="input-wood" placeholder="到達" style="margin:0;">
             </div>
             <div class="station-tags">
                 <span class="station-tag" onclick="fillStation('博多', 'from')">博多</span>
@@ -462,7 +522,6 @@
                 <button class="btn-wood" style="background:#E60012; font-size:0.9rem;" onclick="searchTransport('yahoo')">🔍 Yahoo! 案內</button>
                 <button class="btn-wood" style="background:#4285F4; font-size:0.9rem;" onclick="searchTransport('google')">🗺️ Google Map</button>
             </div>
-            <div style="font-size:0.75rem; color:#888; margin-top:8px; text-align:center;">* Yahoo 案內可查準確車資與月台資訊</div>
         </div>
 
         <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
@@ -504,7 +563,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 47.0 Started");
+        console.log("🚀 福岡行旅 App - Version 48.0 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
