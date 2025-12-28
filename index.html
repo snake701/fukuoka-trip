@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=36.3">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=36.3">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=36.4">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=36.4">
     
-    <title>福岡行旅 2026 (v36.3)</title>
+    <title>福岡行旅 2026 (v36.4)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -27,7 +27,7 @@
             initApp();
             setTimeout(() => {
                 const toast = document.getElementById('toast');
-                toast.innerText = "✅ 系統已更新至 v36.3";
+                toast.innerText = "✅ 系統已更新至 v36.4";
                 toast.className = "show";
                 setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
             }, 1000);
@@ -35,39 +35,13 @@
     </script>
 
     <style>
-        /* --- 全域設定 --- */
-        :root { 
-            --wood-dark: #5D4037; 
-            --wood-light: #EFEBE9; 
-            --paper: #FAF9F6; 
-            --accent-green: #8D9977; 
-            --accent-red: #B06B6B; 
-            --accent-blue: #78909C; 
-            --border: #D7CCC8; 
-            --private-gold: #D4AF37; 
-        }
-        
+        :root { --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; --accent-green: #8D9977; --accent-red: #B06B6B; --accent-blue: #78909C; --border: #D7CCC8; --private-gold: #D4AF37; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        html, body { 
-            height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; 
-            font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); 
-            user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden;
-        }
-        
-        body { 
-            padding-bottom: 140px; 
-            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); 
-            line-height: 1.6; 
-        }
+        html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        body { padding-bottom: 140px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); line-height: 1.6; }
 
         /* Splash Screen */
-        #splash-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
-            background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); 
-            z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            transition: opacity 0.5s ease-out, visibility 0.5s; 
-        }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
         @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
 
@@ -77,7 +51,6 @@
         .modal-btn { display:block; width:100%; padding:14px; margin:12px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:10px; font-size:1rem; cursor:pointer; font-weight: bold; }
         .modal-btn.primary { background:var(--accent-blue); color:white; border:none; }
         .modal-btn.close { color:#666; border:none; background:transparent; font-size:0.9rem; margin-top: 5px; }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: rgba(50,50,50,0.95); color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 0.95rem; opacity: 0; transition: opacity 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; }
         #toast.show { visibility: visible; opacity: 1; }
 
@@ -86,82 +59,33 @@
         .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); padding: 10px; }
         #backup-plane { transform: scaleX(-1); }
 
-        /* Navigation */
-        .main-nav { 
-            max-width: 800px; margin: 0 auto 20px; display: flex; 
-            background: rgba(255, 255, 255, 0.9); padding: 6px; 
-            border-radius: 14px; border: 1px solid var(--border); 
-            overflow-x: auto; scrollbar-width: none; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
+        .main-nav { max-width: 800px; margin: 0 auto 20px; display: flex; background: rgba(255, 255, 255, 0.9); padding: 6px; border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .main-nav::-webkit-scrollbar { display: none; }
-        .nav-tab { 
-            flex: 1; min-width: 75px; text-align: center; padding: 12px 5px; 
-            border-radius: 10px; cursor: pointer; font-size: 0.95rem; 
-            transition: 0.2s; white-space: nowrap; color: #666; font-weight: 500;
-        }
+        .nav-tab { flex: 1; min-width: 75px; text-align: center; padding: 12px 5px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; transition: 0.2s; white-space: nowrap; color: #666; font-weight: 500; }
         .nav-tab.active { background: var(--wood-dark); color: white; font-weight: 700; transform: scale(1.02); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         #tab-private { display: none; }
 
         .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
         .content-section { display: none; animation: fadeIn 0.3s ease; }
         .content-section.active { display: block; }
-        
-        .info-card { 
-            background: var(--paper); padding: 20px; 
-            border: 1px solid var(--border); border-radius: 16px; 
-            margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
-            overflow: hidden; 
-        }
-        
-        .input-wood { 
-            width: 100%; padding: 12px 14px; margin-bottom: 10px; 
-            border: 1px solid var(--border); border-radius: 8px; 
-            font-size: 1rem; background: #fff; min-width: 0; -webkit-appearance: none; 
-        }
-        
+        .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; }
+        .input-wood { width: 100%; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; min-width: 0; -webkit-appearance: none; }
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 700; transition: 0.2s; font-size: 1rem; margin-top: 5px; }
-        .btn-wood:active { transform: scale(0.98); }
         .btn-sm { font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; display: inline-block; margin-top: 5px; font-weight: 500; }
 
-        /* 清單排版 */
-        .check-card {
-            background: white; border-radius: 16px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px;
-            overflow: hidden; border: 1px solid rgba(0,0,0,0.05);
-        }
-        .check-header {
-            padding: 15px 20px; color: white; font-weight: bold; font-size: 1.1rem;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .check-header.luggage { background: linear-gradient(135deg, var(--accent-green), #7ca06d); }
-        .check-header.shopping { background: linear-gradient(135deg, var(--accent-blue), #6b8491); }
-        
-        .check-list-container { padding: 10px 20px 20px 20px; background: #fff; }
-        
-        .check-item { 
-            display: flex; align-items: center; gap: 15px; 
-            padding: 12px 0; border-bottom: 1px dashed #e0e0e0; 
-            transition: all 0.2s;
-        }
+        .checklist-header { background: var(--accent-green); color: white; padding: 12px 16px; margin: -20px -20px 15px -20px; font-weight: bold; font-size: 1.05rem; }
+        .shopping-header { background: var(--accent-blue); color: white; padding: 12px 16px; margin: -20px -20px 15px -20px; font-weight: bold; font-size: 1.05rem; }
+        .check-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px dashed #eee; }
         .check-item:last-child { border-bottom: none; }
-        .check-item input[type="text"] { 
-            border: none; background: transparent; padding: 5px 0; 
-            font-size: 1.05rem; flex: 1; min-width: 0; 
-            border-bottom: 2px dotted #ccc; border-radius: 0; color: #444;
-            transition: border-color 0.3s;
-        }
-        .check-item input[type="text"]:focus { border-bottom-color: var(--wood-dark); outline: none; }
-        .check-item.checked { opacity: 0.6; }
-        .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; border-bottom-color: transparent; }
-        .checkbox-lg { transform: scale(1.6); cursor: pointer; flex-shrink: 0; accent-color: var(--wood-dark); }
-        .delete-btn { color: #ddd; cursor: pointer; font-size: 1.8rem; padding: 0 10px; line-height: 1; flex-shrink: 0; transition: color 0.2s; }
-        .delete-btn:hover { color: #ff6b6b; }
+        .check-item input[type="text"] { border: none; background: transparent; padding: 5px; font-size: 1.05rem; flex: 1; min-width: 0; border-bottom: 1px solid transparent; }
+        .check-item input[type="text"]:focus { border-bottom-color: var(--accent-blue); outline: none; }
+        .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; }
+        .checkbox-lg { transform: scale(1.5); margin-left: 5px; cursor: pointer; flex-shrink: 0; }
 
-        /* 記帳排版 */
         .expense-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
         .expense-row input { margin: 0; border: 1px solid #ddd; }
         .currency-select { border: none; background: #f0f0f0; padding: 8px 10px; border-radius: 6px; font-weight: bold; color: #555; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.6rem; padding: 0 8px; line-height: 1; flex-shrink: 0; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 6px solid var(--accent-green); border-radius: 10px; padding: 18px; margin-bottom: 18px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .itinerary-card.driving { border-left-color: var(--accent-blue); } .itinerary-card.flying { border-left-color: #039BE5; }
@@ -175,16 +99,20 @@
         .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .link-btn { background: white; border: 1px solid #ddd; padding: 16px; text-align: center; border-radius: 10px; text-decoration: none; color: var(--wood-dark); font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.03); }
         .link-btn.emergency { background: #ffebee; border-color: #ef9a9a; color: #c62828; }
-
         .footer-info { text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 50px; padding-bottom: 30px; }
-        
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
-        
+
+        /* Weather Styles (v36.4 optimized) */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 15px auto 0; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
-        
+        #weather-title { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.9rem; text-align: center; display: flex; justify-content: center; align-items: center; gap: 5px; }
+        #refresh-geo-btn { background: none; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; padding: 2px 5px; cursor: pointer; color: #555; }
+        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
+        .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .weather-card img { width: 45px; height: 45px; margin: 5px 0; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -220,7 +148,7 @@
 
 <div id="expense-modal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="margin-top:0;">💰 新增消費</h3>
+        <h3 style="margin-top:0; color:#5D4037;">💰 新增消費</h3>
         <p id="expense-spot-name" style="font-size:1rem; font-weight:bold; margin-bottom:15px; color:#666;">地點名稱</p>
         
         <label class="tool-label" style="text-align:left;">日期</label>
@@ -262,7 +190,10 @@
     
     <div class="weather-container-wrapper">
         <button class="weather-scroll-btn weather-btn-left" onclick="scrollWeather(-200)">‹</button>
-        <div id="weather-title" class="weather-location">定位中...</div>
+        <div id="weather-title">
+            <span id="weather-location-text">定位中...</span>
+            <button id="refresh-geo-btn" onclick="getGeoWeather()">📍</button>
+        </div>
         <div id="weather-scroll">
             <div style="font-size:0.8rem; padding:15px; color:#999; text-align:center; width:100%;">載入天氣中...</div>
         </div>
@@ -445,7 +376,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 36.3 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 36.4 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -455,7 +386,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 36.3 Loaded");
+        console.log("🚀 福岡行旅 App - Version 36.4 Loaded");
         
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -598,36 +529,58 @@
 
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        function getGeoWeather() {
+        // ★★★ 天氣定位核心修復 ★★★
+        window.getGeoWeather = function() {
+            // 先重置顯示
+            document.getElementById('weather-location-text').innerText = "定位中...";
+            
             if (navigator.geolocation) {
-                // 增加 timeout 防止卡死
+                // 設定 5 秒超時，防止卡死
                 navigator.geolocation.getCurrentPosition(
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude, true); },
-                    (error) => { fetchWeather(33.5902, 130.4017, false); },
+                    (error) => { 
+                        console.warn("定位失敗或拒絕:", error);
+                        // 定位失敗時，強制使用福岡座標
+                        fetchWeather(33.5902, 130.4017, false); 
+                        showToast("⚠️ 定位失敗，顯示福岡天氣");
+                    },
                     { timeout: 5000 }
                 );
-            } else { fetchWeather(33.5902, 130.4017, false); }
-        }
+            } else { 
+                fetchWeather(33.5902, 130.4017, false); 
+            }
+        };
 
         async function fetchWeather(lat, lon, isGPS) {
-            let locationName = "福岡";
+            let locationName = "福岡"; // 預設名稱
+            
+            // 1. 嘗試取得地名 (如果是有 GPS 的)
             if (isGPS) {
                 try {
-                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`);
+                    // 改用 Open-Meteo 的 Geocoding API，更穩定且無跨域問題
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/get?latitude=${lat}&longitude=${lon}&count=1&language=zh`);
                     const geoData = await geoRes.json();
-                    // 優先顯示市/區，若無則顯示省/縣
-                    locationName = geoData.locality || geoData.city || geoData.principalSubdivision || "目前位置";
-                } catch(e) { locationName = "目前位置"; }
+                    if(geoData.results && geoData.results.length > 0) {
+                         locationName = geoData.results[0].name; // 取回城市名
+                    }
+                } catch(e) { 
+                    console.error("Geocoding failed", e);
+                    locationName = "當地"; 
+                }
             }
 
             try {
-                // 使用 Open-Meteo
+                // 2. 取得天氣資料
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=14`);
                 if(res.ok) {
                     const data = await res.json();
-                    document.getElementById('weather-title').innerText = `📍 ${locationName}天氣 (14日)`;
+                    
+                    // 更新標題
+                    document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
+                    
                     let html = `<div style="display:flex;gap:10px;">`;
                     const wmoIcons = { 0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️', 55: '🌧️', 61: '☔', 63: '☔', 65: '☔', 80: '🌦️', 81: '🌦️', 82: '🌦️', 95: '⛈️' };
+                    
                     for(let i=0; i<data.daily.time.length; i++) {
                         const dateStr = data.daily.time[i]; const date = new Date(dateStr); const dayName = (date.getMonth()+1) + "/" + date.getDate();
                         const code = data.daily.weathercode[i]; const icon = wmoIcons[code] || '⛅'; const maxT = Math.round(data.daily.temperature_2m_max[i]); const minT = Math.round(data.daily.temperature_2m_min[i]);
@@ -638,7 +591,7 @@
                 }
             } catch(e) {
                 console.error("Weather fetch failed", e);
-                // 失敗時不顯示錯誤，保持載入中或顯示預設
+                document.getElementById('weather-scroll').innerHTML = "<div style='text-align:center; padding:10px; color:red;'>天氣載入失敗</div>";
             }
         }
 
@@ -677,7 +630,7 @@
                 const div = document.createElement('div');
                 div.className = `itinerary-card ${iconClass}`; div.setAttribute('data-id', idx);
                 div.onclick = (e) => { if(e.target.tagName !== 'A' && !e.target.classList.contains('delete-btn') && !e.target.classList.contains('copy-btn') && !e.target.classList.contains('mode-toggle') && !e.target.classList.contains('time-edit-btn')) { openExpenseModal(title); } };
-                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center;"><span class="drag-handle">☰</span><span class="mode-toggle ${iconClass}" onclick="toggleTransportMode(${window.currentDay}, ${idx})">${iconChar}</span><span class="time-edit-btn" onclick="openTimeEditModal(${window.currentDay}, ${idx})">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div class="itinerary-title">${title}</div><div class="itinerary-content">${timeInfo}<div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${btnClass}">${btnText}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div></div>`;
+                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center;"><span class="drag-handle">☰</span><span class="mode-toggle ${iconClass}" onclick="toggleTransportMode(${window.currentDay}, ${idx})">${iconChar}</span><span class="time-edit-btn" onclick="openTimeEditModal(${window.currentDay}, ${idx})">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div style="font-size:1.1rem; font-weight:bold; margin:5px 0 0 35px;">${title}</div><div style="margin-left:35px;">${timeInfo}<div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${btnClass}">${btnText}</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div></div>`;
                 list.appendChild(div);
             });
             sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 250, delay: 200, delayOnTouchOnly: true, onStart: function() { if (navigator.vibrate) navigator.vibrate(50); }, onEnd: function (evt) { const movedItem = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, movedItem); window.tripData[window.currentDay] = items; saveAll(); refreshUI(); } });
@@ -767,84 +720,8 @@
         };
         window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); }};
         
-        window.renderMoney = () => { 
-            let inc = 0, exp = 0; 
-            document.getElementById('member-list').innerHTML = window.members.map((m, i) => { inc += Number(m.v); return `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" placeholder="名字" onchange="members[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`; }).join(''); 
-            document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => { 
-                exp += Number(e.v); 
-                return `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;font-size:0.85rem;" value="${e.d || ''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" placeholder="項目" onchange="expenses[${i}].n=this.value;saveAll()"> <input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"> <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`; 
-            }).join(''); 
-            
-            let totalJpy = 0, totalTwd = 0;
-            document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { 
-                if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v);
-                return `<div class="expense-row">
-                    <input type="date" class="input-wood" style="width:105px;font-size:0.85rem;" value="${p.d || ''}" onchange="purchased[${i}].d=this.value;saveAll()">
-                    <input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" placeholder="品項" onchange="purchased[${i}].n=this.value;saveAll()"> 
-                    <select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll();"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select>
-                    <input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"> 
-                    <span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span>
-                </div>`; 
-            }).join('');
-            document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString();
-            document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString();
-            const balance = inc - exp; 
-            document.getElementById('balance-val').innerText = balance.toLocaleString(); 
-            document.getElementById('balance-val-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
-        };
-
-        window.renderPrivate = () => { 
-            if(document.activeElement.id !== 'private-budget') document.getElementById('private-budget').value = window.privateBudget || ""; 
-            let total = 0; 
-            document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => { 
-                total += Number(e.v); 
-                return `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;font-size:0.85rem;" value="${e.d || ''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" placeholder="消費項目" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5;min-width:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`; 
-            }).join(''); 
-            document.getElementById('private-total').innerText = total.toLocaleString(); 
-            document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); 
-            const balance = window.privateBudget - total; 
-            const balEl = document.getElementById('private-balance'); balEl.innerText = `¥ ${balance.toLocaleString()}`; balEl.style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'; document.getElementById('private-balance-twd').innerText = Math.round(balance * window.currentRate).toLocaleString(); 
-            const percent = window.privateBudget > 0 ? (total / window.privateBudget * 100) : 0; const bar = document.getElementById('budget-bar'); bar.style.width = Math.min(percent, 100) + '%'; bar.style.background = percent > 90 ? 'var(--accent-red)' : (percent > 70 ? 'orange' : 'var(--accent-green)'); document.getElementById('budget-percent').innerText = Math.round(percent) + '%'; 
-        };
-        
-        window.renderCheck = () => { 
-            document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c ? 'checked' : ''}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); 
-            document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c ? 'checked shopping' : 'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c ? 'checked' : ''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" class="input-wood" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join('');
-        };
-        
-        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
-        window.handleHeaderClick = (type) => { 
-            const state = clickStates[type]; state.count++; clearTimeout(state.timer); state.timer = setTimeout(() => { state.count = 0; }, 1000); 
-            if (state.count === 3) { 
-                state.count = 0; 
-                if (type === 'reset') { if(prompt("⚠️ 重設資料？輸入密碼(8888)")==="8888") forceResetAction(); } 
-                if (type === 'title') { const tab = document.getElementById('tab-private'); tab.style.display='block'; tab.click(); alert("🔓 私密空間已開啟"); } 
-                if (type === 'backup') { if(prompt("💾 備份中心？輸入密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; } 
-            } 
-        };
-        window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
-        window.closeBackupModal = () => { document.getElementById('backup-modal').style.display='none'; };
-        
-        window.exportToExcel = () => {
-            const wb = XLSX.utils.book_new();
-            const wsPublic = XLSX.utils.json_to_sheet(window.expenses.map(e => ({日期: e.d, 項目: e.n, 金額: e.v}))); XLSX.utils.book_append_sheet(wb, wsPublic, "公款支出");
-            const wsPurchased = XLSX.utils.json_to_sheet(window.purchased.map(p => ({日期: p.d, 品項: p.n, 幣別: p.c||'JPY', 金額: p.v}))); XLSX.utils.book_append_sheet(wb, wsPurchased, "已購買");
-            const wsPrivate = XLSX.utils.json_to_sheet(window.privateExpenses.map(e => ({日期: e.d, 項目: e.n, 金額: e.v}))); XLSX.utils.book_append_sheet(wb, wsPrivate, "私帳");
-            const wsShopping = XLSX.utils.json_to_sheet(window.shoppingList.map(s => ({品項: s.n, 已買: s.c ? '是' : '否'}))); XLSX.utils.book_append_sheet(wb, wsShopping, "預定購買");
-            XLSX.writeFile(wb, "福岡行旅2026_財務報表.xlsx");
-        };
-
-        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); };
-        window.restoreData = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=(e)=>{ try{ const d=JSON.parse(e.target.result); if(confirm("還原資料？")) set(publicRef, d).then(()=>{alert("✅ 完成");location.reload();}); }catch(err){alert("❌ 錯誤");} }; r.readAsText(f); };
-        window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const firstJpy = document.querySelector('.ex-jpy').value; if(firstJpy) window.syncEx({value: firstJpy}, 'jpy'); window.renderMoney(); window.renderPrivate(); };
-        window.syncEx = (el, type) => { const val = parseFloat(el.value); if(isNaN(val)) return; const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0); document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res); document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val); };
-        window.showToast = (msg="✅ 資料已儲存同步") => { const t = document.getElementById('toast'); t.innerText=msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000); };
-        window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
-        function forceResetAction() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], shoppingList: [{n: "藥妝代購", c: false}, {n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
-    };
-    
-    // 初始化執行
-    setTimeout(window.initApp, 100);
+        // 初始化執行
+        setTimeout(window.initApp, 100);
 </script>
 </body>
 </html>
