@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=41.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=41.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=41.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=41.1">
     
-    <title>福岡行旅 2026 (v41.0)</title>
+    <title>福岡行旅 2026 (v41.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -98,7 +98,7 @@
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
 
-        /* Weather Styles (v41.0 Optimized) */
+        /* Weather Styles (v41.0) */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
@@ -345,7 +345,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 41.0 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 41.1 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -355,7 +355,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 41.0 Started");
+        console.log("🚀 福岡行旅 App - Version 41.1 Started");
         
         // Splash Screen 自動淡出
         setTimeout(() => {
@@ -370,7 +370,7 @@
         setTimeout(() => {
             const toast = document.getElementById('toast');
             if (toast) {
-                toast.innerText = "✅ 系統已更新至 v41.0";
+                toast.innerText = "✅ 系統已更新至 v41.1";
                 toast.className = "show";
                 setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
             }
@@ -405,21 +405,11 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
         
-        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
+        // ★★★ 隱藏功能計數器 (移到全域以便呼叫) ★★★
+        // 此處不需再次定義 handleHeaderClick，因為已在 Head Script 定義
+        // 僅需確保 forceResetAction 可用
 
-        window.handleHeaderClick = (type) => {
-            const state = clickStates[type];
-            state.count++;
-            clearTimeout(state.timer);
-            state.timer = setTimeout(() => { state.count = 0; }, 1000);
-            
-            if (state.count === 3) {
-                state.count = 0;
-                if (type === 'reset') { if(confirm("⚠️ 重設資料？")) forceResetAction(); }
-                if (type === 'title') { document.getElementById('tab-private').style.display='block'; alert("🔓 私密空間已開啟"); }
-                if (type === 'backup') { if(prompt("密碼(8888)")==="8888") document.getElementById('backup-modal').style.display='flex'; }
-            }
-        };
+        window.forceResetAction = function() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}, {n: "VJW QR Code", c: false}, {n: "日幣&信用卡", c: false}, {n: "網卡/漫遊", c: false}], shoppingList: [{n: "藥妝代購", c: false}, {n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); }
 
         if(publicRef) {
             onValue(publicRef, (snapshot) => {
@@ -466,7 +456,7 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位邏輯 (OpenWeatherMap) ★★★
+        // ★★★ OpenWeatherMap 5天預報邏輯 (v41.1) ★★★
         const OWM_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.getGeoWeather = function() {
@@ -486,8 +476,6 @@
 
         async function fetchWeather(lat, lon, isGPS) {
             let locationName = "福岡";
-            
-            // 1. 先用 OWM 的 Weather API 抓地名 (最準)
             try {
                 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric&lang=zh_tw`;
                 const res = await fetch(url);
@@ -498,10 +486,10 @@
                      document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
                 }
 
-                // 2. 處理天氣資料 (5天/3小時 -> 轉為每日摘要)
+                // 資料聚合: 每3小時 -> 每日
                 const dailyData = {};
                 data.list.forEach(item => {
-                    const date = item.dt_txt.split(' ')[0]; // 取出日期 YYYY-MM-DD
+                    const date = item.dt_txt.split(' ')[0];
                     const dateObj = new Date(item.dt * 1000);
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
                     
@@ -513,19 +501,17 @@
                             icon: item.weather[0].icon 
                         };
                     }
-                    // 更新高低溫
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
                     
-                    // 取中午 12 點左右的圖示當作代表
+                    // 優先使用中午的圖示
                     if (item.dt_txt.includes("12:00:00")) {
                         dailyData[date].icon = item.weather[0].icon;
                     }
                 });
 
-                // 3. 渲染 HTML
                 let html = `<div style="display:flex;gap:10px;">`;
-                Object.values(dailyData).slice(0, 5).forEach(day => { // 只取前5天
+                Object.values(dailyData).slice(0, 5).forEach(day => {
                     const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
                     html += `
                         <div class="weather-card">
@@ -559,7 +545,7 @@
             items.forEach((item, idx) => {
                 if(!item.mode) item.mode = 'transit';
                 const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-                // 自動帶入飯店名稱
+                // 自動帶入飯店名稱 (修復)
                 let displayTitle = item.title;
                 if(item.map === 'HOTEL_REF' && hotel.name) {
                     displayTitle = item.title.replace(/飯店/g, hotel.name);
@@ -608,7 +594,6 @@
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
         window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
-        window.forceResetAction = function() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""}]}, checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); };
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         window.renderMoney = () => { document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); let totalJpy=0, totalTwd=0; document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); return `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); };
