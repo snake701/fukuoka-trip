@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.1">
     
-    <title>福岡行旅 2026 (v44.0)</title>
+    <title>福岡行旅 2026 (v44.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,9 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ★★★ 請注意：每次更新程式碼，務必修改這裡的版本號 ★★★
-        const CURRENT_VERSION = 'v44.0'; 
-        // 您的 GitHub index.html 原始檔連結
+        const CURRENT_VERSION = 'v44.1'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
@@ -45,23 +43,20 @@
             }
         }
 
-        // 自動檢查更新函式
         async function checkAppUpdate() {
             try {
-                // 加上時間戳記 timestamp 防止檢查到舊的快取
+                // 加上隨機數 t 確保抓到最新檔案
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
-                if (!response.ok) return; // 網路不通就不檢查
+                if (!response.ok) return;
 
                 const text = await response.text();
-                // 使用正規表達式抓取 GitHub 上那一版的 CURRENT_VERSION
                 const match = text.match(/const CURRENT_VERSION = '(v[\d\.]+)';/);
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`目前版本: ${CURRENT_VERSION}, 最新版本: ${remoteVersion}`);
+                    console.log(`本地: ${CURRENT_VERSION}, 遠端: ${remoteVersion}`);
                     
                     if (remoteVersion !== CURRENT_VERSION) {
-                        // 發現新版本，顯示更新通知
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
                         if (updateModal && updateText) {
@@ -70,29 +65,17 @@
                         }
                     }
                 }
-            } catch (e) {
-                console.log('版本檢查略過 (離線或網絡錯誤)');
-            }
+            } catch (e) { console.log('版本檢查略過'); }
         }
 
-        // 執行強更
         function forceReloadApp() {
-            // 清除快取並重整
-            if (window.caches) {
-                caches.keys().then(function(names) {
-                    for (let name of names) caches.delete(name);
-                });
-            }
-            // 加上隨機參數強制瀏覽器重抓
+            if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
+        // Head 初始化：只負責顯示通知，不負責啟動 App (交給 Module)
         document.addEventListener("DOMContentLoaded", function() {
-            if(window.initApp) window.initApp();
-            
-            // 延遲 1 秒後檢查更新，避免影響啟動速度
-            setTimeout(checkAppUpdate, 1000);
-
+            setTimeout(checkAppUpdate, 1500);
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -101,8 +84,6 @@
                     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
                 }
             }, 1000);
-            
-            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
         });
     </script>
 
@@ -110,28 +91,24 @@
         :root { --wood-dark: #5D4037; --wood-light: #EFEBE9; --paper: #FAF9F6; --accent-green: #8D9977; --accent-red: #B06B6B; --accent-blue: #78909C; --border: #D7CCC8; --private-gold: #D4AF37; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-        body { padding-bottom: 140px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); line-height: 1.6; }
+        body { padding-bottom: 140px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); line-height: 1.6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+        
+        /* iOS 優化 */
+        html { overscroll-behavior-y: none; }
+        input, select, textarea { font-size: 16px !important; }
 
         /* Splash Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
-        .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; }
+        .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; font-weight: bold; }
         .spinner { margin-top: 20px; width: 30px; height: 30px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
         @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Update Modal (New!) */
-        #update-modal { 
-            position: fixed; top:0; left:0; width:100%; height:100%; 
-            background: rgba(0,0,0,0.8); z-index: 10002; 
-            display: none; /* 預設隱藏，有更新才顯示 */
-            justify-content: center; align-items: center; 
-        }
-        .update-content { 
-            background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green);
-        }
+        /* Update Modal */
+        #update-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10002; display: none; justify-content: center; align-items: center; }
+        .update-content { background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green); }
 
         /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
@@ -158,7 +135,8 @@
         .content-section { display: none; animation: fadeIn 0.3s ease; }
         .content-section.active { display: block; }
         .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; }
-        .input-wood { width: 100%; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; min-width: 0; -webkit-appearance: none; }
+        
+        .input-wood { width: 100%; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; min-width: 0; -webkit-appearance: none; }
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 700; transition: 0.2s; font-size: 1rem; margin-top: 5px; }
         .btn-sm { font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; display: inline-block; margin-top: 5px; font-weight: 500; }
 
@@ -195,7 +173,7 @@
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
 
-        /* Weather Styles */
+        /* Weather */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
@@ -452,7 +430,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.0 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.1 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -462,9 +440,8 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 44.0 Started");
+        console.log("🚀 福岡行旅 App - Version 44.1 Started");
         
-        // Splash Screen 自動淡出
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -504,7 +481,7 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
-
+        
         // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
             // 清除 LocalStorage (私帳)
