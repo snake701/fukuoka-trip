@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.3">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.3">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
     
-    <title>福岡行旅 2026 (v44.3)</title>
+    <title>福岡行旅 2026 (v45.2)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,71 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v44.3'; 
+        // ★★★ 請務必每次更新都修改這裡 ★★★
+        const CURRENT_VERSION = 'v45.2'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
-        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
+        // 全域通知函式
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            if (t) {
+                t.innerHTML = msg;
+                t.className = "show";
+                setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+            }
+        }
 
+        // ★★★ 強力版本檢查邏輯 ★★★
+        async function checkAppUpdate(isManual = false) {
+            if (isManual) showToast("🔍 連線 GitHub 檢查中...");
+            
+            try {
+                // 加入 cache: 'no-store' 強制網路請求
+                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) throw new Error("GitHub 連線失敗");
+                
+                const text = await response.text();
+                // 使用更精準的正則表達式
+                const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
+                
+                if (match && match[1]) {
+                    const remoteVersion = match[1];
+                    console.log(`[Version Check] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion}`);
+                    
+                    if (remoteVersion !== CURRENT_VERSION) {
+                        const updateModal = document.getElementById('update-modal');
+                        const updateText = document.getElementById('update-text');
+                        if (updateModal && updateText) {
+                            updateText.innerHTML = `發現新版本 <b>${remoteVersion}</b><br>目前版本: ${CURRENT_VERSION}`;
+                            updateModal.style.display = 'flex';
+                        }
+                    } else {
+                        if (isManual) showToast(`✅ 版本一致，無需更新 (${CURRENT_VERSION})`);
+                        else console.log("系統已是最新");
+                    }
+                } else {
+                    if (isManual) showToast("⚠️ 無法解析遠端版本號");
+                }
+            } catch (e) { 
+                console.error("Update check failed", e);
+                if (isManual) {
+                    if(confirm("⚠️ 無法自動比對 (網路限制)\n是否直接強制重新整理頁面？")) {
+                        forceReloadApp();
+                    }
+                }
+            }
+        }
+
+        function forceReloadApp() {
+            if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
+            window.location.href = window.location.pathname + "?v=" + Date.now();
+        }
+
+        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         function handleHeaderClick(type) {
             const state = clickStates[type];
             if (!state) return;
@@ -43,68 +103,14 @@
             }
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            if (t) {
-                t.innerHTML = msg;
-                t.className = "show";
-                setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
-            }
-        }
-
-        // 版本檢查 (包含 CORS 錯誤處理)
-        async function checkAppUpdate(isManual = false) {
-            if (isManual) showToast("🔍 連線檢查中...");
-            
-            try {
-                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), {
-                    cache: "no-store"
-                });
-                
-                if (!response.ok) throw new Error("Connection failed");
-
-                const text = await response.text();
-                const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
-                
-                if (match && match[1]) {
-                    const remoteVersion = match[1];
-                    console.log(`Ver Check: Local ${CURRENT_VERSION} vs Remote ${remoteVersion}`);
-                    
-                    if (remoteVersion !== CURRENT_VERSION) {
-                        const updateModal = document.getElementById('update-modal');
-                        const updateText = document.getElementById('update-text');
-                        if (updateModal) {
-                            updateText.innerHTML = `發現新版本 <b>${remoteVersion}</b>`;
-                            updateModal.style.display = 'flex';
-                        }
-                    } else {
-                        if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
-                    }
-                }
-            } catch (e) {
-                console.warn("Update check blocked:", e);
-                // 如果是手動檢查失敗，提示使用者直接重整
-                if (isManual) {
-                    if(confirm("⚠️ 無法自動比對 (網路限制)\n是否直接強制重新整理頁面？")) {
-                        forceReloadApp();
-                    }
-                }
-            }
-        }
-
-        function forceReloadApp() {
-            if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
-            window.location.href = window.location.pathname + "?v=" + Date.now();
-        }
-
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 延遲檢查更新
+            // 延遲執行檢查
             setTimeout(() => checkAppUpdate(false), 2000);
             
-            // 延遲天氣定位
-            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
+            // 延遲執行天氣
+            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1000);
 
             setTimeout(() => {
                 const toast = document.getElementById('toast');
@@ -164,7 +170,8 @@
         .content-section { display: none; animation: fadeIn 0.3s ease; }
         .content-section.active { display: block; }
         .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; }
-        .input-wood { width: 100%; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; min-width: 0; -webkit-appearance: none; }
+        
+        .input-wood { width: 100%; padding: 12px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; min-width: 0; -webkit-appearance: none; }
         .btn-wood { background: var(--wood-dark); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 700; transition: 0.2s; font-size: 1rem; margin-top: 5px; }
         .btn-sm { font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; display: inline-block; margin-top: 5px; font-weight: 500; }
 
@@ -210,8 +217,6 @@
         #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
         .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
-        
-        /* 移除工具頁空白框框 (刪除 ex-container-tools 的 css) */
     </style>
 </head>
 <body>
@@ -460,7 +465,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.3 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 45.2 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -470,9 +475,8 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 44.3 Started");
+        console.log("🚀 福岡行旅 App - Version 45.2 Started");
         
-        // Splash Screen 自動淡出
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -551,7 +555,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather(); // 自動定位
+                    window.getGeoWeather();
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -650,7 +654,6 @@
             items.forEach((item, idx) => {
                 if(!item.mode) item.mode = 'transit';
                 const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-                // 自動帶入飯店名稱
                 let displayTitle = item.title;
                 if(item.map === 'HOTEL_REF' && hotel.name) {
                     displayTitle = item.title.replace(/飯店/g, hotel.name);
