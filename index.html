@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // 隱藏功能點擊計數
         const clickStates = { 
             reset: { count: 0, timer: null }, 
             title: { count: 0, timer: null }, 
@@ -37,22 +38,15 @@
             if (state.timer) clearTimeout(state.timer);
             state.timer = setTimeout(() => { state.count = 0; }, 800);
             
-            // 觸發條件：3連擊
             if (state.count === 3) {
                 state.count = 0;
-                
-                // 1. 重設 (左飛機)
+                // 重設
                 if (type === 'reset') { 
-                    if(prompt("⚠️ 警告：這將【刪除所有資料】包含私帳！\n請輸入密碼 (8888) 確認：") === "8888") {
-                        if(window.forceResetAction) {
-                            window.forceResetAction();
-                        } else {
-                            alert("系統資料庫尚未就緒，請稍後再試");
-                        }
+                    if(prompt("⚠️ 警告：這將清除所有資料！\n輸入 8888 確認：") === "8888") {
+                        if(window.forceResetAction) window.forceResetAction();
                     }
                 }
-                
-                // 2. 私帳 (標題)
+                // 私帳
                 if (type === 'title') { 
                     const privateTab = document.getElementById('tab-private');
                     if(privateTab) {
@@ -61,20 +55,24 @@
                         alert("🔓 私密空間已開啟"); 
                     }
                 }
-                
-                // 3. 備份 (右飛機)
+                // 備份
                 if (type === 'backup') { 
-                    if(prompt("💾 進入備份中心？\n請輸入密碼 (8888)：") === "8888") {
-                        const backupModal = document.getElementById('backup-modal');
-                        if(backupModal) backupModal.style.display = 'flex'; 
+                    if(prompt("💾 備份中心\n輸入 8888：") === "8888") {
+                        document.getElementById('backup-modal').style.display='flex'; 
                     }
                 }
             }
         }
 
+        // 啟動與通知
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
+            // 延遲顯示天氣定位，確保 DOM 載入
+            setTimeout(() => {
+                if(window.getGeoWeather) window.getGeoWeather();
+            }, 1500);
+
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -92,6 +90,7 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         body { padding-bottom: 140px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); line-height: 1.6; }
 
+        /* Splash Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
         .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.5rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; }
@@ -100,6 +99,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
         .modal-content { background:white; padding:25px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:14px; margin:12px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:10px; font-size:1rem; cursor:pointer; font-weight: bold; }
@@ -160,6 +160,7 @@
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
 
+        /* Weather Styles */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
@@ -261,7 +262,7 @@
         <div class="info-card" style="border: 2px dashed var(--border); background: #fff;">
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
                 <input type="time" id="new-t" class="input-wood" style="width:110px; margin:0;" value="09:00">
-                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點 (輸入'飯店'顯示全名)">
+                <input type="text" id="new-title" class="input-wood" style="flex:1; margin:0;" placeholder="地點">
                 <button class="btn-wood" style="width:auto; padding: 0 15px;" onclick="addItemUI()">＋</button>
             </div>
             <div style="display:flex; gap:10px; align-items: center;">
@@ -454,7 +455,7 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
-
+        
         // ★★★ 關鍵：全域重置函式 (讓上層呼叫) ★★★
         window.forceResetAction = function() { 
             // 清除 LocalStorage (私帳)
@@ -464,7 +465,7 @@
             // 重置 Firebase (公款)
             const defaultData = { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
-                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""}]}, 
+                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
                 checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"",
                 lastUpdated: Date.now()
             };
@@ -557,17 +558,28 @@
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
                     
                     if (!dailyData[date]) {
-                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
+                        dailyData[date] = { 
+                            name: dayDisplay,
+                            min: 100, 
+                            max: -100, 
+                            icon: item.weather[0].icon 
+                        };
                     }
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
+                    
                     if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
                 });
 
                 let html = `<div style="display:flex;gap:10px;">`;
                 Object.values(dailyData).slice(0, 5).forEach(day => {
                     const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
-                    html += `<div class="weather-card"><div>${day.name}</div><img src="${iconUrl}" alt="icon"><div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div></div>`;
+                    html += `
+                        <div class="weather-card">
+                            <div>${day.name}</div>
+                            <img src="${iconUrl}" alt="icon">
+                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
+                        </div>`;
                 });
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
@@ -650,7 +662,7 @@
         window.exportToExcel = () => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.expenses), "公款"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.purchased), "已購"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.privateExpenses), "私帳"); XLSX.writeFile(wb, "福岡行旅.xlsx"); };
     };
     
-    // 初始化執行
+    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
     setTimeout(window.initApp, 100);
 </script>
 </body>
