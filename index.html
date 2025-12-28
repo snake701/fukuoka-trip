@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.2">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.2">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.0">
     
-    <title>福岡行旅 2026 (v44.2)</title>
+    <title>福岡行旅 2026 (v45.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,67 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v44.2'; 
+        // ★★★ 請務必每次更新都修改這裡 ★★★
+        const CURRENT_VERSION = 'v45.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
-        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
+        // 全域通知函式 (移至 Head 確保可用)
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            if (t) {
+                t.innerHTML = msg;
+                t.className = "show";
+                setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+            }
+        }
 
+        // 版本檢查邏輯
+        async function checkAppUpdate(isManual = false) {
+            if (isManual) showToast("🔍 正在檢查更新...");
+            
+            try {
+                // 加上時間戳記避開快取
+                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const text = await response.text();
+                // 使用更寬鬆的 Regex 抓取版本號
+                const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"]/);
+                
+                if (match && match[1]) {
+                    const remoteVersion = match[1];
+                    console.log(`本地: ${CURRENT_VERSION}, 遠端: ${remoteVersion}`);
+                    
+                    if (remoteVersion !== CURRENT_VERSION) {
+                        // 發現新版 -> 顯示彈窗
+                        const updateModal = document.getElementById('update-modal');
+                        const updateText = document.getElementById('update-text');
+                        if (updateModal && updateText) {
+                            updateText.innerHTML = `發現新版本 <b>${remoteVersion}</b><br>目前版本: ${CURRENT_VERSION}`;
+                            updateModal.style.display = 'flex';
+                        }
+                    } else {
+                        // 版本一致
+                        if (isManual) showToast(`✅ 目前已是最新版本 (${CURRENT_VERSION})`);
+                        else showToast(`✅ 系統就緒 (${CURRENT_VERSION})`);
+                    }
+                } else {
+                    if (isManual) showToast("⚠️ 無法取得遠端版本號");
+                }
+            } catch (e) { 
+                console.error("Update check failed", e);
+                if (isManual) showToast("⚠️ 檢查失敗，請檢查網路");
+            }
+        }
+
+        // 強制更新
+        function forceReloadApp() {
+            if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
+            window.location.href = window.location.pathname + "?v=" + Date.now();
+        }
+
+        // 隱藏功能計數
+        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         function handleHeaderClick(type) {
             const state = clickStates[type];
             if (!state) return;
@@ -43,48 +99,15 @@
             }
         }
 
-        // 版本自動檢查
-        async function checkAppUpdate() {
-            try {
-                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
-                if (!response.ok) return;
-                const text = await response.text();
-                const match = text.match(/const CURRENT_VERSION = '(v[\d\.]+)';/);
-                
-                if (match && match[1]) {
-                    const remoteVersion = match[1];
-                    if (remoteVersion !== CURRENT_VERSION) {
-                        const updateModal = document.getElementById('update-modal');
-                        const updateText = document.getElementById('update-text');
-                        if (updateModal && updateText) {
-                            updateText.innerHTML = `發現新版本 <b>${remoteVersion}</b><br>目前版本: ${CURRENT_VERSION}`;
-                            updateModal.style.display = 'flex';
-                        }
-                    }
-                }
-            } catch (e) { console.log('版本檢查略過'); }
-        }
-
-        function forceReloadApp() {
-            if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
-            window.location.href = window.location.pathname + "?v=" + Date.now();
-        }
-
+        // DOM 載入後執行
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 延遲執行版本檢查與天氣定位
-            setTimeout(checkAppUpdate, 1500);
+            // 延遲 1.5 秒執行版本檢查 (避免跟 Splash 搶資源)
+            setTimeout(() => checkAppUpdate(false), 1500);
+            
+            // 延遲執行天氣
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1000);
-
-            setTimeout(() => {
-                const toast = document.getElementById('toast');
-                if(toast) {
-                    toast.innerText = `✅ 系統就緒 (${CURRENT_VERSION})`;
-                    toast.className = "show";
-                    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-                }
-            }, 1000);
         });
     </script>
 
@@ -425,11 +448,11 @@
         </div>
         <div class="info-card">
             <h3 style="margin-top:0;">📊 系統功能</h3>
-            <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
+            <button class="btn-wood" style="background:#217346; margin-bottom:10px;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
+            <button class="btn-wood" style="background:#555; font-size:0.9rem;" onclick="checkAppUpdate(true)">🔄 檢查更新</button>
         </div>
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
             <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.2 (2025.12.28)</div>
         </div>
     </section>
@@ -442,6 +465,7 @@
     window.initApp = function() {
         console.log("🚀 福岡行旅 App - Version 44.2 Started");
         
+        // Splash Screen 自動淡出
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -449,9 +473,6 @@
                  setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
             }
         }, 5000);
-
-        // 檢查更新
-        setTimeout(checkAppUpdate, 1000);
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -481,21 +502,17 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
-
+        
         // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
-            // 清除 LocalStorage (私帳)
             localStorage.removeItem('fukuoka_private_v3_exp');
             localStorage.removeItem('fukuoka_private_v3_budget');
-            
-            // 重置 Firebase (公款)
             const defaultData = { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
                 tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
                 checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"",
                 lastUpdated: Date.now()
             };
-            
             set(publicRef, defaultData).then(() => {
                 alert("✅ 系統重置成功 (含私帳清除)");
                 location.reload();
@@ -528,7 +545,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather();
+                    window.getGeoWeather(); // 自動定位
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -557,12 +574,14 @@
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude, true); },
                     (error) => { 
                         console.warn("定位失敗:", error);
-                        fetchWeather(33.5902, 130.4017, false); 
-                        showToast("⚠️ 定位失敗，顯示福岡天氣");
+                        // 定位失敗不強制切換，顯示「📍 點此定位」
+                        document.getElementById('weather-location-text').innerText = "📍 點此定位";
                     },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
-            } else { fetchWeather(33.5902, 130.4017, false); }
+            } else { 
+                document.getElementById('weather-location-text').innerText = "📍 點此定位";
+            }
         };
 
         async function fetchWeather(lat, lon, isGPS) {
@@ -584,12 +603,7 @@
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
                     
                     if (!dailyData[date]) {
-                        dailyData[date] = { 
-                            name: dayDisplay,
-                            min: 100, 
-                            max: -100, 
-                            icon: item.weather[0].icon 
-                        };
+                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
                     }
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
@@ -688,7 +702,7 @@
         window.exportToExcel = () => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.expenses), "公款"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.purchased), "已購"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.privateExpenses), "私帳"); XLSX.writeFile(wb, "福岡行旅.xlsx"); };
     };
     
-    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
+    // 初始化執行
     setTimeout(window.initApp, 100);
 </script>
 </body>
