@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=43.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=43.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.0">
     
-    <title>福岡行旅 2026 (v43.0)</title>
+    <title>福岡行旅 2026 (v44.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,64 +23,86 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // 隱藏功能點擊計數
-        const clickStates = { 
-            reset: { count: 0, timer: null }, 
-            title: { count: 0, timer: null }, 
-            backup: { count: 0, timer: null } 
-        };
+        // ★★★ 請注意：每次更新程式碼，務必修改這裡的版本號 ★★★
+        const CURRENT_VERSION = 'v44.0'; 
+        // 您的 GitHub index.html 原始檔連結
+        const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
+
+        const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
         function handleHeaderClick(type) {
             const state = clickStates[type];
             if (!state) return;
-
             state.count++;
             if (state.timer) clearTimeout(state.timer);
             state.timer = setTimeout(() => { state.count = 0; }, 800);
             
             if (state.count === 3) {
                 state.count = 0;
-                // 重設
-                if (type === 'reset') { 
-                    if(prompt("⚠️ 警告：這將清除所有資料！\n輸入 8888 確認：") === "8888") {
-                        if(window.forceResetAction) window.forceResetAction();
-                    }
-                }
-                // 私帳
-                if (type === 'title') { 
-                    const privateTab = document.getElementById('tab-private');
-                    if(privateTab) {
-                        privateTab.style.display = 'block';
-                        privateTab.click(); 
-                        alert("🔓 私密空間已開啟"); 
-                    }
-                }
-                // 備份
-                if (type === 'backup') { 
-                    if(prompt("💾 備份中心\n輸入 8888：") === "8888") {
-                        document.getElementById('backup-modal').style.display='flex'; 
-                    }
-                }
+                if (type === 'reset') { if(prompt("⚠️ 警告：清除所有資料！\n密碼 (8888)：") === "8888") if(window.forceResetAction) window.forceResetAction(); }
+                if (type === 'title') { document.getElementById('tab-private').style.display='block'; document.getElementById('tab-private').click(); alert("🔓 私密空間已開啟"); }
+                if (type === 'backup') { if(prompt("💾 備份中心\n密碼 (8888)：") === "8888") document.getElementById('backup-modal').style.display='flex'; }
             }
         }
 
-        // 啟動與通知
+        // 自動檢查更新函式
+        async function checkAppUpdate() {
+            try {
+                // 加上時間戳記 timestamp 防止檢查到舊的快取
+                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
+                if (!response.ok) return; // 網路不通就不檢查
+
+                const text = await response.text();
+                // 使用正規表達式抓取 GitHub 上那一版的 CURRENT_VERSION
+                const match = text.match(/const CURRENT_VERSION = '(v[\d\.]+)';/);
+                
+                if (match && match[1]) {
+                    const remoteVersion = match[1];
+                    console.log(`目前版本: ${CURRENT_VERSION}, 最新版本: ${remoteVersion}`);
+                    
+                    if (remoteVersion !== CURRENT_VERSION) {
+                        // 發現新版本，顯示更新通知
+                        const updateModal = document.getElementById('update-modal');
+                        const updateText = document.getElementById('update-text');
+                        if (updateModal && updateText) {
+                            updateText.innerHTML = `發現新版本 <b>${remoteVersion}</b><br>目前版本: ${CURRENT_VERSION}`;
+                            updateModal.style.display = 'flex';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('版本檢查略過 (離線或網絡錯誤)');
+            }
+        }
+
+        // 執行強更
+        function forceReloadApp() {
+            // 清除快取並重整
+            if (window.caches) {
+                caches.keys().then(function(names) {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            // 加上隨機參數強制瀏覽器重抓
+            window.location.href = window.location.pathname + "?v=" + Date.now();
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 延遲顯示天氣定位，確保 DOM 載入
-            setTimeout(() => {
-                if(window.getGeoWeather) window.getGeoWeather();
-            }, 1500);
+            // 延遲 1 秒後檢查更新，避免影響啟動速度
+            setTimeout(checkAppUpdate, 1000);
 
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
-                    toast.innerText = "✅ 系統已更新至 v43.0";
+                    toast.innerText = `✅ 系統就緒 (${CURRENT_VERSION})`;
                     toast.className = "show";
                     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
                 }
             }, 1000);
+            
+            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
         });
     </script>
 
@@ -99,11 +121,24 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Update Modal (New!) */
+        #update-modal { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(0,0,0,0.8); z-index: 10002; 
+            display: none; /* 預設隱藏，有更新才顯示 */
+            justify-content: center; align-items: center; 
+        }
+        .update-content { 
+            background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green);
+        }
+
         /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
         .modal-content { background:white; padding:25px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:14px; margin:12px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:10px; font-size:1rem; cursor:pointer; font-weight: bold; }
         .modal-btn.primary { background:var(--accent-blue); color:white; border:none; }
+        .modal-btn.update { background:var(--accent-green); color:white; border:none; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); }
         .modal-btn.close { color:#666; border:none; background:transparent; font-size:0.9rem; margin-top: 5px; }
         #toast { visibility: hidden; min-width: 250px; background-color: rgba(50,50,50,0.95); color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 0.95rem; opacity: 0; transition: opacity 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; }
         #toast.show { visibility: visible; opacity: 1; }
@@ -177,6 +212,16 @@
     <div class="plane-icon">✈️</div>
     <div class="splash-title">福岡行旅 2026</div>
     <div class="spinner"></div>
+</div>
+
+<div id="update-modal">
+    <div class="update-content">
+        <div style="font-size:3rem; margin-bottom:10px;">✨</div>
+        <h3 style="margin-top:0; color:var(--accent-green);">發現新版本</h3>
+        <p id="update-text" style="color:#666; margin:15px 0;">系統已優化，建議立即更新</p>
+        <button class="modal-btn update" onclick="forceReloadApp()">立即更新 ⚡</button>
+        <button class="modal-btn close" onclick="document.getElementById('update-modal').style.display='none'">稍後再說</button>
+    </div>
 </div>
 
 <div id="offline-alert" style="display:none; position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; text-align:center; padding:5px; z-index:10002;">⚠️ 離線模式</div>
@@ -407,7 +452,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 43.0 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.0 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -417,8 +462,9 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 43.0 Started");
+        console.log("🚀 福岡行旅 App - Version 44.0 Started");
         
+        // Splash Screen 自動淡出
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -426,6 +472,9 @@
                  setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
             }
         }, 5000);
+
+        // 檢查更新
+        setTimeout(checkAppUpdate, 1000);
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -455,8 +504,8 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
-        
-        // ★★★ 關鍵：全域重置函式 (讓上層呼叫) ★★★
+
+        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
             // 清除 LocalStorage (私帳)
             localStorage.removeItem('fukuoka_private_v3_exp');
