@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=42.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=42.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=42.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=42.1">
     
-    <title>福岡行旅 2026 (v42.0)</title>
+    <title>福岡行旅 2026 (v42.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,50 +23,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // 定義點擊計數器
+        // 定義點擊計數器 (隱藏功能)
         const clickStates = { 
             reset: { count: 0, timer: null }, 
             title: { count: 0, timer: null }, 
             backup: { count: 0, timer: null } 
         };
 
-        // 這個函式直接綁定在 HTML onclick，保證有效
         function handleHeaderClick(type) {
             const state = clickStates[type];
             if (!state) return;
 
             state.count++;
-            
-            // 清除舊的計時器，重新設定 1 秒超時
             if (state.timer) clearTimeout(state.timer);
-            state.timer = setTimeout(() => { state.count = 0; }, 1000);
+            state.timer = setTimeout(() => { state.count = 0; }, 800);
             
-            // 觸發條件：連續點擊 3 次
             if (state.count === 3) {
-                state.count = 0; // 重置計數
-                
-                // 1. 重設資料 (左飛機)
+                state.count = 0;
                 if (type === 'reset') { 
                     if(prompt("⚠️ 警告：這將清除所有行程資料！\n請輸入密碼 (8888) 確認：") === "8888") {
-                        if(window.forceResetAction) {
-                            window.forceResetAction();
-                        } else {
-                            alert("系統資料庫尚未就緒，請稍後再試");
-                        }
+                        if(window.forceResetAction) window.forceResetAction();
                     }
                 }
-                
-                // 2. 解鎖私帳 (標題)
                 if (type === 'title') { 
                     const privateTab = document.getElementById('tab-private');
                     if(privateTab) {
                         privateTab.style.display = 'block';
-                        privateTab.click(); // 自動切換過去
+                        privateTab.click(); 
                         alert("🔓 私密空間已開啟"); 
                     }
                 }
-                
-                // 3. 備份中心 (右飛機)
                 if (type === 'backup') { 
                     if(prompt("💾 進入備份中心？\n請輸入密碼 (8888)：") === "8888") {
                         const backupModal = document.getElementById('backup-modal');
@@ -76,15 +62,13 @@
             }
         }
 
-        // 初始化
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 顯示版本更新提示
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
-                    toast.innerText = "✅ 系統已更新至 v42.0";
+                    toast.innerText = "✅ 系統已更新至 v42.1";
                     toast.className = "show";
                     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
                 }
@@ -409,7 +393,7 @@
             <input id="h-addr" class="input-wood" placeholder="地址" onchange="updateHotel()">
         </div>
         <div class="info-card">
-            <h3 style="margin-top:0;">📊 系統功能</h3>
+            <h3 style="margin-top:0;">📊 報表匯出</h3>
             <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
         </div>
         <div class="footer-info">
@@ -433,7 +417,7 @@
                  splash.style.opacity = '0'; 
                  setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
             }
-        }, 3000);
+        }, 5000);
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -463,6 +447,16 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
+        
+        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
+        window.forceResetAction = function() { 
+            set(publicRef, { 
+                hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
+                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
+                checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], 
+                members:[], expenses:[], purchased:[], memo:"" 
+            }).then(() => location.reload()); 
+        }
 
         if(publicRef) {
             onValue(publicRef, (snapshot) => {
@@ -539,7 +533,6 @@
                      document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
                 }
 
-                // 資料聚合: 每3小時 -> 每日
                 const dailyData = {};
                 data.list.forEach(item => {
                     const date = item.dt_txt.split(' ')[0];
@@ -547,28 +540,17 @@
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
                     
                     if (!dailyData[date]) {
-                        dailyData[date] = { 
-                            name: dayDisplay,
-                            min: 100, 
-                            max: -100, 
-                            icon: item.weather[0].icon 
-                        };
+                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
                     }
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
-                    
                     if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
                 });
 
                 let html = `<div style="display:flex;gap:10px;">`;
                 Object.values(dailyData).slice(0, 5).forEach(day => {
                     const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
-                    html += `
-                        <div class="weather-card">
-                            <div>${day.name}</div>
-                            <img src="${iconUrl}" alt="icon">
-                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
-                        </div>`;
+                    html += `<div class="weather-card"><div>${day.name}</div><img src="${iconUrl}" alt="icon"><div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div></div>`;
                 });
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
@@ -595,7 +577,7 @@
             items.forEach((item, idx) => {
                 if(!item.mode) item.mode = 'transit';
                 const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-                // ★★★ 飯店自動帶入修復 ★★★
+                // ★★★ 飯店名稱自動帶入 ★★★
                 let displayTitle = item.title;
                 if(item.map === 'HOTEL_REF' && hotel.name) {
                     displayTitle = item.title.replace(/飯店/g, hotel.name);
@@ -644,7 +626,6 @@
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
         window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
-        window.forceResetAction = function() { set(publicRef, { hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"" }).then(() => location.reload()); };
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         window.renderMoney = () => { document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); let totalJpy=0, totalTwd=0; document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); return `<div class="expense-row"><input type="date" class="input-wood" style="width:105px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); };
