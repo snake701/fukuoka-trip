@@ -15,7 +15,7 @@
     <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
     
-    <title>福岡行旅 2026 (v45.2)</title>
+    <title>福岡行旅 2026 (v45.3)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ★★★ 請務必每次更新都修改這裡 ★★★
-        const CURRENT_VERSION = 'v45.2'; 
+        // ★★★ 確認版本號為 v45.3 ★★★
+        const CURRENT_VERSION = 'v45.3'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
-        // 全域通知函式
+        // 全域通知
         function showToast(msg) {
             const t = document.getElementById('toast');
             if (t) {
@@ -37,26 +37,23 @@
             }
         }
 
-        // ★★★ 強力版本檢查邏輯 ★★★
+        // 版本檢查邏輯
         async function checkAppUpdate(isManual = false) {
             if (isManual) showToast("🔍 連線 GitHub 檢查中...");
             
             try {
-                // 加入 cache: 'no-store' 強制網路請求
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), {
-                    cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache' }
+                    cache: 'no-store'
                 });
                 
-                if (!response.ok) throw new Error("GitHub 連線失敗");
+                if (!response.ok) throw new Error("Connection failed");
                 
                 const text = await response.text();
-                // 使用更精準的正則表達式
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`[Version Check] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion}`);
+                    console.log(`Ver Check: Local ${CURRENT_VERSION} vs Remote ${remoteVersion}`);
                     
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
@@ -66,14 +63,13 @@
                             updateModal.style.display = 'flex';
                         }
                     } else {
-                        if (isManual) showToast(`✅ 版本一致，無需更新 (${CURRENT_VERSION})`);
-                        else console.log("系統已是最新");
+                        if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
                     }
                 } else {
-                    if (isManual) showToast("⚠️ 無法解析遠端版本號");
+                    if (isManual) showToast("⚠️ 無法解析遠端版本");
                 }
             } catch (e) { 
-                console.error("Update check failed", e);
+                console.warn("Update check blocked:", e);
                 if (isManual) {
                     if(confirm("⚠️ 無法自動比對 (網路限制)\n是否直接強制重新整理頁面？")) {
                         forceReloadApp();
@@ -88,6 +84,7 @@
         }
 
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
+
         function handleHeaderClick(type) {
             const state = clickStates[type];
             if (!state) return;
@@ -106,11 +103,11 @@
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 延遲執行檢查
+            // 延遲檢查更新
             setTimeout(() => checkAppUpdate(false), 2000);
             
-            // 延遲執行天氣
-            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1000);
+            // 延遲天氣定位
+            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
 
             setTimeout(() => {
                 const toast = document.getElementById('toast');
