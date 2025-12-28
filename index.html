@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.2">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=46.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=46.0">
     
-    <title>福岡行旅 2026 (v45.2)</title>
+    <title>福岡行旅 2026 (v46.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,8 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ★★★ 確認版本號為 v45.2 ★★★
-        const CURRENT_VERSION = 'v45.2'; 
+        const CURRENT_VERSION = 'v46.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         // 全域通知
@@ -53,7 +52,7 @@
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`Ver Check: Local ${CURRENT_VERSION} vs Remote ${remoteVersion}`);
+                    console.log(`[Version Check] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion}`);
                     
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
@@ -66,7 +65,7 @@
                         if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
                     }
                 } else {
-                    if (isManual) showToast("⚠️ 無法解析遠端版本");
+                    if (isManual) showToast("⚠️ 無法解析遠端版本號");
                 }
             } catch (e) { 
                 console.warn("Update check blocked:", e);
@@ -83,6 +82,7 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
+        // 隱藏功能計數器
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
         function handleHeaderClick(type) {
@@ -100,7 +100,9 @@
             }
         }
 
+        // 初始化
         document.addEventListener("DOMContentLoaded", function() {
+            // 嘗試啟動模組 (若模組已載入)
             if(window.initApp) window.initApp();
             
             // 延遲檢查更新
@@ -109,6 +111,7 @@
             // 延遲天氣定位
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
 
+            // 顯示版本通知
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -482,6 +485,9 @@
             }
         }, 5000);
 
+        // 檢查更新
+        setTimeout(checkAppUpdate, 1000);
+
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
             authDomain: "fukuoka-trip-2026.firebaseapp.com",
@@ -511,15 +517,20 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
         
+        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
+            // 清除 LocalStorage (私帳)
             localStorage.removeItem('fukuoka_private_v3_exp');
             localStorage.removeItem('fukuoka_private_v3_budget');
+            
+            // 重置 Firebase (公款)
             const defaultData = { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
                 tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
                 checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"",
                 lastUpdated: Date.now()
             };
+            
             set(publicRef, defaultData).then(() => {
                 alert("✅ 系統重置成功 (含私帳清除)");
                 location.reload();
@@ -552,7 +563,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather();
+                    window.getGeoWeather(); // 自動定位
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -651,6 +662,7 @@
             items.forEach((item, idx) => {
                 if(!item.mode) item.mode = 'transit';
                 const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
+                // 自動帶入飯店名稱
                 let displayTitle = item.title;
                 if(item.map === 'HOTEL_REF' && hotel.name) {
                     displayTitle = item.title.replace(/飯店/g, hotel.name);
