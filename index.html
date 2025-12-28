@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=48.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=48.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=49.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=49.0">
     
-    <title>福岡行旅 2026 (v48.0)</title>
+    <title>福岡行旅 2026 (v49.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v48.0'; 
+        const CURRENT_VERSION = 'v49.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         function showToast(msg) {
@@ -66,59 +66,60 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // 退稅計算 (v48.0 New)
+        // 退稅計算
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
-            
             if (isNaN(inputVal) || inputVal <= 0) {
                 resultDiv.innerHTML = "<span style='color:#ccc;'>請輸入金額...</span>";
                 return;
             }
-
             const mode = document.querySelector('input[name="tax-mode"]:checked').value;
-            const RATE = 0.1; // 10%
-            const THRESHOLD = 5500; // 含稅門檻 5500
+            const THRESHOLD = 5500;
+            let priceWithTax, priceNoTax;
 
-            let priceWithTax, priceNoTax, gap;
-
-            if (mode === 'inc') { // 輸入含稅價 (税込)
+            if (mode === 'inc') { 
                 priceWithTax = inputVal;
                 priceNoTax = Math.round(inputVal / 1.1);
-            } else { // 輸入未稅價 (税抜)
+            } else { 
                 priceNoTax = inputVal;
                 priceWithTax = Math.floor(inputVal * 1.1);
             }
-
             const taxAmount = priceWithTax - priceNoTax;
             const diff = THRESHOLD - priceWithTax;
 
             let html = "";
-            
             if (diff > 0) {
-                // 未達標
-                html = `
-                    <div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div>
-                    <div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>
-                `;
+                html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`;
             } else {
-                // 已達標
-                html = `
-                    <div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div>
-                    <div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;">
-                        <span>退稅後價格:</span>
-                        <span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;">
-                        <span>省下稅金:</span>
-                        <span>¥${taxAmount.toLocaleString()}</span>
-                    </div>
-                `;
+                html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`;
             }
             resultDiv.innerHTML = html;
         }
 
-        // 交通查詢函式
+        // ★★★ 鞋碼換算 (v49.0 New) ★★★
+        function calcSize() {
+            const gender = document.getElementById('size-gender').value;
+            const type = document.getElementById('size-type').value;
+            const val = parseFloat(document.getElementById('size-input').value);
+            const resEl = document.getElementById('size-result');
+
+            if (!val) { resEl.innerText = "JP -- cm"; return; }
+
+            let jp = 0;
+            // 簡易換算邏輯
+            if (type === 'us') {
+                jp = (gender === 'm') ? (val + 18) : (val + 17);
+            } else if (type === 'eu') {
+                 // 歐碼近似公式: (EU + 10) / 2
+                 jp = (val + 10) / 2;
+            }
+            // 修正為 0.5 單位
+            jp = Math.round(jp * 2) / 2;
+            resEl.innerText = `JP ${jp} cm`;
+        }
+
+        // 交通查詢
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
@@ -504,6 +505,25 @@
         </div>
 
         <div class="info-card">
+            <h3 style="margin-top:0;">👟 尺碼換算 (鞋碼)</h3>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <select id="size-gender" class="input-wood" onchange="calcSize()" style="margin:0;">
+                    <option value="w">女鞋 (Women)</option>
+                    <option value="m">男鞋 (Men)</option>
+                </select>
+                <select id="size-type" class="input-wood" onchange="calcSize()" style="margin:0;">
+                    <option value="us">US 美碼</option>
+                    <option value="eu">EU 歐碼</option>
+                </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="number" id="size-input" class="input-wood" placeholder="輸入尺碼" style="margin:0;" oninput="calcSize()">
+                <div style="font-weight:bold; font-size:1.2rem;">⮕</div>
+                <div id="size-result" style="font-size:1.2rem; font-weight:bold; color:var(--wood-dark); min-width:80px; text-align:right;">JP -- cm</div>
+            </div>
+        </div>
+
+        <div class="info-card">
             <h3 style="margin-top:0;">🚄 電車轉乘/車資查詢</h3>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <input id="trans-from" class="input-wood" placeholder="出發" style="margin:0;">
@@ -563,7 +583,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 48.0 Started");
+        console.log("🚀 福岡行旅 App - Version 49.0 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
