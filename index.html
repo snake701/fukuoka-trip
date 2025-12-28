@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        // ★★★ 核心版本號 v46.0 ★★★
         const CURRENT_VERSION = 'v46.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
@@ -52,7 +53,6 @@
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`[Version Check] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion}`);
                     
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
@@ -65,7 +65,7 @@
                         if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
                     }
                 } else {
-                    if (isManual) showToast("⚠️ 無法解析遠端版本號");
+                    if (isManual) showToast("⚠️ 無法解析遠端版本");
                 }
             } catch (e) { 
                 console.warn("Update check blocked:", e);
@@ -82,7 +82,6 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // 隱藏功能計數器
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
 
         function handleHeaderClick(type) {
@@ -100,18 +99,19 @@
             }
         }
 
-        // 初始化
         document.addEventListener("DOMContentLoaded", function() {
-            // 嘗試啟動模組 (若模組已載入)
             if(window.initApp) window.initApp();
             
+            // 自動填入版本號
+            const verDisplay = document.getElementById('disp-version');
+            if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
+
             // 延遲檢查更新
             setTimeout(() => checkAppUpdate(false), 2000);
             
-            // 延遲天氣定位
+            // 延遲執行天氣
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
 
-            // 顯示版本通知
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -435,6 +435,7 @@
     </section>
 
     <section id="tools-sec" class="content-section">
+        
         <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
             <h3 style="margin-top:0; color:#c62828;">🚨 福岡急用工具包</h3>
             <div class="link-grid">
@@ -459,13 +460,12 @@
         </div>
         <div class="info-card">
             <h3 style="margin-top:0;">📊 系統功能</h3>
-            <button class="btn-wood" style="background:#217346; margin-bottom:10px;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
-            <button class="btn-wood" style="background:#555; font-size:0.9rem;" onclick="checkAppUpdate(true)">🔄 檢查更新</button>
+            <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
+            <button class="btn-wood" style="background:#555; font-size:0.9rem; margin-top:10px;" onclick="checkAppUpdate(true)">🔄 檢查更新</button>
         </div>
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
-            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 45.2 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver <span id="disp-version"></span></div>
         </div>
     </section>
 </div>
@@ -475,7 +475,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 45.2 Started");
+        console.log("🚀 福岡行旅 App - Version 46.0 Started");
         
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -517,20 +517,15 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
         
-        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
-            // 清除 LocalStorage (私帳)
             localStorage.removeItem('fukuoka_private_v3_exp');
             localStorage.removeItem('fukuoka_private_v3_budget');
-            
-            // 重置 Firebase (公款)
             const defaultData = { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
                 tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
                 checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], members:[], expenses:[], purchased:[], memo:"",
                 lastUpdated: Date.now()
             };
-            
             set(publicRef, defaultData).then(() => {
                 alert("✅ 系統重置成功 (含私帳清除)");
                 location.reload();
@@ -662,7 +657,6 @@
             items.forEach((item, idx) => {
                 if(!item.mode) item.mode = 'transit';
                 const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-                // 自動帶入飯店名稱
                 let displayTitle = item.title;
                 if(item.map === 'HOTEL_REF' && hotel.name) {
                     displayTitle = item.title.replace(/飯店/g, hotel.name);
