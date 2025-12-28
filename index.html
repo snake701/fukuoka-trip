@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=37.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=37.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=37.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=37.1">
     
-    <title>福岡行旅 2026 (v37.0)</title>
+    <title>福岡行旅 2026 (v37.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -94,6 +94,7 @@
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
 
+        /* Weather Styles (v37.1 Optimized) */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 15px auto 0; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
@@ -169,6 +170,7 @@
         <h1 style="margin:0; font-family: 'Noto Serif TC', serif;" onclick="handleHeaderClick('title')">福岡行旅 2026</h1>
         <span id="backup-plane" class="secret-trigger" onclick="handleHeaderClick('backup')">✈️</span>
     </div>
+    
     <div class="weather-container-wrapper">
         <button class="weather-scroll-btn weather-btn-left" onclick="scrollWeather(-200)">‹</button>
         <div id="weather-title">
@@ -342,7 +344,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 37.0 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 37.1 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -353,7 +355,7 @@
 
     // 定義全域變數，確保可以在 HTML onclick 中呼叫
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 37.0 Started");
+        console.log("🚀 福岡行旅 App - Version 37.1 Started");
         
         // --- 安全機制：Splash Screen 自動淡出 (5秒後強制執行) ---
         setTimeout(() => {
@@ -392,8 +394,6 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
 
-        // ... (以下為各項功能函式，保持與 v36.4 相同邏輯，已省略重複代碼以節省空間，功能完全保留) ...
-        
         // 匯率同步 UI
         window.syncEx = (el, type) => {
             const val = parseFloat(el.value);
@@ -486,14 +486,19 @@
 
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位邏輯 (v36.4 優化版) ★★★
+        // ★★★ 天氣定位邏輯 (v37.1 升級版) ★★★
         window.getGeoWeather = function() {
             document.getElementById('weather-location-text').innerText = "定位中...";
             if (navigator.geolocation) {
+                // 使用高精確度模式
                 navigator.geolocation.getCurrentPosition(
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude, true); },
-                    (error) => { fetchWeather(33.5902, 130.4017, false); showToast("⚠️ 定位失敗，顯示福岡天氣"); },
-                    { timeout: 5000 }
+                    (error) => { 
+                        console.warn("定位失敗:", error);
+                        fetchWeather(33.5902, 130.4017, false); 
+                        showToast("⚠️ 無法獲取精確位置，顯示福岡");
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // 強制使用 GPS
                 );
             } else { fetchWeather(33.5902, 130.4017, false); }
         };
