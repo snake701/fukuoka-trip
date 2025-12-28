@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=45.1">
     
-    <title>福岡行旅 2026 (v45.0)</title>
+    <title>福岡行旅 2026 (v45.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // ★★★ 請務必每次更新都修改這裡 ★★★
-        const CURRENT_VERSION = 'v45.0'; 
+        // ★★★ 下次更新時，請修改此處版本號 (例如 v45.2) ★★★
+        const CURRENT_VERSION = 'v45.1'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
-        // 全域通知函式 (移至 Head 確保可用)
+        // 全域通知
         function showToast(msg) {
             const t = document.getElementById('toast');
             if (t) {
@@ -37,25 +37,28 @@
             }
         }
 
-        // 版本檢查邏輯
+        // ★★★ 強力版本檢查邏輯 ★★★
         async function checkAppUpdate(isManual = false) {
-            if (isManual) showToast("🔍 正在檢查更新...");
+            if (isManual) showToast("🔍 連線 GitHub 檢查中...");
             
             try {
-                // 加上時間戳記避開快取
-                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
-                if (!response.ok) throw new Error("Network response was not ok");
+                // 加入 cache: 'no-store' 強制網路請求
+                const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) throw new Error("GitHub 連線失敗");
                 
                 const text = await response.text();
-                // 使用更寬鬆的 Regex 抓取版本號
-                const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"]/);
+                // 使用更精準的正則表達式
+                const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`本地: ${CURRENT_VERSION}, 遠端: ${remoteVersion}`);
+                    console.log(`[Version Check] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion}`);
                     
                     if (remoteVersion !== CURRENT_VERSION) {
-                        // 發現新版 -> 顯示彈窗
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
                         if (updateModal && updateText) {
@@ -63,26 +66,23 @@
                             updateModal.style.display = 'flex';
                         }
                     } else {
-                        // 版本一致
-                        if (isManual) showToast(`✅ 目前已是最新版本 (${CURRENT_VERSION})`);
-                        else showToast(`✅ 系統就緒 (${CURRENT_VERSION})`);
+                        if (isManual) showToast(`✅ 版本一致，無需更新 (${CURRENT_VERSION})`);
+                        else console.log("系統已是最新");
                     }
                 } else {
-                    if (isManual) showToast("⚠️ 無法取得遠端版本號");
+                    if (isManual) showToast("⚠️ 無法解析遠端版本號");
                 }
             } catch (e) { 
                 console.error("Update check failed", e);
-                if (isManual) showToast("⚠️ 檢查失敗，請檢查網路");
+                if (isManual) showToast("⚠️ 檢查失敗 (請檢查網路)");
             }
         }
 
-        // 強制更新
         function forceReloadApp() {
             if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // 隱藏功能計數
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         function handleHeaderClick(type) {
             const state = clickStates[type];
@@ -99,15 +99,23 @@
             }
         }
 
-        // DOM 載入後執行
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
             
-            // 延遲 1.5 秒執行版本檢查 (避免跟 Splash 搶資源)
-            setTimeout(() => checkAppUpdate(false), 1500);
+            // 延遲執行檢查
+            setTimeout(() => checkAppUpdate(false), 2000);
             
             // 延遲執行天氣
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1000);
+
+            setTimeout(() => {
+                const toast = document.getElementById('toast');
+                if(toast) {
+                    toast.innerText = `✅ 系統就緒 (${CURRENT_VERSION})`;
+                    toast.className = "show";
+                    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+                }
+            }, 1000);
         });
     </script>
 
@@ -453,7 +461,8 @@
         </div>
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.2 (2025.12.28)</div>
+            <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 45.1 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -463,9 +472,8 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 44.2 Started");
+        console.log("🚀 福岡行旅 App - Version 45.1 Started");
         
-        // Splash Screen 自動淡出
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -503,7 +511,6 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
         
-        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
             localStorage.removeItem('fukuoka_private_v3_exp');
             localStorage.removeItem('fukuoka_private_v3_budget');
@@ -545,7 +552,6 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather(); // 自動定位
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -574,14 +580,12 @@
                     (position) => { fetchWeather(position.coords.latitude, position.coords.longitude, true); },
                     (error) => { 
                         console.warn("定位失敗:", error);
-                        // 定位失敗不強制切換，顯示「📍 點此定位」
-                        document.getElementById('weather-location-text').innerText = "📍 點此定位";
+                        fetchWeather(33.5902, 130.4017, false); 
+                        showToast("⚠️ 定位失敗，顯示福岡天氣");
                     },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-            } else { 
-                document.getElementById('weather-location-text').innerText = "📍 點此定位";
-            }
+            } else { fetchWeather(33.5902, 130.4017, false); }
         };
 
         async function fetchWeather(lat, lon, isGPS) {
@@ -607,19 +611,13 @@
                     }
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
-                    
                     if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
                 });
 
                 let html = `<div style="display:flex;gap:10px;">`;
                 Object.values(dailyData).slice(0, 5).forEach(day => {
                     const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
-                    html += `
-                        <div class="weather-card">
-                            <div>${day.name}</div>
-                            <img src="${iconUrl}" alt="icon">
-                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
-                        </div>`;
+                    html += `<div class="weather-card"><div>${day.name}</div><img src="${iconUrl}" alt="icon"><div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div></div>`;
                 });
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
@@ -702,7 +700,7 @@
         window.exportToExcel = () => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.expenses), "公款"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.purchased), "已購"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.privateExpenses), "私帳"); XLSX.writeFile(wb, "福岡行旅.xlsx"); };
     };
     
-    // 初始化執行
+    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
     setTimeout(window.initApp, 100);
 </script>
 </body>
