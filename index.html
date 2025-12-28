@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.1">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.1">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.2">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=44.2">
     
-    <title>福岡行旅 2026 (v44.1)</title>
+    <title>福岡行旅 2026 (v44.2)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v44.1'; 
+        const CURRENT_VERSION = 'v44.2'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
@@ -43,19 +43,16 @@
             }
         }
 
+        // 版本自動檢查
         async function checkAppUpdate() {
             try {
-                // 加上隨機數 t 確保抓到最新檔案
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now());
                 if (!response.ok) return;
-
                 const text = await response.text();
                 const match = text.match(/const CURRENT_VERSION = '(v[\d\.]+)';/);
                 
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`本地: ${CURRENT_VERSION}, 遠端: ${remoteVersion}`);
-                    
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
@@ -73,9 +70,13 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // Head 初始化：只負責顯示通知，不負責啟動 App (交給 Module)
         document.addEventListener("DOMContentLoaded", function() {
+            if(window.initApp) window.initApp();
+            
+            // 延遲執行版本檢查與天氣定位
             setTimeout(checkAppUpdate, 1500);
+            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1000);
+
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -93,7 +94,6 @@
         html, body { height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; color: var(--wood-dark); user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         body { padding-bottom: 140px; background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png'); line-height: 1.6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
         
-        /* iOS 優化 */
         html { overscroll-behavior-y: none; }
         input, select, textarea { font-size: 16px !important; }
 
@@ -173,7 +173,7 @@
         .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
         .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
 
-        /* Weather */
+        /* Weather Styles */
         .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
         .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
         .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
@@ -430,7 +430,7 @@
         <div class="footer-info">
             ☁️ 最後同步：<span id="last-updated">--</span>
             <span style="cursor:pointer; margin-left:10px;" onclick="alert('💡 操作小抄：\n1. 點標題 3 下：解鎖私帳\n2. 長按左飛機：重設資料\n3. 長按右飛機：備份資料\n4. 長按「三條線」：拖曳排序')">❓</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.1 (2025.12.28)</div>
+            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver 44.2 (2025.12.28)</div>
         </div>
     </section>
 </div>
@@ -440,7 +440,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 44.1 Started");
+        console.log("🚀 福岡行旅 App - Version 44.2 Started");
         
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -481,7 +481,7 @@
         let selectedSpot = null;
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
-        
+
         // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
             // 清除 LocalStorage (私帳)
