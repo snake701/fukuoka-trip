@@ -25,6 +25,9 @@
     <script>
         const CURRENT_VERSION = 'v50.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
+        
+        // 設定自動檢查間隔 (毫秒)：這裡設定 10 分鐘
+        const AUTO_CHECK_INTERVAL = 10 * 60 * 1000; 
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -37,14 +40,21 @@
 
         async function checkAppUpdate(isManual = false) {
             if (isManual) showToast("🔍 連線 GitHub 檢查中...");
+            
             try {
+                // 加上隨機數防止快取
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), { cache: 'no-store' });
                 if (!response.ok) throw new Error("Connection failed");
+                
                 const text = await response.text();
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
+                
                 if (match && match[1]) {
                     const remoteVersion = match[1];
+                    console.log(`[AutoCheck] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion} | Manual: ${isManual}`);
+                    
                     if (remoteVersion !== CURRENT_VERSION) {
+                        // 發現新版 -> 顯示彈窗
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
                         if (updateModal && updateText) {
@@ -52,6 +62,7 @@
                             updateModal.style.display = 'flex';
                         }
                     } else {
+                        // 版本一致：只有手動按按鈕時才顯示提示，自動檢查時保持安靜
                         if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
                     }
                 }
@@ -66,38 +77,22 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // 退稅計算
+        // --- 其他功能函式 ---
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
-            if (isNaN(inputVal) || inputVal <= 0) {
-                resultDiv.innerHTML = "<span style='color:#ccc;'>請輸入金額...</span>";
-                return;
-            }
+            if (isNaN(inputVal) || inputVal <= 0) { resultDiv.innerHTML = "<span style='color:#ccc;'>請輸入金額...</span>"; return; }
             const mode = document.querySelector('input[name="tax-mode"]:checked').value;
             const THRESHOLD = 5500;
             let priceWithTax, priceNoTax;
-
-            if (mode === 'inc') { 
-                priceWithTax = inputVal;
-                priceNoTax = Math.round(inputVal / 1.1);
-            } else { 
-                priceNoTax = inputVal;
-                priceWithTax = Math.floor(inputVal * 1.1);
-            }
+            if (mode === 'inc') { priceWithTax = inputVal; priceNoTax = Math.round(inputVal / 1.1); } else { priceNoTax = inputVal; priceWithTax = Math.floor(inputVal * 1.1); }
             const taxAmount = priceWithTax - priceNoTax;
             const diff = THRESHOLD - priceWithTax;
-
             let html = "";
-            if (diff > 0) {
-                html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`;
-            } else {
-                html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`;
-            }
+            if (diff > 0) { html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`; } else { html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`; }
             resultDiv.innerHTML = html;
         }
 
-        // 鞋碼換算
         function calcSize() {
             const gender = document.getElementById('size-gender').value;
             const type = document.getElementById('size-type').value;
@@ -105,16 +100,11 @@
             const resEl = document.getElementById('size-result');
             if (!val) { resEl.innerText = "JP -- cm"; return; }
             let jp = 0;
-            if (type === 'us') {
-                jp = (gender === 'm') ? (val + 18) : (val + 17);
-            } else if (type === 'eu') {
-                 jp = (val + 10) / 2;
-            }
+            if (type === 'us') { jp = (gender === 'm') ? (val + 18) : (val + 17); } else if (type === 'eu') { jp = (val + 10) / 2; }
             jp = Math.round(jp * 2) / 2;
             resEl.innerText = `JP ${jp} cm`;
         }
 
-        // 交通查詢
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
@@ -135,7 +125,6 @@
             state.count++;
             if (state.timer) clearTimeout(state.timer);
             state.timer = setTimeout(() => { state.count = 0; }, 800);
-            
             if (state.count === 3) {
                 state.count = 0;
                 if (type === 'reset') { if(prompt("⚠️ 警告：清除資料！\n密碼 (8888)：") === "8888") if(window.forceResetAction) window.forceResetAction(); }
@@ -146,10 +135,29 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
+            
             const verDisplay = document.getElementById('disp-version');
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
+
+            // 1. 啟動後延遲檢查
             setTimeout(() => checkAppUpdate(false), 2000);
-            // 天氣載入邏輯在 initApp 中
+            
+            // 2. 設定定時檢查 (每 10 分鐘)
+            setInterval(() => checkAppUpdate(false), AUTO_CHECK_INTERVAL);
+
+            // 3. 設定喚醒檢查 (當網頁從背景回來時)
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === 'visible') {
+                    console.log("App 喚醒，執行版本檢查...");
+                    checkAppUpdate(false);
+                    // 也可以順便更新天氣
+                    if(window.getGeoWeather) window.getGeoWeather();
+                }
+            });
+
+            // 啟動天氣定位
+            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
+
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -584,6 +592,16 @@
 
         // 檢查更新
         setTimeout(checkAppUpdate, 1000);
+        setInterval(() => checkAppUpdate(false), AUTO_CHECK_INTERVAL); // 定時檢查
+
+        // 喚醒檢查
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                console.log("App 喚醒");
+                checkAppUpdate(false);
+                if(window.getGeoWeather) window.getGeoWeather();
+            }
+        });
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -674,13 +692,7 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位邏輯 (Open-Meteo + BigDataCloud) ★★★
-        const WMO_CODE_MAP = {
-            0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
-            51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔",
-            80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
-        };
-
+        // ★★★ 天氣定位邏輯 (Open-Meteo) ★★★
         window.getGeoWeather = function() {
             document.getElementById('weather-location-text').innerText = "定位中...";
             if (navigator.geolocation) {
@@ -704,14 +716,13 @@
                 if (isGPS) {
                     const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`);
                     const geoData = await geoRes.json();
-                    // 優先顯示: 區 > 市 > 國家
                     locationName = geoData.locality || geoData.city || geoData.principalSubdivision || "目前位置";
                 }
             } catch(e) { console.warn("Geo lookup failed"); }
             
             document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
 
-            // 2. 取得天氣 (Open-Meteo)
+            // 2. 取得天氣 (Open-Meteo 7天)
             try {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
                 const res = await fetch(url);
@@ -721,9 +732,15 @@
 
                 let html = `<div style="display:flex; gap:10px;">`;
                 
-                // Open-Meteo 回傳的是陣列，直接跑迴圈
+                // 天氣代碼對照表
+                const WMO_CODE_MAP = {
+                    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
+                    51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔",
+                    80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
+                };
+
                 for(let i=0; i<7; i++) {
-                    const dateStr = data.daily.time[i]; // YYYY-MM-DD
+                    const dateStr = data.daily.time[i]; 
                     const dateObj = new Date(dateStr);
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
                     const code = data.daily.weathercode[i];
