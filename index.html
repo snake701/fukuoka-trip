@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=52.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=52.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=53.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=53.0">
     
-    <title>福岡行旅 2026 (v52.0)</title>
+    <title>福岡行旅 2026 (v53.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v52.0'; 
+        const CURRENT_VERSION = 'v53.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
-        
-        // ★★★ 交通查詢狀態變數 ★★★
-        let activeTransportId = 'trans-from'; // 預設選中「出發」
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -70,7 +67,6 @@
         }
 
         // --- 功能函式 ---
-        
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
@@ -98,7 +94,6 @@
             resEl.innerText = `JP ${jp} cm`;
         }
 
-        // 交通查詢 (v51.0 Updated)
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
@@ -107,24 +102,18 @@
             window.open(url, '_blank');
         }
 
-        // ★★★ v52.0 新邏輯：設定目前選中的欄位 ★★★
+        let activeTransportId = 'trans-from';
         function setActiveField(id) {
             activeTransportId = id;
-            // 更新 UI 樣式
             document.querySelectorAll('.transport-input').forEach(el => el.classList.remove('active-field'));
             document.getElementById(id).classList.add('active-field');
         }
 
-        // ★★★ v52.0 新邏輯：填入目前選中的欄位 ★★★
         function fillStation(name) {
             if (!activeTransportId) return;
             const input = document.getElementById(activeTransportId);
             input.value = name;
-            
-            // 自動切換到另一格 (優化體驗)
-            if (activeTransportId === 'trans-from') {
-                setActiveField('trans-to');
-            }
+            if (activeTransportId === 'trans-from') { setActiveField('trans-to'); }
         }
 
         function swapStations() {
@@ -156,7 +145,6 @@
             const verDisplay = document.getElementById('disp-version');
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
             
-            // 初始化選中出發欄位
             setActiveField('trans-from');
 
             setTimeout(() => checkAppUpdate(false), 2000);
@@ -264,7 +252,6 @@
         .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
         
-        /* ★★★ 新增：車站標籤樣式 ★★★ */
         .station-tags { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; -webkit-overflow-scrolling: touch; }
         .station-tag { 
             background: #fff; padding: 6px 12px; border-radius: 20px; 
@@ -273,7 +260,6 @@
         }
         .station-tag:active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
         
-        /* ★★★ 新增：輸入框選取樣式 ★★★ */
         .transport-input { transition: all 0.3s; border: 1px solid #ccc; }
         .active-field { 
             border: 2px solid var(--wood-dark) !important; 
@@ -602,12 +588,12 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 52.0 Started");
+        console.log("🚀 福岡行旅 App - Version 53.0 Started");
         
-        // 顯示版本
+        // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
-
+        
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -648,9 +634,13 @@
         let sortableInstance = null;
         let currentEditingDay = null, currentEditingIndex = null;
         
+        // ★★★ 確保 forceResetAction 在全域可用 (給隱藏按鈕呼叫) ★★★
         window.forceResetAction = function() { 
+            // 清除 LocalStorage (私帳)
             localStorage.removeItem('fukuoka_private_v3_exp');
             localStorage.removeItem('fukuoka_private_v3_budget');
+            
+            // 重置 Firebase (公款)
             const defaultData = { 
                 hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
                 tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
@@ -689,7 +679,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather();
+                    window.getGeoWeather(); // 自動定位
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -708,7 +698,7 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位 (OWM) ★★★
+        // ★★★ 天氣定位邏輯 (OpenWeatherMap) ★★★
         const OWM_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
 
         window.getGeoWeather = function() {
@@ -728,40 +718,58 @@
 
         async function fetchWeather(lat, lon, isGPS) {
             let locationName = "福岡";
+            
+            // 1. 嘗試取得地名 (中文優先)
             try {
-                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric&lang=zh_tw`;
+                // 使用 OpenWeatherMap Geocoding API
+                const geoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${OWM_KEY}`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+                
+                if (geoData && geoData.length > 0) {
+                     // 優先顯示: 中文名 > 日文名 > 英文名
+                     locationName = geoData[0].local_names?.zh || geoData[0].local_names?.ja || geoData[0].name;
+                }
+            } catch(e) { console.warn("Geo lookup failed"); }
+            
+            document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
+
+            // 2. 取得天氣 (Open-Meteo)
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
-                if (data.city && data.city.name) {
-                     locationName = data.city.name;
-                     document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
-                }
+                if (!data.daily) throw new Error("No daily data");
 
-                const dailyData = {};
-                data.list.forEach(item => {
-                    const date = item.dt_txt.split(' ')[0];
-                    const dateObj = new Date(item.dt * 1000);
+                let html = `<div style="display:flex; gap:10px;">`;
+                
+                // 天氣代碼對照表
+                const WMO_CODE_MAP = {
+                    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
+                    51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔",
+                    80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
+                };
+
+                for(let i=0; i<7; i++) {
+                    const dateStr = data.daily.time[i]; 
+                    const dateObj = new Date(dateStr);
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
-                    
-                    if (!dailyData[date]) {
-                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
-                    }
-                    if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
-                    if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
-                    if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
-                });
+                    const code = data.daily.weathercode[i];
+                    const icon = WMO_CODE_MAP[code] || "🌥️";
+                    const min = Math.round(data.daily.temperature_2m_min[i]);
+                    const max = Math.round(data.daily.temperature_2m_max[i]);
+                    const rain = data.daily.precipitation_probability_max[i];
 
-                let html = `<div style="display:flex;gap:10px;">`;
-                Object.values(dailyData).slice(0, 5).forEach(day => {
-                    const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
                     html += `
                         <div class="weather-card">
-                            <div>${day.name}</div>
-                            <img src="${iconUrl}" alt="icon">
-                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
+                            <div style="font-weight:bold; color:var(--wood-dark);">${dayDisplay}</div>
+                            <div style="font-size:1.8rem; margin:2px 0;">${icon}</div>
+                            <div style="font-size:0.85rem; color:#555;">${min}° - ${max}°</div>
+                            <div style="font-size:0.75rem; color:#4285F4; font-weight:bold;">☔ ${rain}%</div>
                         </div>`;
-                });
+                }
+                
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
 
