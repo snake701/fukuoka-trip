@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=49.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=49.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=50.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=50.0">
     
-    <title>福岡行旅 2026 (v49.0)</title>
+    <title>福岡行旅 2026 (v50.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v49.0'; 
+        const CURRENT_VERSION = 'v50.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
 
         function showToast(msg) {
@@ -97,24 +97,19 @@
             resultDiv.innerHTML = html;
         }
 
-        // ★★★ 鞋碼換算 (v49.0 New) ★★★
+        // 鞋碼換算
         function calcSize() {
             const gender = document.getElementById('size-gender').value;
             const type = document.getElementById('size-type').value;
             const val = parseFloat(document.getElementById('size-input').value);
             const resEl = document.getElementById('size-result');
-
             if (!val) { resEl.innerText = "JP -- cm"; return; }
-
             let jp = 0;
-            // 簡易換算邏輯
             if (type === 'us') {
                 jp = (gender === 'm') ? (val + 18) : (val + 17);
             } else if (type === 'eu') {
-                 // 歐碼近似公式: (EU + 10) / 2
                  jp = (val + 10) / 2;
             }
-            // 修正為 0.5 單位
             jp = Math.round(jp * 2) / 2;
             resEl.innerText = `JP ${jp} cm`;
         }
@@ -133,7 +128,6 @@
             input.value = name;
         }
 
-        // 隱藏功能
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         function handleHeaderClick(type) {
             const state = clickStates[type];
@@ -152,13 +146,10 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
-            
             const verDisplay = document.getElementById('disp-version');
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
-
             setTimeout(() => checkAppUpdate(false), 2000);
-            setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
-
+            // 天氣載入邏輯在 initApp 中
             setTimeout(() => {
                 const toast = document.getElementById('toast');
                 if(toast) {
@@ -178,7 +169,6 @@
         html { overscroll-behavior-y: none; }
         input, select, textarea { font-size: 16px !important; }
 
-        /* Splash Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
         .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
         .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; font-weight: bold; }
@@ -187,11 +177,9 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Update Modal */
         #update-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10002; display: none; justify-content: center; align-items: center; }
         .update-content { background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green); }
 
-        /* UI Components */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
         .modal-content { background:white; padding:25px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-btn { display:block; width:100%; padding:14px; margin:12px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:10px; font-size:1rem; cursor:pointer; font-weight: bold; }
@@ -264,12 +252,9 @@
         .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
         
-        /* Transport Search Tags */
         .station-tags { display:flex; gap:5px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; }
         .station-tag { background:#eee; padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer; white-space:nowrap; color:#555; border:1px solid #ddd; }
         .station-tag:active { background:var(--accent-blue); color:white; }
-        
-        /* Tax Free Styles */
         .tax-result-box { margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px; border:1px solid #eee; text-align:center; }
     </style>
 </head>
@@ -583,7 +568,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 49.0 Started");
+        console.log("🚀 福岡行旅 App - Version 50.0 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
@@ -689,8 +674,12 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位邏輯 (OpenWeatherMap) ★★★
-        const OWM_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
+        // ★★★ 天氣定位邏輯 (Open-Meteo + BigDataCloud) ★★★
+        const WMO_CODE_MAP = {
+            0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
+            51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔",
+            80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
+        };
 
         window.getGeoWeather = function() {
             document.getElementById('weather-location-text').innerText = "定位中...";
@@ -709,41 +698,49 @@
 
         async function fetchWeather(lat, lon, isGPS) {
             let locationName = "福岡";
+            
+            // 1. 嘗試取得地名 (反向地理編碼)
             try {
-                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric&lang=zh_tw`;
+                if (isGPS) {
+                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`);
+                    const geoData = await geoRes.json();
+                    // 優先顯示: 區 > 市 > 國家
+                    locationName = geoData.locality || geoData.city || geoData.principalSubdivision || "目前位置";
+                }
+            } catch(e) { console.warn("Geo lookup failed"); }
+            
+            document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
+
+            // 2. 取得天氣 (Open-Meteo)
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
-                if (data.city && data.city.name) {
-                     locationName = data.city.name;
-                     document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
-                }
+                if (!data.daily) throw new Error("No daily data");
 
-                const dailyData = {};
-                data.list.forEach(item => {
-                    const date = item.dt_txt.split(' ')[0];
-                    const dateObj = new Date(item.dt * 1000);
+                let html = `<div style="display:flex; gap:10px;">`;
+                
+                // Open-Meteo 回傳的是陣列，直接跑迴圈
+                for(let i=0; i<7; i++) {
+                    const dateStr = data.daily.time[i]; // YYYY-MM-DD
+                    const dateObj = new Date(dateStr);
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
-                    
-                    if (!dailyData[date]) {
-                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
-                    }
-                    if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
-                    if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
-                    
-                    if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
-                });
+                    const code = data.daily.weathercode[i];
+                    const icon = WMO_CODE_MAP[code] || "🌥️";
+                    const min = Math.round(data.daily.temperature_2m_min[i]);
+                    const max = Math.round(data.daily.temperature_2m_max[i]);
+                    const rain = data.daily.precipitation_probability_max[i];
 
-                let html = `<div style="display:flex;gap:10px;">`;
-                Object.values(dailyData).slice(0, 5).forEach(day => {
-                    const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
                     html += `
                         <div class="weather-card">
-                            <div>${day.name}</div>
-                            <img src="${iconUrl}" alt="icon">
-                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
+                            <div style="font-weight:bold; color:var(--wood-dark);">${dayDisplay}</div>
+                            <div style="font-size:1.8rem; margin:2px 0;">${icon}</div>
+                            <div style="font-size:0.85rem; color:#555;">${min}° - ${max}°</div>
+                            <div style="font-size:0.75rem; color:#4285F4; font-weight:bold;">☔ ${rain}%</div>
                         </div>`;
-                });
+                }
+                
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
 
