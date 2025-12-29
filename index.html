@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=50.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=50.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=52.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=52.0">
     
-    <title>福岡行旅 2026 (v50.0)</title>
+    <title>福岡行旅 2026 (v52.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,11 +23,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v50.0'; 
+        const CURRENT_VERSION = 'v52.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         
-        // 設定自動檢查間隔 (毫秒)：這裡設定 10 分鐘
-        const AUTO_CHECK_INTERVAL = 10 * 60 * 1000; 
+        // ★★★ 交通查詢狀態變數 ★★★
+        let activeTransportId = 'trans-from'; // 預設選中「出發」
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -40,21 +40,14 @@
 
         async function checkAppUpdate(isManual = false) {
             if (isManual) showToast("🔍 連線 GitHub 檢查中...");
-            
             try {
-                // 加上隨機數防止快取
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), { cache: 'no-store' });
                 if (!response.ok) throw new Error("Connection failed");
-                
                 const text = await response.text();
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
-                
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`[AutoCheck] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion} | Manual: ${isManual}`);
-                    
                     if (remoteVersion !== CURRENT_VERSION) {
-                        // 發現新版 -> 顯示彈窗
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
                         if (updateModal && updateText) {
@@ -62,7 +55,6 @@
                             updateModal.style.display = 'flex';
                         }
                     } else {
-                        // 版本一致：只有手動按按鈕時才顯示提示，自動檢查時保持安靜
                         if (isManual) showToast(`✅ 版本一致 (${CURRENT_VERSION})`);
                     }
                 }
@@ -77,7 +69,8 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // --- 其他功能函式 ---
+        // --- 功能函式 ---
+        
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
@@ -105,6 +98,7 @@
             resEl.innerText = `JP ${jp} cm`;
         }
 
+        // 交通查詢 (v51.0 Updated)
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
@@ -113,9 +107,32 @@
             window.open(url, '_blank');
         }
 
-        function fillStation(name, type) {
-            const input = document.getElementById(type === 'from' ? 'trans-from' : 'trans-to');
+        // ★★★ v52.0 新邏輯：設定目前選中的欄位 ★★★
+        function setActiveField(id) {
+            activeTransportId = id;
+            // 更新 UI 樣式
+            document.querySelectorAll('.transport-input').forEach(el => el.classList.remove('active-field'));
+            document.getElementById(id).classList.add('active-field');
+        }
+
+        // ★★★ v52.0 新邏輯：填入目前選中的欄位 ★★★
+        function fillStation(name) {
+            if (!activeTransportId) return;
+            const input = document.getElementById(activeTransportId);
             input.value = name;
+            
+            // 自動切換到另一格 (優化體驗)
+            if (activeTransportId === 'trans-from') {
+                setActiveField('trans-to');
+            }
+        }
+
+        function swapStations() {
+            const fromInput = document.getElementById('trans-from');
+            const toInput = document.getElementById('trans-to');
+            const temp = fromInput.value;
+            fromInput.value = toInput.value;
+            toInput.value = temp;
         }
 
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
@@ -138,24 +155,11 @@
             
             const verDisplay = document.getElementById('disp-version');
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
-
-            // 1. 啟動後延遲檢查
-            setTimeout(() => checkAppUpdate(false), 2000);
             
-            // 2. 設定定時檢查 (每 10 分鐘)
-            setInterval(() => checkAppUpdate(false), AUTO_CHECK_INTERVAL);
+            // 初始化選中出發欄位
+            setActiveField('trans-from');
 
-            // 3. 設定喚醒檢查 (當網頁從背景回來時)
-            document.addEventListener("visibilitychange", () => {
-                if (document.visibilityState === 'visible') {
-                    console.log("App 喚醒，執行版本檢查...");
-                    checkAppUpdate(false);
-                    // 也可以順便更新天氣
-                    if(window.getGeoWeather) window.getGeoWeather();
-                }
-            });
-
-            // 啟動天氣定位
+            setTimeout(() => checkAppUpdate(false), 2000);
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
 
             setTimeout(() => {
@@ -260,9 +264,23 @@
         .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
         
-        .station-tags { display:flex; gap:5px; margin-bottom:10px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; }
-        .station-tag { background:#eee; padding:4px 10px; border-radius:15px; font-size:0.8rem; cursor:pointer; white-space:nowrap; color:#555; border:1px solid #ddd; }
-        .station-tag:active { background:var(--accent-blue); color:white; }
+        /* ★★★ 新增：車站標籤樣式 ★★★ */
+        .station-tags { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; -webkit-overflow-scrolling: touch; }
+        .station-tag { 
+            background: #fff; padding: 6px 12px; border-radius: 20px; 
+            font-size: 0.85rem; cursor: pointer; white-space: nowrap; 
+            color: #555; border: 1px solid #ddd; transition: all 0.2s;
+        }
+        .station-tag:active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        
+        /* ★★★ 新增：輸入框選取樣式 ★★★ */
+        .transport-input { transition: all 0.3s; border: 1px solid #ccc; }
+        .active-field { 
+            border: 2px solid var(--wood-dark) !important; 
+            background-color: #fffde7 !important; 
+            box-shadow: 0 0 5px rgba(93, 64, 55, 0.2);
+        }
+
         .tax-result-box { margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px; border:1px solid #eee; text-align:center; }
     </style>
 </head>
@@ -518,19 +536,27 @@
 
         <div class="info-card">
             <h3 style="margin-top:0;">🚄 電車轉乘/車資查詢</h3>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <input id="trans-from" class="input-wood" placeholder="出發" style="margin:0;">
-                <div style="align-self:center; color:#888;">➔</div>
-                <input id="trans-to" class="input-wood" placeholder="到達" style="margin:0;">
+            <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                <div style="flex:1;">
+                    <input id="trans-from" class="input-wood transport-input" placeholder="出發" style="margin:0;" onclick="setActiveField('trans-from')">
+                </div>
+                <button onclick="swapStations()" style="background:none; border:1px solid #ccc; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:1rem; padding:0; flex-shrink:0;">⇄</button>
+                <div style="flex:1;">
+                    <input id="trans-to" class="input-wood transport-input" placeholder="到達" style="margin:0;" onclick="setActiveField('trans-to')">
+                </div>
             </div>
+            
             <div class="station-tags">
-                <span class="station-tag" onclick="fillStation('博多', 'from')">博多</span>
-                <span class="station-tag" onclick="fillStation('福岡空港', 'from')">福岡空港</span>
-                <span class="station-tag" onclick="fillStation('天神', 'from')">天神</span>
-                <span class="station-tag" onclick="fillStation('由布院', 'to')">由布院</span>
-                <span class="station-tag" onclick="fillStation('別府', 'to')">別府</span>
-                <span class="station-tag" onclick="fillStation('太宰府', 'to')">太宰府</span>
+                <span class="station-tag" onclick="fillStation('博多')">博多</span>
+                <span class="station-tag" onclick="fillStation('福岡空港')">福岡空港</span>
+                <span class="station-tag" onclick="fillStation('天神')">天神</span>
+                <span class="station-tag" onclick="fillStation('由布院')">由布院</span>
+                <span class="station-tag" onclick="fillStation('別府')">別府</span>
+                <span class="station-tag" onclick="fillStation('太宰府')">太宰府</span>
+                <span class="station-tag" onclick="fillStation('熊本')">熊本</span>
+                <span class="station-tag" onclick="fillStation('門司港')">門司港</span>
             </div>
+            
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
                 <button class="btn-wood" style="background:#E60012; font-size:0.9rem;" onclick="searchTransport('yahoo')">🔍 Yahoo! 案內</button>
                 <button class="btn-wood" style="background:#4285F4; font-size:0.9rem;" onclick="searchTransport('google')">🗺️ Google Map</button>
@@ -576,12 +602,12 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 50.0 Started");
+        console.log("🚀 福岡行旅 App - Version 52.0 Started");
         
-        // 自動填入版本號
+        // 顯示版本
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
-        
+
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if(splash && splash.style.opacity !== '0') {
@@ -592,16 +618,6 @@
 
         // 檢查更新
         setTimeout(checkAppUpdate, 1000);
-        setInterval(() => checkAppUpdate(false), AUTO_CHECK_INTERVAL); // 定時檢查
-
-        // 喚醒檢查
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === 'visible') {
-                console.log("App 喚醒");
-                checkAppUpdate(false);
-                if(window.getGeoWeather) window.getGeoWeather();
-            }
-        });
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -673,7 +689,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather(); // 自動定位
+                    window.getGeoWeather();
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -692,7 +708,9 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
 
-        // ★★★ 天氣定位邏輯 (Open-Meteo) ★★★
+        // ★★★ 天氣定位 (OWM) ★★★
+        const OWM_KEY = "b8f2962f275943c4264c5d1e72c1b21b";
+
         window.getGeoWeather = function() {
             document.getElementById('weather-location-text').innerText = "定位中...";
             if (navigator.geolocation) {
@@ -710,54 +728,40 @@
 
         async function fetchWeather(lat, lon, isGPS) {
             let locationName = "福岡";
-            
-            // 1. 嘗試取得地名 (反向地理編碼)
             try {
-                if (isGPS) {
-                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`);
-                    const geoData = await geoRes.json();
-                    locationName = geoData.locality || geoData.city || geoData.principalSubdivision || "目前位置";
-                }
-            } catch(e) { console.warn("Geo lookup failed"); }
-            
-            document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
-
-            // 2. 取得天氣 (Open-Meteo 7天)
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
+                const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OWM_KEY}&units=metric&lang=zh_tw`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
-                if (!data.daily) throw new Error("No daily data");
+                if (data.city && data.city.name) {
+                     locationName = data.city.name;
+                     document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
+                }
 
-                let html = `<div style="display:flex; gap:10px;">`;
-                
-                // 天氣代碼對照表
-                const WMO_CODE_MAP = {
-                    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️",
-                    51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔",
-                    80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
-                };
-
-                for(let i=0; i<7; i++) {
-                    const dateStr = data.daily.time[i]; 
-                    const dateObj = new Date(dateStr);
+                const dailyData = {};
+                data.list.forEach(item => {
+                    const date = item.dt_txt.split(' ')[0];
+                    const dateObj = new Date(item.dt * 1000);
                     const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
-                    const code = data.daily.weathercode[i];
-                    const icon = WMO_CODE_MAP[code] || "🌥️";
-                    const min = Math.round(data.daily.temperature_2m_min[i]);
-                    const max = Math.round(data.daily.temperature_2m_max[i]);
-                    const rain = data.daily.precipitation_probability_max[i];
+                    
+                    if (!dailyData[date]) {
+                        dailyData[date] = { name: dayDisplay, min: 100, max: -100, icon: item.weather[0].icon };
+                    }
+                    if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
+                    if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
+                    if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
+                });
 
+                let html = `<div style="display:flex;gap:10px;">`;
+                Object.values(dailyData).slice(0, 5).forEach(day => {
+                    const iconUrl = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
                     html += `
                         <div class="weather-card">
-                            <div style="font-weight:bold; color:var(--wood-dark);">${dayDisplay}</div>
-                            <div style="font-size:1.8rem; margin:2px 0;">${icon}</div>
-                            <div style="font-size:0.85rem; color:#555;">${min}° - ${max}°</div>
-                            <div style="font-size:0.75rem; color:#4285F4; font-weight:bold;">☔ ${rain}%</div>
+                            <div>${day.name}</div>
+                            <img src="${iconUrl}" alt="icon">
+                            <div>${Math.round(day.min)}° - ${Math.round(day.max)}°</div>
                         </div>`;
-                }
-                
+                });
                 html += `</div>`;
                 document.getElementById('weather-scroll').innerHTML = html;
 
