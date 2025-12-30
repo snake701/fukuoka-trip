@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.1">
     
-    <title>福岡行旅 2026 (v60.0)</title>
+    <title>福岡行旅 2026 (v60.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v60.0'; 
+        const CURRENT_VERSION = 'v60.1'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -339,40 +339,54 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; border-bottom: none; }
         .checkbox-lg { transform: scale(1.5); margin-left: 5px; cursor: pointer; flex-shrink: 0; accent-color: var(--wood-dark); }
 
-        /* ★★★ v60.0 記帳卡片樣式 ★★★ */
+        /* ★★★ v60.1 記帳列表樣式優化 ★★★ */
+        /* 公款 (單行緊湊版) */
+        .expense-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; background: #fff; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
+        body.dark-mode .expense-row { background: #333; border-color: #444; }
+        .expense-row input { margin: 0; border: 1px solid #ddd; padding: 8px 6px; background: transparent; min-width: 0; } 
+        body.dark-mode .expense-row input { border-color: #555; color: #fff; }
+        /* 日期窄一點，名字佔滿，金額固定 */
+        .expense-row input[type="date"] { width: 90px; font-size: 0.8rem; }
+        .expense-row input.ex-name { flex: 1; font-weight: bold; }
+        .expense-row input.ex-amount { width: 60px; text-align: right; }
+
+        /* 已購/私帳 (雙行卡片版) */
         .expense-card-item {
             background: #fff; border: 1px solid #eee; border-radius: 12px;
             padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex; flex-direction: column; gap: 5px;
         }
         body.dark-mode .expense-card-item { background: #333; border-color: #444; }
         
         .expense-date-row {
-            margin-bottom: 6px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 4px;
+            display: flex; align-items: center; border-bottom: 1px dashed #f0f0f0; padding-bottom: 4px; margin-bottom: 2px;
         }
-        body.dark-mode .expense-date-row { border-bottom-color: #444; }
+        body.dark-mode .expense-date-row { border-bottom-color: #555; }
         
         .expense-date-input {
-            border: none; background: transparent; color: #888; font-size: 0.8rem; width: 100%;
+            border: none !important; background: transparent !important; color: #999; font-size: 0.8rem; padding: 0; width: auto;
         }
         
         .expense-main-row {
             display: flex; align-items: center; gap: 8px;
         }
-        
         .ex-input-clean {
-            border: 1px solid #eee; border-radius: 6px; padding: 8px; font-size: 1rem;
-            background: #fafafa;
+            border: 1px solid #eee; border-radius: 6px; padding: 10px 8px; font-size: 1rem;
+            background: #fafafa; min-width: 0; /* 關鍵：防止爆版 */
         }
         body.dark-mode .ex-input-clean { background: #444; border-color: #555; color: #fff; }
         
-        .ex-cat { font-size: 1.2rem; margin-right: 2px; }
-        .ex-name { flex: 2; min-width: 0; } /* 彈性寬度 */
-        .ex-amount { flex: 1.2; text-align: right; font-weight: bold; color: var(--wood-dark); }
+        .ex-name { flex: 1; } /* 佔滿剩餘 */
+        .ex-amount { width: 75px; text-align: right; font-weight: bold; color: var(--wood-dark); flex-shrink: 0; } /* 禁止壓縮 */
         body.dark-mode .ex-amount { color: #ddd; }
-        .ex-currency { width: 50px; background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 2px; text-align: center; font-size: 0.8rem; color: #555; }
+        
+        .ex-currency { 
+            width: 55px; background: #f0f0f0; border: none; border-radius: 6px; 
+            padding: 8px 2px; text-align: center; font-size: 0.9rem; color: #555; flex-shrink: 0; 
+        }
         body.dark-mode .ex-currency { background: #555; color: #ccc; }
 
-        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.4rem; padding: 0 5px; flex-shrink: 0; }
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.6rem; padding: 0 4px; line-height: 1; flex-shrink: 0; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 6px solid var(--accent-green); border-radius: 10px; padding: 18px; margin-bottom: 18px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         body.dark-mode .itinerary-card { background: #333; border-color: #444; }
@@ -861,7 +875,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 60.0 Started");
+        console.log("🚀 福岡行旅 App - Version 60.1 Started");
         
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
@@ -979,7 +993,6 @@
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); renderBookings(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
         
-        // ★★★ v58.0 搜尋過濾 ★★★
         window.filterExpenses = (keyword) => {
             window.expenseFilter = keyword.toLowerCase();
             window.renderMoney();
@@ -1111,31 +1124,26 @@
         window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
-        
-        // ★★★ v60.0 新版記帳渲染 (卡片式) ★★★
         window.renderMoney = () => { 
             const list = document.getElementById('expense-list');
             const filter = window.expenseFilter;
             const filteredExpenses = window.expenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
             
+            // ★★★ V60.1 公款單行修復 ★★★
             list.innerHTML = filteredExpenses.map((e, i) => `
-                <div class="expense-card-item">
-                    <div class="expense-date-row">
-                        <input type="date" class="expense-date-input" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()">
-                    </div>
-                    <div class="expense-main-row">
-                        <span class="ex-cat">${e.cat||'📦'}</span>
-                        <input class="ex-input-clean ex-name" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()">
-                        <input type="number" class="ex-input-clean ex-amount" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()">
-                        <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span>
-                    </div>
+                <div class="expense-row">
+                    <span class="cat-badge">${e.cat||'📦'}</span>
+                    <input type="date" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()">
+                    <input class="ex-name" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()">
+                    <input type="number" class="ex-amount" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()">
+                    <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span>
                 </div>
-            `).join('');
+            `).join(''); 
             
-            // Member List (Simple Row)
+            // Member List
             document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); 
             
-            // Purchased List (Card)
+            // Purchased List
             const filteredPurchased = window.purchased.filter(p => !filter || (p.n && p.n.toLowerCase().includes(filter)));
             document.getElementById('purchased-list').innerHTML = filteredPurchased.map((p, i) => `
                 <div class="expense-card-item" style="border-left:4px solid #78909C;">
