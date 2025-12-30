@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.2">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.2">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=55.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=55.0">
     
-    <title>福岡行旅 2026 (v54.2)</title>
+    <title>福岡行旅 2026 (v55.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,13 +23,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v54.2'; 
+        const CURRENT_VERSION = 'v55.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
-        
-        // 自動檢查設定
-        const CHECK_INTERVAL_MS = 10 * 60 * 1000; // 10分鐘
-        let lastCheckTime = 0; // 上次檢查時間戳記
+        const CHECK_INTERVAL_MS = 10 * 60 * 1000;
+        let lastCheckTime = 0;
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -42,20 +40,15 @@
 
         async function checkAppUpdate(isManual = false) {
             if (isManual) showToast("🔍 連線 GitHub 檢查中...");
-            
             try {
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), { cache: 'no-store' });
                 if (!response.ok) throw new Error("Connection failed");
                 const text = await response.text();
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
                 
-                // 更新檢查時間
                 lastCheckTime = Date.now();
-                
                 if (match && match[1]) {
                     const remoteVersion = match[1];
-                    console.log(`[AutoCheck] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion} | Time: ${new Date().toLocaleTimeString()}`);
-                    
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
@@ -73,14 +66,8 @@
             }
         }
 
-        // ★★★ 智慧檢查排程器 ★★★
         function scheduleSmartCheck() {
-            const now = Date.now();
-            // 如果距離上次檢查超過設定時間，就執行檢查
-            if (now - lastCheckTime > CHECK_INTERVAL_MS) {
-                console.log("喚醒檢查：時間已到，執行更新檢查...");
-                checkAppUpdate(false);
-            }
+            if (Date.now() - lastCheckTime > CHECK_INTERVAL_MS) checkAppUpdate(false);
         }
 
         function forceReloadApp() {
@@ -88,20 +75,16 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // --- 功能函式 (維持不變) ---
+        // --- 功能函式 ---
         function updateCountdown() {
             const now = new Date();
             const target = new Date(TRIP_START_DATE);
             const diff = target - now;
             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
             const el = document.getElementById('countdown-text');
-            if (days > 0) {
-                el.innerText = `🇯🇵 距離福岡之旅還有 ${days} 天`;
-            } else if (days > -10) {
-                el.innerText = `🇯🇵 福岡之旅 Day ${Math.abs(days) + 1}`;
-            } else {
-                el.innerText = `🇯🇵 期待下一次旅行`;
-            }
+            if (days > 0) el.innerText = `🇯🇵 距離福岡之旅還有 ${days} 天`;
+            else if (days > -10) el.innerText = `🇯🇵 福岡之旅 Day ${Math.abs(days) + 1}`;
+            else el.innerText = `🇯🇵 期待下一次旅行`;
         }
 
         function toggleDarkMode() {
@@ -109,13 +92,11 @@
             localStorage.setItem('fukuoka_dark_mode', isDark);
             updateDarkModeIcon(isDark);
         }
-
         function loadDarkMode() {
             const isDark = localStorage.getItem('fukuoka_dark_mode') === 'true';
             if (isDark) document.body.classList.add('dark-mode');
             updateDarkModeIcon(isDark);
         }
-        
         function updateDarkModeIcon(isDark) {
             const btn = document.getElementById('dark-mode-float-btn');
             if(btn) btn.innerText = isDark ? "☀️" : "🌙";
@@ -200,18 +181,12 @@
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
 
             setActiveField('trans-from');
-            
-            // 1. 啟動時立刻檢查一次
             setTimeout(() => checkAppUpdate(false), 2000);
-            
-            // 2. 設定一般計時器 (每10分鐘)
-            setInterval(scheduleSmartCheck, 60000); // 每分鐘檢查一次是否過期
+            setInterval(scheduleSmartCheck, 60000); 
 
-            // 3. 綁定喚醒事件 (當 App 從背景回來)
             document.addEventListener("visibilitychange", () => {
                 if (document.visibilityState === 'visible') {
-                    scheduleSmartCheck(); // 檢查是否需要更新版本
-                    // 順便更新天氣
+                    scheduleSmartCheck();
                     if(window.getGeoWeather) window.getGeoWeather();
                 }
             });
@@ -247,32 +222,23 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+        /* ★★★ 關鍵修改：Flexbox Layout ★★★ */
         html, body { 
-            height: 100%; background-color: var(--wood-light); margin: 0; padding: 0; 
-            font-family: 'Noto Sans TC', sans-serif; color: var(--text-color); 
-            user-select: none; -webkit-font-smoothing: antialiased; overflow-x: hidden; 
-            transition: background-color 0.3s, color 0.3s;
+            height: 100%; 
+            margin: 0; padding: 0; 
+            font-family: 'Noto Sans TC', sans-serif; 
+            color: var(--text-color); 
+            background-color: var(--wood-light);
+            background-image: var(--bg-image);
+            overflow: hidden; /* 鎖定 Body 捲動 */
         }
         
-        body { 
-            padding-bottom: 140px; 
-            background-image: var(--bg-image); 
-            line-height: 1.6; padding-bottom: calc(120px + env(safe-area-inset-bottom)); 
+        body {
+            display: flex;
+            flex-direction: column; /* 垂直排列 */
         }
-        
-        html { overscroll-behavior-y: none; }
+
         input, select, textarea { font-size: 16px !important; }
-        
-        /* Dark Mode Adjustments */
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #444; color: #fff; border-color: #555; }
-        body.dark-mode .info-card { background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        body.dark-mode .weather-card { background: rgba(60,60,60,0.9); color: #ddd; border-color: #555; }
-        body.dark-mode .weather-card div { color: #ddd !important; }
-        body.dark-mode .active-field { background-color: #4a4a3a !important; border-color: #e6c15c !important; }
-        body.dark-mode .station-tag { background: #444; color: #ddd; border-color: #555; }
-        body.dark-mode .tax-result-box { background: #333; border-color: #444; }
-        body.dark-mode .nav-tab.active { background: #e0e0e0; color: #1a1a1a; }
-        body.dark-mode #countdown-text { color: var(--accent-green); }
 
         /* Splash Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
@@ -310,14 +276,26 @@
         #toast { visibility: hidden; min-width: 250px; background-color: rgba(50,50,50,0.95); color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 0.95rem; opacity: 0; transition: opacity 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; }
         #toast.show { visibility: visible; opacity: 1; }
 
-        header { max-width: 900px; margin: 0 auto; padding: 40px 20px 20px; text-align: center; cursor: default; }
+        /* Header 固定區 */
+        header { 
+            flex: 0 0 auto; /* 不縮放 */
+            max-width: 900px; margin: 0 auto; 
+            padding: 40px 20px 10px; text-align: center; cursor: default; width: 100%; 
+        }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
         .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); padding: 10px; }
         #backup-plane { transform: scaleX(-1); }
 
         #countdown-text { font-size: 0.9rem; color: var(--accent-green); font-weight: bold; margin-top: 5px; display: block; animation: fadeIn 2s; }
 
-        .main-nav { max-width: 800px; margin: 0 auto 20px; display: flex; background: rgba(255, 255, 255, 0.9); padding: 6px; border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        /* Nav 固定區 */
+        .main-nav { 
+            flex: 0 0 auto; /* 不縮放 */
+            max-width: 800px; width: 95%; margin: 0 auto 10px; 
+            display: flex; background: rgba(255, 255, 255, 0.9); padding: 6px; 
+            border-radius: 14px; border: 1px solid var(--border); 
+            overflow-x: auto; scrollbar-width: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+        }
         body.dark-mode .main-nav { background: rgba(60, 60, 60, 0.9); }
         .main-nav::-webkit-scrollbar { display: none; }
         .nav-tab { flex: 1; min-width: 75px; text-align: center; padding: 12px 5px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; transition: 0.2s; white-space: nowrap; color: #666; font-weight: 500; }
@@ -325,7 +303,15 @@
         .nav-tab.active { background: var(--wood-dark); color: white; font-weight: 700; transform: scale(1.02); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         #tab-private { display: none; }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 0 15px; }
+        /* ★★★ 捲動區塊 ★★★ */
+        .container { 
+            flex: 1; /* 佔滿剩餘空間 */
+            overflow-y: auto; /* 內部捲動 */
+            max-width: 800px; width: 100%; margin: 0 auto; 
+            padding: 10px 15px 50px 15px; /* 底部留白 */
+            -webkit-overflow-scrolling: touch; /* iOS 滑動優化 */
+        }
+        
         .content-section { display: none; animation: fadeIn 0.3s ease; }
         .content-section.active { display: block; }
         .info-card { background: var(--paper); padding: 20px; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); overflow: hidden; }
@@ -755,7 +741,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 54.2 Started");
+        console.log("🚀 福岡行旅 App - Version 55.0 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
@@ -771,16 +757,6 @@
 
         // 檢查更新
         setTimeout(checkAppUpdate, 1000);
-        setInterval(scheduleSmartCheck, 60000); // 定時檢查
-
-        // 喚醒檢查
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === 'visible') {
-                console.log("App 喚醒");
-                checkAppUpdate(false);
-                if(window.getGeoWeather) window.getGeoWeather();
-            }
-        });
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
@@ -806,6 +782,7 @@
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
         window.myExpenseChart = null;
+        window.chartMode = 'account'; // 'account' or 'category'
 
         let selectedSpot = null;
         let sortableInstance = null;
@@ -853,7 +830,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather();
+                    window.getGeoWeather(); // 自動定位
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
