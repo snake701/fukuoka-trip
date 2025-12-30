@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=55.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=55.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=56.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=56.0">
     
-    <title>福岡行旅 2026 (v55.0)</title>
+    <title>福岡行旅 2026 (v56.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v55.0'; 
+        const CURRENT_VERSION = 'v56.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -222,21 +222,16 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* ★★★ 關鍵修改：Flexbox Layout ★★★ */
         html, body { 
-            height: 100%; 
-            margin: 0; padding: 0; 
+            height: 100%; margin: 0; padding: 0; 
             font-family: 'Noto Sans TC', sans-serif; 
             color: var(--text-color); 
             background-color: var(--wood-light);
             background-image: var(--bg-image);
-            overflow: hidden; /* 鎖定 Body 捲動 */
+            overflow: hidden; 
         }
         
-        body {
-            display: flex;
-            flex-direction: column; /* 垂直排列 */
-        }
+        body { display: flex; flex-direction: column; }
 
         input, select, textarea { font-size: 16px !important; }
 
@@ -276,10 +271,8 @@
         #toast { visibility: hidden; min-width: 250px; background-color: rgba(50,50,50,0.95); color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 0.95rem; opacity: 0; transition: opacity 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; }
         #toast.show { visibility: visible; opacity: 1; }
 
-        /* Header 固定區 */
         header { 
-            flex: 0 0 auto; /* 不縮放 */
-            max-width: 900px; margin: 0 auto; 
+            flex: 0 0 auto; max-width: 900px; margin: 0 auto; 
             padding: 40px 20px 10px; text-align: center; cursor: default; width: 100%; 
         }
         .header-title-row { display: flex; justify-content: center; align-items: center; gap: 20px; }
@@ -288,10 +281,8 @@
 
         #countdown-text { font-size: 0.9rem; color: var(--accent-green); font-weight: bold; margin-top: 5px; display: block; animation: fadeIn 2s; }
 
-        /* Nav 固定區 */
         .main-nav { 
-            flex: 0 0 auto; /* 不縮放 */
-            max-width: 800px; width: 95%; margin: 0 auto 10px; 
+            flex: 0 0 auto; max-width: 800px; width: 95%; margin: 0 auto 10px; 
             display: flex; background: rgba(255, 255, 255, 0.9); padding: 6px; 
             border-radius: 14px; border: 1px solid var(--border); 
             overflow-x: auto; scrollbar-width: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
@@ -303,13 +294,9 @@
         .nav-tab.active { background: var(--wood-dark); color: white; font-weight: 700; transform: scale(1.02); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         #tab-private { display: none; }
 
-        /* ★★★ 捲動區塊 ★★★ */
         .container { 
-            flex: 1; /* 佔滿剩餘空間 */
-            overflow-y: auto; /* 內部捲動 */
-            max-width: 800px; width: 100%; margin: 0 auto; 
-            padding: 10px 15px 50px 15px; /* 底部留白 */
-            -webkit-overflow-scrolling: touch; /* iOS 滑動優化 */
+            flex: 1; overflow-y: auto; max-width: 800px; width: 100%; margin: 0 auto; 
+            padding: 10px 15px 50px 15px; -webkit-overflow-scrolling: touch; 
         }
         
         .content-section { display: none; animation: fadeIn 0.3s ease; }
@@ -741,7 +728,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 55.0 Started");
+        console.log("🚀 福岡行旅 App - Version 56.0 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
@@ -830,7 +817,7 @@
                     }
                     
                     refreshUI();
-                    window.getGeoWeather(); // 自動定位
+                    window.getGeoWeather();
                     
                     const splash = document.getElementById('splash-screen');
                     if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
@@ -980,9 +967,8 @@
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
         window.renderMoney = () => { document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); let totalJpy=0, totalTwd=0; document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:105px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); };
-        window.renderPrivate = () => { let total = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0); document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5;min-width:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`).join(''); document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); let bal = window.privateBudget - total; document.getElementById('private-balance').innerText = `¥ ${bal.toLocaleString()}`; document.getElementById('private-balance-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); document.getElementById('budget-percent').innerText = window.privateBudget > 0 ? Math.round(total / window.privateBudget * 100) + '%' : '0%'; };
         
-        // ★★★ 圖表切換邏輯 (v54.0) ★★★
+        // ★★★ v56.0 圖表邏輯：排除私帳 ★★★
         window.toggleChartType = () => {
             window.chartMode = (window.chartMode === 'account') ? 'category' : 'account';
             updateChart();
@@ -995,9 +981,9 @@
             let data = [], labels = [], bgColors = [];
 
             if (window.chartMode === 'category') {
-                // 依類別統計
+                // 排除私帳 (privateExpenses)
                 const cats = {};
-                const allExp = [...window.expenses, ...window.purchased, ...window.privateExpenses];
+                const allExp = [...window.expenses, ...window.purchased]; // 只合併公款與購物
                 allExp.forEach(e => {
                     const c = e.cat || '📦';
                     const val = (e.c === 'TWD') ? Number(e.v)/window.currentRate : Number(e.v);
@@ -1007,13 +993,13 @@
                 data = Object.values(cats);
                 bgColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
             } else {
-                // 依帳戶統計 (舊有邏輯)
+                // 排除私帳
                 let pub = window.expenses.reduce((a, c) => a + Number(c.v), 0);
                 let shop = 0; window.purchased.forEach(p => shop += (p.c === 'TWD' ? Number(p.v)/window.currentRate : Number(p.v)));
-                let priv = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0);
-                labels = ['公款', '購物', '私帳'];
-                data = [pub, shop, priv];
-                bgColors = ['#8D9977', '#78909C', '#D4AF37'];
+                
+                labels = ['公款', '購物'];
+                data = [pub, shop];
+                bgColors = ['#8D9977', '#78909C'];
             }
 
             if(window.myExpenseChart) window.myExpenseChart.destroy();
