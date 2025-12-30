@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.1">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.1">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.2">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.2">
     
-    <title>福岡行旅 2026 (v54.1)</title>
+    <title>福岡行旅 2026 (v54.2)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,9 +23,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v54.1'; 
+        const CURRENT_VERSION = 'v54.2'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
+        
+        // 自動檢查設定
+        const CHECK_INTERVAL_MS = 10 * 60 * 1000; // 10分鐘
+        let lastCheckTime = 0; // 上次檢查時間戳記
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -38,13 +42,20 @@
 
         async function checkAppUpdate(isManual = false) {
             if (isManual) showToast("🔍 連線 GitHub 檢查中...");
+            
             try {
                 const response = await fetch(GITHUB_SOURCE_URL + '?t=' + Date.now(), { cache: 'no-store' });
                 if (!response.ok) throw new Error("Connection failed");
                 const text = await response.text();
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
+                
+                // 更新檢查時間
+                lastCheckTime = Date.now();
+                
                 if (match && match[1]) {
                     const remoteVersion = match[1];
+                    console.log(`[AutoCheck] Local: ${CURRENT_VERSION} | Remote: ${remoteVersion} | Time: ${new Date().toLocaleTimeString()}`);
+                    
                     if (remoteVersion !== CURRENT_VERSION) {
                         const updateModal = document.getElementById('update-modal');
                         const updateText = document.getElementById('update-text');
@@ -62,12 +73,22 @@
             }
         }
 
+        // ★★★ 智慧檢查排程器 ★★★
+        function scheduleSmartCheck() {
+            const now = Date.now();
+            // 如果距離上次檢查超過設定時間，就執行檢查
+            if (now - lastCheckTime > CHECK_INTERVAL_MS) {
+                console.log("喚醒檢查：時間已到，執行更新檢查...");
+                checkAppUpdate(false);
+            }
+        }
+
         function forceReloadApp() {
             if (window.caches) { caches.keys().then(names => { for (let name of names) caches.delete(name); }); }
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // --- 功能函式 ---
+        // --- 功能函式 (維持不變) ---
         function updateCountdown() {
             const now = new Date();
             const target = new Date(TRIP_START_DATE);
@@ -83,7 +104,6 @@
             }
         }
 
-        // ★★★ 深色模式 (懸浮按鈕版) ★★★
         function toggleDarkMode() {
             const isDark = document.body.classList.toggle('dark-mode');
             localStorage.setItem('fukuoka_dark_mode', isDark);
@@ -112,7 +132,7 @@
             const taxAmount = priceWithTax - priceNoTax;
             const diff = THRESHOLD - priceWithTax;
             let html = "";
-            if (diff > 0) { html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`; } else { html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`; }
+            if (diff > 0) { html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`; } else { html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`; }
             resultDiv.innerHTML = html;
         }
 
@@ -180,7 +200,22 @@
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
 
             setActiveField('trans-from');
+            
+            // 1. 啟動時立刻檢查一次
             setTimeout(() => checkAppUpdate(false), 2000);
+            
+            // 2. 設定一般計時器 (每10分鐘)
+            setInterval(scheduleSmartCheck, 60000); // 每分鐘檢查一次是否過期
+
+            // 3. 綁定喚醒事件 (當 App 從背景回來)
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === 'visible') {
+                    scheduleSmartCheck(); // 檢查是否需要更新版本
+                    // 順便更新天氣
+                    if(window.getGeoWeather) window.getGeoWeather();
+                }
+            });
+
             setTimeout(() => { if(window.getGeoWeather) window.getGeoWeather(); }, 1500);
 
             setTimeout(() => {
@@ -249,7 +284,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ★★★ 深色模式懸浮按鈕 ★★★ */
+        /* 深色模式懸浮按鈕 */
         #dark-mode-float-btn {
             position: fixed; top: 15px; left: 15px; width: 42px; height: 42px;
             border-radius: 50%; background: rgba(255, 255, 255, 0.9);
@@ -720,7 +755,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 54.1 Started");
+        console.log("🚀 福岡行旅 App - Version 54.2 Started");
         
         // 自動填入版本號
         const verDisplay = document.getElementById('disp-version');
@@ -736,6 +771,16 @@
 
         // 檢查更新
         setTimeout(checkAppUpdate, 1000);
+        setInterval(scheduleSmartCheck, 60000); // 定時檢查
+
+        // 喚醒檢查
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                console.log("App 喚醒");
+                checkAppUpdate(false);
+                if(window.getGeoWeather) window.getGeoWeather();
+            }
+        });
 
         const firebaseConfig = {
             apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
