@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.1">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=54.1">
     
-    <title>福岡行旅 2026 (v54.0)</title>
+    <title>福岡行旅 2026 (v54.1)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v54.0'; 
+        const CURRENT_VERSION = 'v54.1'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
 
@@ -67,9 +67,7 @@
             window.location.href = window.location.pathname + "?v=" + Date.now();
         }
 
-        // --- v54.0 新功能函式 ---
-
-        // 倒數計時
+        // --- 功能函式 ---
         function updateCountdown() {
             const now = new Date();
             const target = new Date(TRIP_START_DATE);
@@ -85,24 +83,24 @@
             }
         }
 
-        // 深色模式切換
+        // ★★★ 深色模式 (懸浮按鈕版) ★★★
         function toggleDarkMode() {
             const isDark = document.body.classList.toggle('dark-mode');
             localStorage.setItem('fukuoka_dark_mode', isDark);
-            const btn = document.getElementById('dark-mode-btn');
-            if(btn) btn.innerText = isDark ? "☀️ 切換亮色模式" : "🌙 切換深色模式";
+            updateDarkModeIcon(isDark);
         }
 
         function loadDarkMode() {
             const isDark = localStorage.getItem('fukuoka_dark_mode') === 'true';
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                const btn = document.getElementById('dark-mode-btn');
-                if(btn) btn.innerText = "☀️ 切換亮色模式";
-            }
+            if (isDark) document.body.classList.add('dark-mode');
+            updateDarkModeIcon(isDark);
+        }
+        
+        function updateDarkModeIcon(isDark) {
+            const btn = document.getElementById('dark-mode-float-btn');
+            if(btn) btn.innerText = isDark ? "☀️" : "🌙";
         }
 
-        // 退稅計算
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
@@ -114,11 +112,10 @@
             const taxAmount = priceWithTax - priceNoTax;
             const diff = THRESHOLD - priceWithTax;
             let html = "";
-            if (diff > 0) { html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#888;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`; } else { html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`; }
+            if (diff > 0) { html = `<div style="color:#d32f2f; font-weight:bold; margin-bottom:5px;">⚠️ 還差 ¥${diff.toLocaleString()} 免稅</div><div style="font-size:0.9rem; color:#666;">目前總額(含稅): ¥${priceWithTax.toLocaleString()}</div>`; } else { html = `<div style="color:#2E7D32; font-weight:bold; font-size:1.1rem; margin-bottom:5px;">✅ 符合免稅資格!</div><div style="display:flex; justify-content:space-between; border-top:1px dashed #ddd; padding-top:5px; margin-top:5px;"><span>退稅後價格:</span><span style="font-weight:bold; color:#000;">¥${priceNoTax.toLocaleString()}</span></div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#888;"><span>省下稅金:</span><span>¥${taxAmount.toLocaleString()}</span></div>`; }
             resultDiv.innerHTML = html;
         }
 
-        // 鞋碼
         function calcSize() {
             const gender = document.getElementById('size-gender').value;
             const type = document.getElementById('size-type').value;
@@ -131,7 +128,6 @@
             resEl.innerText = `JP ${jp} cm`;
         }
 
-        // 交通
         function searchTransport(engine) {
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
@@ -160,7 +156,6 @@
             toInput.value = temp;
         }
 
-        // 隱藏功能
         const clickStates = { reset: { count: 0, timer: null }, title: { count: 0, timer: null }, backup: { count: 0, timer: null } };
         function handleHeaderClick(type) {
             const state = clickStates[type];
@@ -168,7 +163,6 @@
             state.count++;
             if (state.timer) clearTimeout(state.timer);
             state.timer = setTimeout(() => { state.count = 0; }, 800);
-            
             if (state.count === 3) {
                 state.count = 0;
                 if (type === 'reset') { if(prompt("⚠️ 警告：清除資料！\n密碼 (8888)：") === "8888") if(window.forceResetAction) window.forceResetAction(); }
@@ -208,13 +202,12 @@
             --text-color: #5D4037; --card-bg: #FAF9F6; --bg-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
         }
         
-        /* Dark Mode Variables */
         body.dark-mode {
             --wood-dark: #e0e0e0; --wood-light: #1a1a1a; --paper: #2d2d2d;
             --accent-green: #7ca06d; --accent-red: #d67a7a; --accent-blue: #8faab5;
             --border: #444; --private-gold: #e6c15c;
             --text-color: #ddd; --card-bg: #2d2d2d;
-            --bg-image: none; /* 深色模式移除紋理，保持簡潔 */
+            --bg-image: none; 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -236,9 +229,7 @@
         input, select, textarea { font-size: 16px !important; }
         
         /* Dark Mode Adjustments */
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
-            background-color: #444; color: #fff; border-color: #555;
-        }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #444; color: #fff; border-color: #555; }
         body.dark-mode .info-card { background: var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         body.dark-mode .weather-card { background: rgba(60,60,60,0.9); color: #ddd; border-color: #555; }
         body.dark-mode .weather-card div { color: #ddd !important; }
@@ -258,12 +249,23 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* ★★★ 深色模式懸浮按鈕 ★★★ */
+        #dark-mode-float-btn {
+            position: fixed; top: 15px; left: 15px; width: 42px; height: 42px;
+            border-radius: 50%; background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 2000; font-size: 1.2rem; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s;
+        }
+        body.dark-mode #dark-mode-float-btn { background: #444; border-color: #666; color: #fff; }
+
         #update-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10002; display: none; justify-content: center; align-items: center; }
         .update-content { background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green); }
+        body.dark-mode .modal-content, body.dark-mode .update-content { background: #333; color: #fff; border: 1px solid #555; }
 
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
         .modal-content { background:white; padding:25px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        body.dark-mode .modal-content, body.dark-mode .update-content { background: #333; color: #fff; border: 1px solid #555; }
         
         .modal-btn { display:block; width:100%; padding:14px; margin:12px 0; border:1px solid #ddd; background:#f9f9f9; border-radius:10px; font-size:1rem; cursor:pointer; font-weight: bold; }
         body.dark-mode .modal-btn { background: #444; border-color: #555; color: #fff; }
@@ -278,7 +280,6 @@
         .secret-trigger { font-size: 1.5rem; cursor: pointer; opacity: 0.3; color: var(--wood-dark); padding: 10px; }
         #backup-plane { transform: scaleX(-1); }
 
-        /* Countdown Style */
         #countdown-text { font-size: 0.9rem; color: var(--accent-green); font-weight: bold; margin-top: 5px; display: block; animation: fadeIn 2s; }
 
         .main-nav { max-width: 800px; margin: 0 auto 20px; display: flex; background: rgba(255, 255, 255, 0.9); padding: 6px; border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -384,6 +385,8 @@
     </style>
 </head>
 <body>
+
+<button id="dark-mode-float-btn" onclick="toggleDarkMode()">🌙</button>
 
 <div id="splash-screen">
     <div class="plane-icon">✈️</div>
@@ -616,10 +619,6 @@
 
     <section id="tools-sec" class="content-section">
         <div class="info-card">
-            <button id="dark-mode-btn" class="btn-wood" style="background:#333;" onclick="toggleDarkMode()">🌙 切換深色模式</button>
-        </div>
-
-        <div class="info-card">
             <h3 style="margin-top:0;">🛍️ 日本購物退稅計算</h3>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                <input type="number" id="tax-input" class="input-wood" style="margin:0;" placeholder="輸入標價" oninput="calcTaxFree()">
@@ -721,7 +720,11 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 54.0 Started");
+        console.log("🚀 福岡行旅 App - Version 54.1 Started");
+        
+        // 自動填入版本號
+        const verDisplay = document.getElementById('disp-version');
+        if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
         
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -758,7 +761,6 @@
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
         window.myExpenseChart = null;
-        window.chartMode = 'account'; // 'account' or 'category'
 
         let selectedSpot = null;
         let sortableInstance = null;
@@ -866,6 +868,7 @@
                     }
                     if (item.main.temp_min < dailyData[date].min) dailyData[date].min = item.main.temp_min;
                     if (item.main.temp_max > dailyData[date].max) dailyData[date].max = item.main.temp_max;
+                    
                     if (item.dt_txt.includes("12:00:00")) dailyData[date].icon = item.weather[0].icon;
                 });
 
@@ -935,7 +938,7 @@
         window.openExpenseModal = (name, type) => { selectedSpot = name; document.getElementById('expense-spot-name').innerText = name; document.getElementById('expense-date').value = new Date().toISOString().split('T')[0]; if(type) document.querySelector(`input[name="exp-type"][value="${type}"]`).checked = true; document.getElementById('expense-modal').style.display = 'flex'; };
         window.closeExpenseModal = () => document.getElementById('expense-modal').style.display = 'none';
         window.updateExpensePreview = (val) => { let twd = (document.getElementById('expense-currency').value === 'JPY') ? Math.round(val * window.currentRate) : Math.round(val); document.getElementById('expense-twd-preview').innerText = twd.toLocaleString(); };
-        window.saveSpotExpense = () => { const n = document.getElementById('expense-item').value; const v = document.getElementById('expense-amount').value; if(!n || !v) { alert("請輸入"); return; } const cat = document.getElementById('expense-cat').value; const type = document.querySelector('input[name="exp-type"]:checked').value; const rec = { d: document.getElementById('expense-date').value, n: `[${selectedSpot||''}] ${n}`, v: v, c: document.getElementById('expense-currency').value, cat: cat }; if(type==='private') { window.privateExpenses.push(rec); savePrivate(); } else if(type==='public') { window.expenses.push({d:rec.d, n:rec.n, v:v, cat:cat}); saveAll(); } else { window.purchased.push(rec); saveAll(); } closeExpenseModal(); };
+        window.saveSpotExpense = () => { const n = document.getElementById('expense-item').value; const v = document.getElementById('expense-amount').value; if(!n || !v) { alert("請輸入"); return; } const type = document.querySelector('input[name="exp-type"]:checked').value; const rec = { d: document.getElementById('expense-date').value, n: `[${selectedSpot||''}] ${n}`, v: v, c: document.getElementById('expense-currency').value, cat: document.getElementById('expense-cat').value }; if(type==='private') { window.privateExpenses.push(rec); savePrivate(); } else if(type==='public') { window.expenses.push({d:rec.d, n:rec.n, v:v, cat:rec.cat}); saveAll(); } else { window.purchased.push(rec); saveAll(); } closeExpenseModal(); };
         window.addPurchasedManual = () => { window.purchased.push({d: new Date().toISOString().split('T')[0], n: "品項", v: 0, c: "JPY", cat: "🛍️"}); saveAll(); };
         window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); };
         window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
