@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=59.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=59.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=60.0">
     
-    <title>福岡行旅 2026 (v59.0)</title>
+    <title>福岡行旅 2026 (v60.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v59.0'; 
+        const CURRENT_VERSION = 'v60.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -45,8 +45,6 @@
                 if (!response.ok) throw new Error("Connection failed");
                 const text = await response.text();
                 const match = text.match(/const\s+CURRENT_VERSION\s*=\s*['"](v[\d\.]+)['"];/);
-                
-                lastCheckTime = Date.now();
                 if (match && match[1]) {
                     const remoteVersion = match[1];
                     if (remoteVersion !== CURRENT_VERSION) {
@@ -196,8 +194,6 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             if(window.initApp) window.initApp();
-            loadDarkMode();
-            updateCountdown();
             
             const verDisplay = document.getElementById('disp-version');
             if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
@@ -343,13 +339,40 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; border-bottom: none; }
         .checkbox-lg { transform: scale(1.5); margin-left: 5px; cursor: pointer; flex-shrink: 0; accent-color: var(--wood-dark); }
 
-        /* ★★★ v59.0 優化：記帳列表排版 ★★★ */
-        .expense-row { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; background: #fff; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
-        body.dark-mode .expense-row { background: #333; border-color: #444; }
-        .expense-row input { margin: 0; border: 1px solid #ddd; padding: 8px 5px; } /* 縮小 Padding */
-        .currency-select { border: none; background: #f0f0f0; padding: 8px 5px; border-radius: 6px; font-weight: bold; color: #555; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
-        body.dark-mode .currency-select { background: #444; color: #ccc; }
-        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.6rem; padding: 0 4px; line-height: 1; flex-shrink: 0; }
+        /* ★★★ v60.0 記帳卡片樣式 ★★★ */
+        .expense-card-item {
+            background: #fff; border: 1px solid #eee; border-radius: 12px;
+            padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        body.dark-mode .expense-card-item { background: #333; border-color: #444; }
+        
+        .expense-date-row {
+            margin-bottom: 6px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 4px;
+        }
+        body.dark-mode .expense-date-row { border-bottom-color: #444; }
+        
+        .expense-date-input {
+            border: none; background: transparent; color: #888; font-size: 0.8rem; width: 100%;
+        }
+        
+        .expense-main-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        
+        .ex-input-clean {
+            border: 1px solid #eee; border-radius: 6px; padding: 8px; font-size: 1rem;
+            background: #fafafa;
+        }
+        body.dark-mode .ex-input-clean { background: #444; border-color: #555; color: #fff; }
+        
+        .ex-cat { font-size: 1.2rem; margin-right: 2px; }
+        .ex-name { flex: 2; min-width: 0; } /* 彈性寬度 */
+        .ex-amount { flex: 1.2; text-align: right; font-weight: bold; color: var(--wood-dark); }
+        body.dark-mode .ex-amount { color: #ddd; }
+        .ex-currency { width: 50px; background: #f0f0f0; border: none; border-radius: 6px; padding: 8px 2px; text-align: center; font-size: 0.8rem; color: #555; }
+        body.dark-mode .ex-currency { background: #555; color: #ccc; }
+
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.4rem; padding: 0 5px; flex-shrink: 0; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 6px solid var(--accent-green); border-radius: 10px; padding: 18px; margin-bottom: 18px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         body.dark-mode .itinerary-card { background: #333; border-color: #444; }
@@ -424,7 +447,6 @@
         .phrase-cn-sm { font-size: 0.8rem; color: #666; }
         body.dark-mode .phrase-cn-sm { color: #aaa; }
 
-        /* ★★★ v59.0 搜尋框樣式 ★★★ */
         .search-bar-container { margin-bottom: 10px; display: flex; align-items: center; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
         body.dark-mode .search-bar-container { background: #444; border-color: #555; }
         .search-input-wide { border: none; background: transparent; width: 100%; font-size: 0.95rem; outline: none; }
@@ -839,7 +861,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 59.0 Started");
+        console.log("🚀 福岡行旅 App - Version 60.0 Started");
         
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
@@ -1089,18 +1111,50 @@
         window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
+        
+        // ★★★ v60.0 新版記帳渲染 (卡片式) ★★★
         window.renderMoney = () => { 
             const list = document.getElementById('expense-list');
             const filter = window.expenseFilter;
             const filteredExpenses = window.expenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
             
-            list.innerHTML = filteredExpenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:95px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); 
+            list.innerHTML = filteredExpenses.map((e, i) => `
+                <div class="expense-card-item">
+                    <div class="expense-date-row">
+                        <input type="date" class="expense-date-input" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()">
+                    </div>
+                    <div class="expense-main-row">
+                        <span class="ex-cat">${e.cat||'📦'}</span>
+                        <input class="ex-input-clean ex-name" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()">
+                        <input type="number" class="ex-input-clean ex-amount" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()">
+                        <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span>
+                    </div>
+                </div>
+            `).join('');
             
+            // Member List (Simple Row)
             document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); 
             
+            // Purchased List (Card)
             const filteredPurchased = window.purchased.filter(p => !filter || (p.n && p.n.toLowerCase().includes(filter)));
-            document.getElementById('purchased-list').innerHTML = filteredPurchased.map((p, i) => { if(p.c === 'TWD') return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:95px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>`; else return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:95px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); 
-            
+            document.getElementById('purchased-list').innerHTML = filteredPurchased.map((p, i) => `
+                <div class="expense-card-item" style="border-left:4px solid #78909C;">
+                    <div class="expense-date-row">
+                         <input type="date" class="expense-date-input" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()">
+                    </div>
+                    <div class="expense-main-row">
+                        <span class="ex-cat">${p.cat||'🛍️'}</span>
+                        <input class="ex-input-clean ex-name" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()">
+                        <select class="ex-currency" onchange="purchased[${i}].c=this.value;saveAll()">
+                            <option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option>
+                            <option value="TWD" ${p.c==='TWD'?'selected':''}>$</option>
+                        </select>
+                        <input type="number" class="ex-input-clean ex-amount" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()">
+                        <span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span>
+                    </div>
+                </div>
+            `).join('');
+
             let totalJpy=0, totalTwd=0; 
             window.purchased.forEach(p => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); });
             document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); 
@@ -1111,7 +1165,19 @@
         window.renderPrivate = () => { 
             const filter = window.expenseFilter;
             const filteredPrivate = window.privateExpenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
-            document.getElementById('private-expense-list').innerHTML = filteredPrivate.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:95px;" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5;min-width:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`).join(''); 
+            document.getElementById('private-expense-list').innerHTML = filteredPrivate.map((e, i) => `
+                <div class="expense-card-item" style="border-left:4px solid var(--private-gold);">
+                    <div class="expense-date-row">
+                        <input type="date" class="expense-date-input" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()">
+                    </div>
+                    <div class="expense-main-row">
+                        <span class="ex-cat">${e.cat||'📦'}</span>
+                        <input class="ex-input-clean ex-name" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()">
+                        <input type="number" class="ex-input-clean ex-amount" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()">
+                        <span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span>
+                    </div>
+                </div>
+            `).join(''); 
             
             let total = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0); 
             document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); let bal = window.privateBudget - total; document.getElementById('private-balance').innerText = `¥ ${bal.toLocaleString()}`; document.getElementById('private-balance-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); document.getElementById('budget-percent').innerText = window.privateBudget > 0 ? Math.round(total / window.privateBudget * 100) + '%' : '0%'; 
