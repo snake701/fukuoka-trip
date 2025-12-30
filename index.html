@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=57.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=57.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=59.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=59.0">
     
-    <title>福岡行旅 2026 (v57.0)</title>
+    <title>福岡行旅 2026 (v59.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v57.0'; 
+        const CURRENT_VERSION = 'v59.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -102,7 +102,6 @@
             if(btn) btn.innerText = isDark ? "☀️" : "🌙";
         }
 
-        // 指指通顯示
         function showPhrase(jp, romaji, cn) {
             const m = document.getElementById('phrase-modal');
             document.getElementById('phrase-jp').innerText = jp;
@@ -110,12 +109,21 @@
             document.getElementById('phrase-cn').innerText = cn;
             m.style.display = 'flex';
         }
+        
+        function showSubwayMap() {
+            document.getElementById('map-modal').style.display = 'flex';
+        }
 
         function copyText(txt) {
             navigator.clipboard.writeText(txt).then(() => showToast("📋 已複製"));
         }
+        
+        function filterExpenses(keyword) {
+            window.expenseFilter = keyword.toLowerCase();
+            if (window.renderMoney) window.renderMoney();
+            if (window.renderPrivate) window.renderPrivate();
+        }
 
-        // 退稅 & 尺碼 & 交通 (維持 v56 邏輯)
         function calcTaxFree() {
             const inputVal = parseFloat(document.getElementById('tax-input').value);
             const resultDiv = document.getElementById('tax-result');
@@ -270,10 +278,12 @@
         }
         body.dark-mode #dark-mode-float-btn { background: #444; border-color: #666; color: #fff; }
 
-        #update-modal, #phrase-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10002; display: none; justify-content: center; align-items: center; }
+        #update-modal, #phrase-modal, #map-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10002; display: none; justify-content: center; align-items: center; }
         .update-content { background: white; padding: 30px; border-radius: 16px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--accent-green); }
         .phrase-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; border: 4px solid var(--wood-dark); }
-        body.dark-mode .modal-content, body.dark-mode .update-content, body.dark-mode .phrase-content { background: #333; color: #fff; border: 1px solid #555; }
+        .map-content { background: white; padding: 5px; border-radius: 8px; width: 95%; height: 80%; display: flex; flex-direction: column; }
+        
+        body.dark-mode .modal-content, body.dark-mode .update-content, body.dark-mode .phrase-content, body.dark-mode .map-content { background: #333; color: #fff; border: 1px solid #555; }
 
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 10001; display:none; justify-content:center; align-items:center; backdrop-filter: blur(3px); }
         .modal-content { background:white; padding:25px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -333,12 +343,13 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; border-bottom: none; }
         .checkbox-lg { transform: scale(1.5); margin-left: 5px; cursor: pointer; flex-shrink: 0; accent-color: var(--wood-dark); }
 
-        .expense-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        /* ★★★ v59.0 優化：記帳列表排版 ★★★ */
+        .expense-row { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; background: #fff; padding: 8px; border-radius: 10px; border: 1px solid #eee; }
         body.dark-mode .expense-row { background: #333; border-color: #444; }
-        .expense-row input { margin: 0; border: 1px solid #ddd; }
-        .currency-select { border: none; background: #f0f0f0; padding: 8px 10px; border-radius: 6px; font-weight: bold; color: #555; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
+        .expense-row input { margin: 0; border: 1px solid #ddd; padding: 8px 5px; } /* 縮小 Padding */
+        .currency-select { border: none; background: #f0f0f0; padding: 8px 5px; border-radius: 6px; font-weight: bold; color: #555; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
         body.dark-mode .currency-select { background: #444; color: #ccc; }
-        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.6rem; padding: 0 8px; line-height: 1; flex-shrink: 0; }
+        .delete-btn { color: #ccc; cursor: pointer; font-size: 1.6rem; padding: 0 4px; line-height: 1; flex-shrink: 0; }
         
         .itinerary-card { background: white; border: 1px solid var(--border); border-left: 6px solid var(--accent-green); border-radius: 10px; padding: 18px; margin-bottom: 18px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         body.dark-mode .itinerary-card { background: #333; border-color: #444; }
@@ -403,7 +414,7 @@
         .expense-type-selector label:has(input:checked) { border-color: var(--wood-dark); background: #fff8e1; }
         body.dark-mode .expense-type-selector label:has(input:checked) { background: #555; border-color: #777; }
         
-        .cat-badge { font-size: 1.2rem; margin-right: 5px; }
+        .cat-badge { font-size: 1.2rem; margin-right: 2px; }
 
         /* Phrase Card */
         .phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -412,6 +423,12 @@
         .phrase-jp-sm { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; display: block; }
         .phrase-cn-sm { font-size: 0.8rem; color: #666; }
         body.dark-mode .phrase-cn-sm { color: #aaa; }
+
+        /* ★★★ v59.0 搜尋框樣式 ★★★ */
+        .search-bar-container { margin-bottom: 10px; display: flex; align-items: center; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        body.dark-mode .search-bar-container { background: #444; border-color: #555; }
+        .search-input-wide { border: none; background: transparent; width: 100%; font-size: 0.95rem; outline: none; }
+        body.dark-mode .search-input-wide { color: #fff; }
     </style>
 </head>
 <body>
@@ -431,6 +448,16 @@
         <p id="update-text" style="color:#666; margin:15px 0;">系統已優化，建議立即更新</p>
         <button class="modal-btn update" onclick="forceReloadApp()">立即更新 ⚡</button>
         <button class="modal-btn close" onclick="document.getElementById('update-modal').style.display='none'">稍後再說</button>
+    </div>
+</div>
+
+<div id="map-modal" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="map-content" onclick="event.stopPropagation()">
+        <h3 style="margin:0 0 10px 0; text-align:center;">福岡地下鐵路線圖</h3>
+        <div style="flex:1; overflow:auto; background:#fff; border-radius:4px; display:flex; align-items:center; justify-content:center;">
+             <img src="https://subway.city.fukuoka.lg.jp/img/route/map_l_en.jpg" style="max-width:100%; height:auto;" alt="Fukuoka Subway Map">
+        </div>
+        <button class="modal-btn close" style="margin-top:10px;" onclick="document.getElementById('map-modal').style.display='none'">關閉</button>
     </div>
 </div>
 
@@ -614,7 +641,14 @@
             <button class="btn-sm" onclick="addMember()">+ 新增成員</button>
         </div>
         <div class="info-card">
-            <h3 style="margin-top:0;">💸 公共支出 (公款)</h3>
+            <h3 style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
+                <span>💸 公共支出</span>
+            </h3>
+            <div class="search-bar-container">
+                <span style="font-size:0.9rem;">🔍</span>
+                <input class="search-input-wide" placeholder="搜尋消費紀錄..." oninput="filterExpenses(this.value)">
+            </div>
+            
             <div id="expense-list"></div>
             <button class="btn-sm" onclick="addExpense()">+ 新增支出</button>
             <div style="margin-top:15px; text-align:right; font-weight:bold;">
@@ -639,6 +673,10 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3 style="color: var(--private-gold); margin:0;">🔒 我的私密帳本</h3>
                 <button class="btn-sm" style="background:#eee; color:#666;" onclick="lockPrivate()">🛑 上鎖</button>
+            </div>
+            <div class="search-bar-container">
+                <span style="font-size:0.9rem;">🔍</span>
+                <input class="search-input-wide" placeholder="搜尋私帳..." oninput="filterExpenses(this.value)">
             </div>
             <p style="font-size:0.8rem; color:#888; margin-bottom:15px;">* 資料僅儲存於本機 (Local Only)</p>
             <div style="background:#fffaf0; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #efe5c9;">
@@ -665,6 +703,10 @@
                 <input id="booking-code" class="input-wood" placeholder="編號" style="flex:1; margin:0;">
                 <button class="btn-wood" style="width:auto; padding:0 15px;" onclick="addBooking()">＋</button>
             </div>
+        </div>
+
+        <div class="info-card">
+            <button class="btn-wood" style="background:#0078D7;" onclick="showSubwayMap()">🚇 顯示福岡地鐵路線圖</button>
         </div>
 
         <div class="info-card">
@@ -709,6 +751,7 @@
             <div id="tax-result" class="tax-result-box">
                 <span style="color:#ccc; font-size:0.9rem;">輸入金額以計算...</span>
             </div>
+            <div style="font-size:0.75rem; color:#888; margin-top:5px; text-align:center;">* 免稅門檻：5,500円 (含稅)</div>
         </div>
 
         <div class="info-card">
@@ -796,7 +839,7 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 57.0 Started");
+        console.log("🚀 福岡行旅 App - Version 59.0 Started");
         
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
@@ -840,12 +883,13 @@
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
         window.purchased = []; window.hotelData = []; window.checks = []; window.shoppingList = []; window.memo = "";
-        window.bookings = []; // v57.0
+        window.bookings = [];
         window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
         window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
         window.currentRate = 0.215;
         window.myExpenseChart = null;
         window.chartMode = 'account';
+        window.expenseFilter = "";
 
         let selectedSpot = null;
         let sortableInstance = null;
@@ -879,7 +923,7 @@
                     window.checks = data.checks || []; 
                     window.shoppingList = data.shoppingList || []; 
                     window.memo = data.memo || "";
-                    window.bookings = data.bookings || []; // v57.0
+                    window.bookings = data.bookings || [];
                     
                     const memoArea = document.getElementById('group-memo');
                     if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
@@ -912,8 +956,14 @@
         window.savePrivate = () => { localStorage.setItem('fukuoka_private_v3_exp', JSON.stringify(window.privateExpenses)); localStorage.setItem('fukuoka_private_v3_budget', window.privateBudget); renderPrivate(); };
         window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); renderBookings(); updateChart(); };
         window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
+        
+        // ★★★ v58.0 搜尋過濾 ★★★
+        window.filterExpenses = (keyword) => {
+            window.expenseFilter = keyword.toLowerCase();
+            window.renderMoney();
+            window.renderPrivate();
+        };
 
-        // ★★★ v57.0 預訂編號夾 ★★★
         window.renderBookings = () => {
             const list = document.getElementById('booking-list');
             if (!list) return;
@@ -940,14 +990,8 @@
             document.getElementById('booking-title').value = "";
             document.getElementById('booking-code').value = "";
         };
-        window.deleteBooking = (i) => {
-            if(confirm("刪除此預訂資料？")) {
-                window.bookings.splice(i, 1);
-                saveAll();
-            }
-        };
+        window.deleteBooking = (i) => { if(confirm("刪除此預訂資料？")) { window.bookings.splice(i, 1); saveAll(); } };
 
-        // 天氣定位 (Open-Meteo)
         window.getGeoWeather = function() {
             document.getElementById('weather-location-text').innerText = "定位中...";
             if (navigator.geolocation) {
@@ -1041,43 +1085,58 @@
         window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
         window.closeBackupModal = () => document.getElementById('backup-modal').style.display='none';
         window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
-        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, bookings:window.bookings, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup.json`; a.click(); };
+        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, memo:window.memo}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup.json`; a.click(); };
         window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
 
         window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
-        window.renderMoney = () => { document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('expense-list').innerHTML = window.expenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); let totalJpy=0, totalTwd=0; document.getElementById('purchased-list').innerHTML = window.purchased.map((p, i) => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:105px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); };
-        window.renderPrivate = () => { let total = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0); document.getElementById('private-expense-list').innerHTML = window.privateExpenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:105px;" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5;min-width:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`).join(''); document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); let bal = window.privateBudget - total; document.getElementById('private-balance').innerText = `¥ ${bal.toLocaleString()}`; document.getElementById('private-balance-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); document.getElementById('budget-percent').innerText = window.privateBudget > 0 ? Math.round(total / window.privateBudget * 100) + '%' : '0%'; };
-        
-        window.toggleChartType = () => {
-            window.chartMode = (window.chartMode === 'account') ? 'category' : 'account';
-            updateChart();
+        window.renderMoney = () => { 
+            const list = document.getElementById('expense-list');
+            const filter = window.expenseFilter;
+            const filteredExpenses = window.expenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
+            
+            list.innerHTML = filteredExpenses.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:95px;" value="${e.d||''}" onchange="expenses[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="expenses[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${e.v}" onchange="expenses[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span></div>`).join(''); 
+            
+            document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); 
+            
+            const filteredPurchased = window.purchased.filter(p => !filter || (p.n && p.n.toLowerCase().includes(filter)));
+            document.getElementById('purchased-list').innerHTML = filteredPurchased.map((p, i) => { if(p.c === 'TWD') return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:95px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>`; else return `<div class="expense-row"><span class="cat-badge">${p.cat||'🛍️'}</span><input type="date" class="input-wood" style="width:95px;" value="${p.d||''}" onchange="purchased[${i}].d=this.value;saveAll()"><input class="input-wood" style="flex:2;min-width:0;" value="${p.n}" onchange="purchased[${i}].n=this.value;saveAll()"><select class="currency-select" onchange="purchased[${i}].c=this.value;saveAll()"><option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option><option value="TWD" ${p.c==='TWD'?'selected':''}>$</option></select><input type="number" class="input-wood" style="flex:1;min-width:0;" value="${p.v}" onchange="purchased[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="purchased.splice(${i},1);saveAll()">×</span></div>` }).join(''); 
+            
+            let totalJpy=0, totalTwd=0; 
+            window.purchased.forEach(p => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); });
+            document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); 
+            let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); 
+            document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); 
         };
+        
+        window.renderPrivate = () => { 
+            const filter = window.expenseFilter;
+            const filteredPrivate = window.privateExpenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
+            document.getElementById('private-expense-list').innerHTML = filteredPrivate.map((e, i) => `<div class="expense-row"><span class="cat-badge">${e.cat||'📦'}</span><input type="date" class="input-wood" style="width:95px;" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()"><input class="input-wood" style="flex:2;min-width:0;" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()"><input type="number" class="input-wood" style="flex:1.5;min-width:0;" value="${e.v}" onchange="privateExpenses[${i}].v=this.value;savePrivate()"><span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span></div>`).join(''); 
+            
+            let total = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0); 
+            document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); let bal = window.privateBudget - total; document.getElementById('private-balance').innerText = `¥ ${bal.toLocaleString()}`; document.getElementById('private-balance-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); document.getElementById('budget-percent').innerText = window.privateBudget > 0 ? Math.round(total / window.privateBudget * 100) + '%' : '0%'; 
+        };
+        
+        window.toggleChartType = () => { window.chartMode = (window.chartMode === 'account') ? 'category' : 'account'; updateChart(); };
 
         window.updateChart = () => {
             const ctx = document.getElementById('expenseChart');
             if(!ctx) return;
-            
             let data = [], labels = [], bgColors = [];
-
             if (window.chartMode === 'category') {
                 const cats = {};
-                const allExp = [...window.expenses, ...window.purchased]; // 排除私帳
+                const allExp = [...window.expenses, ...window.purchased]; 
                 allExp.forEach(e => {
                     const c = e.cat || '📦';
                     const val = (e.c === 'TWD') ? Number(e.v)/window.currentRate : Number(e.v);
                     cats[c] = (cats[c] || 0) + val;
                 });
-                labels = Object.keys(cats);
-                data = Object.values(cats);
-                bgColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+                labels = Object.keys(cats); data = Object.values(cats); bgColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
             } else {
                 let pub = window.expenses.reduce((a, c) => a + Number(c.v), 0);
                 let shop = 0; window.purchased.forEach(p => shop += (p.c === 'TWD' ? Number(p.v)/window.currentRate : Number(p.v)));
-                labels = ['公款', '購物'];
-                data = [pub, shop];
-                bgColors = ['#8D9977', '#78909C'];
+                labels = ['公款', '購物']; data = [pub, shop]; bgColors = ['#8D9977', '#78909C'];
             }
-
             if(window.myExpenseChart) window.myExpenseChart.destroy();
             window.myExpenseChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
         };
