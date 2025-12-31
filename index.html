@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=62.0">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=62.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=63.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=63.0">
     
-    <title>福岡行旅 2026 (v62.0)</title>
+    <title>福岡行旅 2026 (v63.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v62.0'; 
+        const CURRENT_VERSION = 'v63.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -344,7 +344,7 @@
         .check-item.checked input[type="text"] { text-decoration: line-through; color: #aaa; border-bottom: none; }
         .checkbox-lg { transform: scale(1.5); margin-left: 5px; cursor: pointer; flex-shrink: 0; accent-color: var(--wood-dark); }
 
-        /* Expense Row (Public) */
+        /* Expense Row */
         .expense-row { 
             display: flex; gap: 4px; margin-bottom: 6px; align-items: center; 
             background: #fff; padding: 8px 6px; border-radius: 8px; border: 1px solid #eee; 
@@ -403,54 +403,6 @@
         .itinerary-title { font-size: 1.1rem; font-weight: bold; margin: 10px 0 5px 38px; line-height: 1.4; word-break: break-word; }
         .itinerary-content { margin-left: 38px; }
 
-        .tool-label { font-size: 0.9rem; color: #555; font-weight: bold; margin: 12px 0 6px; display: block; }
-        body.dark-mode .tool-label { color: #aaa; }
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .link-btn { background: white; border: 1px solid #ddd; padding: 16px; text-align: center; border-radius: 10px; text-decoration: none; color: var(--wood-dark); font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.03); }
-        body.dark-mode .link-btn { background: #333; border-color: #444; color: #ddd; }
-        .link-btn.emergency { background: #ffebee; border-color: #ef9a9a; color: #c62828; }
-        body.dark-mode .link-btn.emergency { background: #5a2a2a; border-color: #7f3e3e; color: #ff9999; }
-        .footer-info { text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 50px; padding-bottom: 30px; }
-        .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
-        body.dark-mode .ex-tool { background: #2c3e50 !important; border-color: #4a6fa5 !important; }
-        .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
-
-        /* Weather Styles */
-        .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
-        .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
-        .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
-        #weather-title { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.9rem; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        #refresh-geo-btn { background: #fff; border: 1px solid #ccc; border-radius: 20px; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        body.dark-mode #refresh-geo-btn { background: #444; border-color: #666; color: #ccc; }
-        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
-        .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
-        
-        .station-tags { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; -webkit-overflow-scrolling: touch; }
-        .station-tag { 
-            background: #fff; padding: 6px 12px; border-radius: 20px; 
-            font-size: 0.85rem; cursor: pointer; white-space: nowrap; 
-            color: #555; border: 1px solid #ddd; transition: all 0.2s;
-        }
-        body.dark-mode .station-tag { background: #444; color: #ccc; border-color: #555; }
-        .station-tag:active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-        
-        .transport-input { transition: all 0.3s; border: 1px solid #ccc; }
-        .active-field { 
-            border: 2px solid var(--wood-dark) !important; 
-            background-color: #fffde7 !important; 
-            box-shadow: 0 0 5px rgba(93, 64, 55, 0.2);
-        }
-        body.dark-mode .active-field { background-color: #4a4a3a !important; border-color: #e6c15c !important; }
-
-        .tax-result-box { margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px; border:1px solid #eee; text-align:center; }
-        
-        /* Accordion Style */
-        details summary { cursor: pointer; outline: none; font-weight: bold; color: var(--wood-dark); padding: 5px; list-style: none; }
-        details summary::-webkit-details-marker { display: none; }
-        details[open] summary { margin-bottom: 10px; }
-        body.dark-mode details summary { color: #ddd; }
-
         .search-bar-container { margin-bottom: 10px; display: flex; align-items: center; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
         body.dark-mode .search-bar-container { background: #444; border-color: #555; }
         .search-input-wide { border: none; background: transparent; width: 100%; font-size: 0.95rem; outline: none; }
@@ -481,9 +433,12 @@
     <div class="map-content" onclick="event.stopPropagation()">
         <h3 style="margin:0 0 10px 0; text-align:center;">福岡地下鐵路線圖</h3>
         <div style="flex:1; overflow:auto; background:#fff; border-radius:4px; display:flex; align-items:center; justify-content:center;">
-             <img src="https://subway.city.fukuoka.lg.jp/img/route/map_l_en.jpg" style="max-width:100%; height:auto;" alt="Fukuoka Subway Map">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Fukuoka_City_Subway_Route_Map_en.svg/1024px-Fukuoka_City_Subway_Route_Map_en.svg.png" style="max-width:100%; height:auto;" alt="Fukuoka Subway Map">
         </div>
-        <button class="modal-btn close" style="margin-top:10px;" onclick="document.getElementById('map-modal').style.display='none'">關閉</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="modal-btn" style="flex:1;" onclick="window.open('https://subway.city.fukuoka.lg.jp/cha/route/', '_blank')">🔗 開啟原始網頁</button>
+            <button class="modal-btn close" style="flex:1; margin:0;" onclick="document.getElementById('map-modal').style.display='none'">關閉</button>
+        </div>
     </div>
 </div>
 
@@ -600,7 +555,7 @@
             <div style="display:flex; gap:10px; align-items: center;">
                 <button onclick="checkGoogleTime()" style="background:var(--accent-blue); color:white; border:none; padding:12px; border-radius:6px; font-size:0.9rem; cursor:pointer; white-space:nowrap;">🔍 查詢</button>
                 <input type="text" id="new-travel" class="input-wood" style="flex:1; margin:0; font-size:0.95rem;" placeholder="交通方式">
-                <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.95rem;" placeholder="⏳ 停留時間" inputmode="decimal">
+                <input type="text" id="new-stay" class="input-wood" style="flex:1; margin:0; font-size:0.95rem;" placeholder="⏳ 停留時間">
             </div>
         </div>
         <div style="text-align:center; font-size:0.8rem; color:#999; margin-bottom:10px; display:flex; justify-content:space-between; padding:0 5px;">
@@ -788,430 +743,4 @@
         <div class="info-card">
             <h3 style="margin-top:0;">👟 尺碼換算 (鞋碼)</h3>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <select id="size-gender" class="input-wood" onchange="calcSize()" style="margin:0;">
-                    <option value="w">女鞋 (Women)</option>
-                    <option value="m">男鞋 (Men)</option>
-                </select>
-                <select id="size-type" class="input-wood" onchange="calcSize()" style="margin:0;">
-                    <option value="us">US 美碼</option>
-                    <option value="eu">EU 歐碼</option>
-                </select>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <input type="number" id="size-input" class="input-wood" placeholder="輸入尺碼" style="margin:0;" inputmode="decimal" oninput="calcSize()">
-                <div style="font-weight:bold; font-size:1.2rem;">⮕</div>
-                <div id="size-result" style="font-size:1.2rem; font-weight:bold; color:var(--wood-dark); min-width:80px; text-align:right;">JP -- cm</div>
-            </div>
-        </div>
-
-        <div class="info-card">
-            <h3 style="margin-top:0;">🚄 電車轉乘/車資查詢</h3>
-            <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-                <div style="flex:1;">
-                    <input id="trans-from" class="input-wood transport-input" placeholder="出發" style="margin:0;" onclick="setActiveField('trans-from')">
-                </div>
-                <button onclick="swapStations()" style="background:none; border:1px solid #ccc; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:1rem; padding:0; flex-shrink:0;">⇄</button>
-                <div style="flex:1;">
-                    <input id="trans-to" class="input-wood transport-input" placeholder="到達" style="margin:0;" onclick="setActiveField('trans-to')">
-                </div>
-            </div>
-            <div class="station-tags">
-                <span class="station-tag" onclick="fillStation('博多')">博多</span>
-                <span class="station-tag" onclick="fillStation('福岡空港')">福岡空港</span>
-                <span class="station-tag" onclick="fillStation('天神')">天神</span>
-                <span class="station-tag" onclick="fillStation('由布院')">由布院</span>
-                <span class="station-tag" onclick="fillStation('別府')">別府</span>
-                <span class="station-tag" onclick="fillStation('太宰府')">太宰府</span>
-                <span class="station-tag" onclick="fillStation('熊本')">熊本</span>
-                <span class="station-tag" onclick="fillStation('門司港')">門司港</span>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-wood" style="background:#E60012; font-size:0.9rem;" onclick="searchTransport('yahoo')">🔍 Yahoo! 案內</button>
-                <button class="btn-wood" style="background:#4285F4; font-size:0.9rem;" onclick="searchTransport('google')">🗺️ Google Map</button>
-            </div>
-        </div>
-
-        <div class="info-card" style="border: 1px solid #ef9a9a; background: #fffafb;">
-            <h3 style="margin-top:0; color:#c62828;">🚨 福岡急用工具包</h3>
-            <div class="link-grid">
-                <a href="tel:110" class="link-btn emergency">👮‍♂️ 報警 110</a>
-                <a href="tel:119" class="link-btn emergency">🚑 救護 119</a>
-                <a href="https://www.vjw.digital.go.jp/" target="_blank" class="link-btn">🇯🇵 VJW 入境</a>
-                <a href="https://subway.city.fukuoka.lg.jp/cha/route/" target="_blank" class="link-btn">🚇 地鐵圖</a>
-                <a href="https://www.roc-taiwan.org/jpfuk/index.html" target="_blank" class="link-btn">🇹🇼 辦事處</a>
-                <a href="https://translate.google.com/?sl=zh-TW&tl=ja" target="_blank" class="link-btn">🗣️ 翻譯</a>
-            </div>
-        </div>
-        <div class="info-card" style="border: 1px solid #aaa; background: #fffdf5;">
-            <h3 style="margin-top:0; color:#666;">📝 公用備忘錄</h3>
-            <textarea id="group-memo" class="memo-area" oninput="updateMemo(this.value)"></textarea>
-        </div>
-        <div class="info-card">
-            <h3 style="margin-top:0;">🏨 飯店資訊設定</h3>
-            <label class="tool-label">名稱</label>
-            <input id="h-name" class="input-wood" placeholder="飯店名稱" onchange="updateHotel()">
-            <label class="tool-label">地址 (點擊導航)</label>
-            <input id="h-addr" class="input-wood" placeholder="地址" onchange="updateHotel()">
-        </div>
-        <div class="info-card">
-            <h3 style="margin-top:0;">📊 系統功能</h3>
-            <button class="btn-wood" style="background:#217346;" onclick="exportToExcel()">📤 匯出 Excel (.xlsx)</button>
-            <button class="btn-wood" style="background:#555; font-size:0.9rem; margin-top:10px;" onclick="checkAppUpdate(true)">🔄 檢查更新</button>
-        </div>
-        <div class="footer-info">
-            ☁️ 最後同步：<span id="last-updated">--</span>
-            <div style="margin-top: 5px; font-size: 0.6rem; color: #ccc;">Ver <span id="disp-version"></span></div>
-        </div>
-    </section>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 62.0 Started");
-        
-        const verDisplay = document.getElementById('disp-version');
-        if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
-        
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if(splash && splash.style.opacity !== '0') {
-                 splash.style.opacity = '0'; 
-                 setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
-            }
-        }, 5000);
-
-        // 檢查更新
-        setTimeout(checkAppUpdate, 1000);
-        setInterval(scheduleSmartCheck, 60000); 
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === 'visible') {
-                scheduleSmartCheck();
-                if(window.getGeoWeather) window.getGeoWeather();
-            }
-        });
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBRzjZkVrMPADgC3dgmTRMpzYGdoEHVhuI",
-            authDomain: "fukuoka-trip-2026.firebaseapp.com",
-            databaseURL: "https://fukuoka-trip-2026-default-rtdb.firebaseio.com",
-            projectId: "fukuoka-trip-2026",
-            storageBucket: "fukuoka-trip-2026.firebasestorage.app",
-            messagingSenderId: "788923341638",
-            appId: "1:788923341638:web:838629fb9a547648372347"
-        };
-
-        let app, db, publicRef;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getDatabase(app);
-            publicRef = ref(db, 'fukuoka_trip_final_v17/public');
-        } catch(e) { console.error("Firebase init failed", e); }
-
-        window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
-        window.tripData = {}; window.members = []; window.expenses = []; 
-        window.purchased = []; window.hotelData = []; window.checks = []; window.shoppingList = []; window.memo = "";
-        window.bookings = [];
-        window.privateExpenses = JSON.parse(localStorage.getItem('fukuoka_private_v3_exp')) || [];
-        window.privateBudget = Number(localStorage.getItem('fukuoka_private_v3_budget')) || 0;
-        window.currentRate = 0.215;
-        window.myExpenseChart = null;
-        window.chartMode = 'account';
-        window.expenseFilter = "";
-
-        let selectedSpot = null;
-        let sortableInstance = null;
-        let currentEditingDay = null, currentEditingIndex = null;
-        
-        window.forceResetAction = function() { 
-            localStorage.removeItem('fukuoka_private_v3_exp');
-            localStorage.removeItem('fukuoka_private_v3_budget');
-            localStorage.removeItem('fukuoka_dark_mode');
-            const defaultData = { 
-                hotelData:[{name:"Fukuoka U-BELL Hotel",addr:"福岡市中央區警固 1-9-3"}], 
-                tripData:{1:[{t:"04:00", title:"吉林路26巷出發", map:"桃園機場", mode:"driving", travel:"40分", stay:""},{t:"08:10", title:"BR106 起飛", map:"桃園機場", mode:"driving", travel:"", stay:""},{t:"12:00", title:"飯店寄放行李", map:"HOTEL_REF", mode:"transit", travel:"20分", stay:"30分"}],7:[{t:"15:30", title:"前往機場回台", map:"福岡機場", mode:"transit", travel:"40分", stay:""},{t:"20:00", title:"開車回家", map:"溫暖的家", mode:"driving", travel:"50分", stay:""}]}, 
-                checks: [{n: "護照", c: false}], shoppingList: [{n: "伴手禮", c: false}], bookings: [], members:[], expenses:[], purchased:[], memo:"",
-                lastUpdated: Date.now()
-            };
-            set(publicRef, defaultData).then(() => {
-                alert("✅ 系統重置成功 (含私帳清除)");
-                location.reload();
-            }); 
-        };
-
-        if(publicRef) {
-            onValue(publicRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    window.tripData = data.tripData || {};
-                    window.members = data.members || [];
-                    window.expenses = data.expenses || [];
-                    window.purchased = data.purchased || [];
-                    window.hotelData = data.hotelData || [{name:"", addr:""}];
-                    window.checks = data.checks || []; 
-                    window.shoppingList = data.shoppingList || []; 
-                    window.memo = data.memo || "";
-                    window.bookings = data.bookings || [];
-                    
-                    const memoArea = document.getElementById('group-memo');
-                    if(memoArea && document.activeElement !== memoArea) memoArea.value = window.memo;
-                    
-                    if(data.lastUpdated) {
-                        const date = new Date(data.lastUpdated);
-                        document.getElementById('last-updated').innerText = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-                    }
-                    if(window.hotelData[0]) {
-                        document.getElementById('h-name').value = window.hotelData[0].name || "";
-                        document.getElementById('h-addr').value = window.hotelData[0].addr || "";
-                    }
-                    
-                    refreshUI();
-                    window.getGeoWeather();
-                    
-                    const splash = document.getElementById('splash-screen');
-                    if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.visibility = 'hidden', 500); }
-                } else { 
-                    window.forceResetAction();
-                }
-            });
-        }
-
-        window.syncEx = (el, type) => { const val = parseFloat(el.value); if(isNaN(val)) return; const res = type === 'jpy' ? (val * window.currentRate).toFixed(0) : (val / window.currentRate).toFixed(0); document.querySelectorAll('.ex-jpy').forEach(i => i.value = type === 'jpy' ? val : res); document.querySelectorAll('.ex-twd').forEach(i => i.value = type === 'jpy' ? res : val); };
-        window.updateGlobalRate = (newRate) => { window.currentRate = parseFloat(newRate); document.querySelectorAll('.ex-rate-input').forEach(i => i.value = window.currentRate); const autoDisplay = document.getElementById('auto-rate-display'); if(autoDisplay) autoDisplay.innerText = window.currentRate; window.renderMoney(); window.renderPrivate(); };
-        window.toggleRateMode = (mode) => { const manualControls = document.getElementById('manual-controls'); const autoControls = document.getElementById('auto-controls'); const rateSourceLabel = document.getElementById('rate-source'); const manualInputs = document.querySelectorAll('.ex-rate-input'); if (mode === 'auto') { manualControls.style.display = 'none'; autoControls.style.display = 'inline-block'; rateSourceLabel.innerText = "自動模式 (市價)"; rateSourceLabel.style.color = "var(--accent-blue)"; rateSourceLabel.style.borderColor = "var(--accent-blue)"; manualInputs.forEach(input => input.disabled = true); window.fetchLiveRate(); } else { manualControls.style.display = 'inline-block'; autoControls.style.display = 'none'; rateSourceLabel.innerText = "手動模式 (玉山)"; rateSourceLabel.style.color = "#666"; rateSourceLabel.style.borderColor = "#ccc"; manualInputs.forEach(input => input.disabled = false); } };
-        window.fetchLiveRate = async () => { const btn = document.querySelector('#auto-controls button'); const originalText = btn ? btn.innerText : ''; if(btn) btn.innerText = "⏳..."; try { const res = await fetch("https://api.exchangerate-api.com/v4/latest/JPY"); const data = await res.json(); window.updateGlobalRate(data.rates.TWD); showToast(`✅ 已更新匯率: ${data.rates.TWD}`); } catch (e) { showToast("⚠️ 匯率抓取失敗，請檢查網路"); } finally { if(btn) btn.innerText = originalText; } };
-        window.saveAll = () => { set(publicRef, { tripData: window.tripData, members: window.members, expenses: window.expenses, purchased: window.purchased, hotelData: window.hotelData, checks: window.checks, shoppingList: window.shoppingList, bookings: window.bookings, memo: window.memo, lastUpdated: Date.now() }).then(() => showToast()); };
-        window.savePrivate = () => { localStorage.setItem('fukuoka_private_v3_exp', JSON.stringify(window.privateExpenses)); localStorage.setItem('fukuoka_private_v3_budget', window.privateBudget); renderPrivate(); };
-        window.refreshUI = function() { renderItinerary(window.currentDay); renderMoney(); renderPrivate(); renderCheck(); renderBookings(); updateChart(); };
-        window.scrollWeather = (offset) => { document.getElementById('weather-scroll').scrollLeft += offset; };
-        
-        window.filterExpenses = (keyword) => {
-            window.expenseFilter = keyword.toLowerCase();
-            window.renderMoney();
-            window.renderPrivate();
-        };
-
-        window.renderBookings = () => {
-            const list = document.getElementById('booking-list');
-            if (!list) return;
-            if (window.bookings.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:#ccc; font-size:0.8rem; padding:10px;">尚無預訂資料</div>`;
-                return;
-            }
-            list.innerHTML = window.bookings.map((b, i) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #eee;">
-                    <div style="flex:1;">
-                        <div style="font-weight:bold; font-size:0.95rem;">${b.t}</div>
-                        <div style="font-family:monospace; color:#555; background:#eee; display:inline-block; padding:2px 6px; border-radius:4px; font-size:0.9rem;" onclick="copyText('${b.c}')">${b.c} 📋</div>
-                    </div>
-                    <span class="delete-btn" onclick="deleteBooking(${i})">×</span>
-                </div>
-            `).join('');
-        };
-        window.addBooking = () => {
-            const t = document.getElementById('booking-title').value;
-            const c = document.getElementById('booking-code').value;
-            if (!t || !c) return;
-            window.bookings.push({t, c});
-            saveAll();
-            document.getElementById('booking-title').value = "";
-            document.getElementById('booking-code').value = "";
-        };
-        window.deleteBooking = (i) => { if(confirm("刪除此預訂資料？")) { window.bookings.splice(i, 1); saveAll(); } };
-
-        window.getGeoWeather = function() {
-            document.getElementById('weather-location-text').innerText = "定位中...";
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => { fetchWeather(position.coords.latitude, position.coords.longitude, true); },
-                    (error) => { console.warn(error); fetchWeather(33.5902, 130.4017, false); showToast("⚠️ 定位失敗，顯示福岡"); },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-            } else { fetchWeather(33.5902, 130.4017, false); }
-        };
-
-        async function fetchWeather(lat, lon, isGPS) {
-            let locationName = "福岡";
-            try {
-                if (isGPS) {
-                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh`);
-                    const geoData = await geoRes.json();
-                    locationName = geoData.locality || geoData.city || geoData.principalSubdivision || "目前位置";
-                }
-            } catch(e) {}
-            document.getElementById('weather-location-text').innerText = `📍 ${locationName}`;
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (!data.daily) throw new Error("No data");
-                let html = `<div style="display:flex; gap:10px;">`;
-                const WMO_CODE_MAP = { 0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️", 51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "☔", 63: "☔", 65: "☔", 80: "🌦️", 81: "🌦️", 82: "⛈️", 95: "⛈️", 96: "⛈️", 99: "⛈️" };
-                for(let i=0; i<7; i++) {
-                    const dateStr = data.daily.time[i]; const dateObj = new Date(dateStr); const dayDisplay = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
-                    const icon = WMO_CODE_MAP[data.daily.weathercode[i]] || "🌥️";
-                    const min = Math.round(data.daily.temperature_2m_min[i]); const max = Math.round(data.daily.temperature_2m_max[i]); const rain = data.daily.precipitation_probability_max[i];
-                    html += `<div class="weather-card"><div style="font-weight:bold; color:var(--wood-dark);">${dayDisplay}</div><div style="font-size:1.8rem; margin:2px 0;">${icon}</div><div style="font-size:0.85rem; color:#555;">${min}°-${max}°</div><div style="font-size:0.75rem; color:#4285F4; font-weight:bold;">☔ ${rain}%</div></div>`;
-                }
-                html += `</div>`;
-                document.getElementById('weather-scroll').innerHTML = html;
-            } catch(e) { document.getElementById('weather-scroll').innerHTML = "載入失敗"; }
-        }
-
-        window.renderItinerary = function(day) {
-            window.currentDay = day; localStorage.setItem('lastDay', day);
-            const tabs = document.getElementById('day-tabs'); tabs.innerHTML = "";
-            for(let i=1; i<=7; i++) tabs.innerHTML += `<button class="btn-sm" style="margin-right:5px; padding:8px 15px; ${i===day?'background:var(--wood-dark);color:white;':''}" onclick="renderItinerary(${i})">D${i}</button>`;
-            const list = document.getElementById('itinerary-list');
-            if(sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
-            list.innerHTML = "";
-            let items = window.tripData[day] || [];
-            if(items.length === 0) { list.innerHTML = `<div style="text-align:center; color:#ccc; padding:30px;">📭 無行程</div>`; return; }
-            const hotel = window.hotelData[0] || { name: "", addr: "" };
-            items.forEach((item, idx) => {
-                if(!item.mode) item.mode = 'transit';
-                const dest = (item.map === 'HOTEL_REF') ? hotel.addr : item.map;
-                let displayTitle = (item.map === 'HOTEL_REF' && hotel.name) ? item.title.replace(/飯店/g, hotel.name) : item.title;
-                let originAddr = "My+Location"; if (idx > 0) { const prev = items[idx-1]; originAddr = (prev.map==='HOTEL_REF') ? hotel.addr : prev.map; }
-                let iconClass = item.mode==='driving'?'driving':(item.mode==='flying'?'flying':'transit');
-                let iconChar = item.mode==='driving'?'🚗':(item.mode==='flying'?'✈️':'🚌');
-                const navUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originAddr)}&destination=${encodeURIComponent(dest)}&travelmode=${item.mode==='driving'?'driving':'transit'}`;
-                let timeInfo = (item.travel||item.stay) ? `<div class="time-info">${item.travel?`<span>🚀 ${item.travel}</span>`:''}${item.stay?`<span>⏳ ${item.stay}</span>`:''}</div>` : '';
-                const div = document.createElement('div'); div.className = `itinerary-card ${iconClass}`; div.setAttribute('data-id', idx);
-                div.onclick = (e) => { if(!['A','SPAN'].includes(e.target.tagName)) window.openExpenseModal(item.title); };
-                div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center;"><span class="drag-handle">☰</span><span class="mode-toggle ${iconClass}" onclick="toggleTransportMode(${day}, ${idx})">${iconChar}</span><span class="time-edit-btn" onclick="openTimeEditModal(${day}, ${idx})">${item.t}</span></div><span class="delete-btn" onclick="deleteItem(${idx})">×</span></div><div class="itinerary-title">${displayTitle}</div><div class="itinerary-content">${timeInfo}<div class="action-row"><a href="${navUrl}" target="_blank" class="map-btn ${iconClass}">導航</a><span class="copy-btn" onclick="copyAddr('${dest}')">📋 複製地址</span></div></div>`;
-                list.appendChild(div);
-            });
-            sortableInstance = new Sortable(list, { handle: '.drag-handle', animation: 150, onEnd: function (evt) { const moved = items.splice(evt.oldIndex, 1)[0]; items.splice(evt.newIndex, 0, moved); window.tripData[day] = items; saveAll(); refreshUI(); }});
-        };
-
-        window.toggleTransportMode = (day, idx) => { const item = window.tripData[day][idx]; item.mode = (item.mode==='transit')?'driving':(item.mode==='driving'?'flying':'transit'); saveAll(); renderItinerary(day); };
-        window.addItemUI = () => { const t = document.getElementById('new-t').value; const title = document.getElementById('new-title').value; if(!title) return; if(!window.tripData[window.currentDay]) window.tripData[window.currentDay]=[]; window.tripData[window.currentDay].push({ t, title, map: title.includes("飯店") ? "HOTEL_REF" : title, mode: 'transit', travel: document.getElementById('new-travel').value, stay: document.getElementById('new-stay').value }); saveAll(); document.getElementById('new-title').value=""; };
-        window.deleteItem = (idx) => { if(confirm("刪除？")) { window.tripData[window.currentDay].splice(idx, 1); saveAll(); } };
-        window.copyItineraryText = () => { let items = window.tripData[window.currentDay]||[]; let txt = `📅 Day ${window.currentDay}\n`; items.forEach(i=>txt+=`${i.t} ${i.title}\n`); navigator.clipboard.writeText(txt).then(()=>showToast("📋 已複製")); };
-        window.openDayMap = () => { let items = window.tripData[window.currentDay]||[]; if(!items.length) return; const h = window.hotelData[0]; let o = items[0].map==='HOTEL_REF'?h.addr:items[0].map; let d = items[items.length-1].map==='HOTEL_REF'?h.addr:items[items.length-1].map; window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(o)}&destination=${encodeURIComponent(d)}`, '_blank'); };
-        window.checkGoogleTime = () => { const dest = document.getElementById('new-title').value; if(!dest) return; let items = window.tripData[window.currentDay] || []; let origin = "My+Location"; if(items.length > 0) { let prev = items[items.length - 1]; const hotel = window.hotelData[0] || {name:"",addr:""}; origin = (prev.map === 'HOTEL_REF') ? hotel.addr : prev.map; } window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=transit`, '_blank'); };
-        window.openTimeEditModal = (day, idx) => { currentEditingDay = day; currentEditingIndex = idx; document.getElementById('edit-time-input').value = window.tripData[day][idx].t; document.getElementById('time-edit-modal').style.display = 'flex'; };
-        window.closeTimeEditModal = () => { document.getElementById('time-edit-modal').style.display = 'none'; };
-        window.saveNewTime = () => { const newTime = document.getElementById('edit-time-input').value; if (newTime) { window.tripData[currentEditingDay][currentEditingIndex].t = newTime; window.tripData[currentEditingDay].sort((a, b) => a.t.localeCompare(b.t)); saveAll(); refreshUI(); closeTimeEditModal(); } };
-        window.openExpenseModal = (name, type) => { selectedSpot = name; document.getElementById('expense-spot-name').innerText = name; document.getElementById('expense-date').value = new Date().toISOString().split('T')[0]; if(type) document.querySelector(`input[name="exp-type"][value="${type}"]`).checked = true; document.getElementById('expense-modal').style.display = 'flex'; };
-        window.closeExpenseModal = () => document.getElementById('expense-modal').style.display = 'none';
-        window.updateExpensePreview = (val) => { let twd = (document.getElementById('expense-currency').value === 'JPY') ? Math.round(val * window.currentRate) : Math.round(val); document.getElementById('expense-twd-preview').innerText = twd.toLocaleString(); };
-        window.saveSpotExpense = () => { const n = document.getElementById('expense-item').value; const v = document.getElementById('expense-amount').value; if(!n || !v) { alert("請輸入"); return; } const type = document.querySelector('input[name="exp-type"]:checked').value; const rec = { d: document.getElementById('expense-date').value, n: `[${selectedSpot||''}] ${n}`, v: v, c: document.getElementById('expense-currency').value, cat: document.getElementById('expense-cat').value }; if(type==='private') { window.privateExpenses.push(rec); savePrivate(); } else if(type==='public') { window.expenses.push({d:rec.d, n:rec.n, v:v, cat:rec.cat}); saveAll(); } else { window.purchased.push(rec); saveAll(); } closeExpenseModal(); };
-        window.addPurchasedManual = () => { window.purchased.push({d: new Date().toISOString().split('T')[0], n: "品項", v: 0, c: "JPY", cat: "🛍️"}); saveAll(); };
-        window.addShoppingItem = () => { window.shoppingList.push({ n: "想買的東西", c: false }); saveAll(); };
-        window.copyAddr = (addr) => { navigator.clipboard.writeText(addr).then(() => showToast("📋 已複製")); };
-        window.updatePrivateBudget = (val) => { window.privateBudget = Number(val); savePrivate(); };
-        window.updateMemo = (val) => { window.memo = val; saveAll(); };
-        window.addMember = () => { window.members.push({n: "", v: 0}); saveAll(); };
-        window.addExpense = () => { window.expenses.push({d: new Date().toISOString().split('T')[0], n: "", v: 0, cat: "📦"}); saveAll(); };
-        window.addPrivateExpense = () => { window.privateExpenses.push({d: new Date().toISOString().split('T')[0], n: "項目", v: 0, cat: "📦"}); savePrivate(); };
-        window.updateHotel = () => { window.hotelData = [{name: document.getElementById('h-name').value, addr: document.getElementById('h-addr').value}]; saveAll(); };
-        window.addCheck = () => { window.checks.push({n: "新項目", c: false}); saveAll(); };
-        
-        window.switchSection = (id, el) => { document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(id + '-sec').classList.add('active'); document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); if(el) el.classList.add('active'); localStorage.setItem('lastTab', id); refreshUI(); };
-        window.closeBackupModal = () => document.getElementById('backup-modal').style.display='none';
-        window.lockPrivate = () => { document.getElementById('tab-private').style.display='none'; document.querySelector('.nav-tab').click(); };
-        window.backupData = () => { const data={tripData:window.tripData, members:window.members, expenses:window.expenses, purchased:window.purchased, hotelData:window.hotelData, checks:window.checks, shoppingList:window.shoppingList, bookings:window.bookings, memo:window.memo, privateExpenses: window.privateExpenses, privateBudget: window.privateBudget}; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"})); a.download=`backup.json`; a.click(); };
-        window.restoreData = (input) => { const f=input.files[0]; if(f) { const r=new FileReader(); r.onload=(e)=>{ set(publicRef, JSON.parse(e.target.result)).then(()=>location.reload()); }; r.readAsText(f); } };
-
-        window.renderCheck = () => { document.getElementById('checklist-area').innerHTML = window.checks.map((c, i) => `<div class="check-item ${c.c?'checked':''}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="checks[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="checks[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="checks.splice(${i},1);saveAll()">×</span></div>`).join(''); document.getElementById('shopping-list-area').innerHTML = window.shoppingList.map((c, i) => `<div class="check-item ${c.c?'checked shopping':'shopping'}"><input type="checkbox" class="checkbox-lg" ${c.c?'checked':''} onchange="shoppingList[${i}].c=this.checked;saveAll()"><input type="text" value="${c.n}" onchange="shoppingList[${i}].n=this.value;saveAll()"><span class="delete-btn" onclick="shoppingList.splice(${i},1);saveAll()">×</span></div>`).join(''); };
-        window.renderMoney = () => { 
-            const list = document.getElementById('expense-list');
-            const filter = window.expenseFilter;
-            const filteredExpenses = window.expenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
-            
-            list.innerHTML = filteredExpenses.map((e, i) => `
-                <div class="expense-row">
-                    <span class="cat-badge">${e.cat||'📦'}</span>
-                    <input type="date" value="${e.d||''}" style="width:90px; font-size:0.8rem;" onchange="expenses[${i}].d=this.value;saveAll()">
-                    <input class="ex-name" value="${e.n}" style="flex:1; min-width:0;" onchange="expenses[${i}].n=this.value;saveAll()">
-                    <input type="number" class="ex-amount" style="width:60px;" value="${e.v}" inputmode="decimal" onchange="expenses[${i}].v=this.value;saveAll()">
-                    <span class="delete-btn" onclick="expenses.splice(${i},1);saveAll()">×</span>
-                </div>
-            `).join(''); 
-            
-            document.getElementById('member-list').innerHTML = window.members.map((m, i) => `<div class="expense-row"><input class="input-wood" style="flex:2;" value="${m.n}" onchange="members[${i}].n=this.value;saveAll()"><input type="number" class="input-wood" style="flex:1;" value="${m.v}" inputmode="decimal" onchange="members[${i}].v=this.value;saveAll()"><span class="delete-btn" onclick="members.splice(${i},1);saveAll()">×</span></div>`).join(''); 
-            
-            const filteredPurchased = window.purchased.filter(p => !filter || (p.n && p.n.toLowerCase().includes(filter)));
-            document.getElementById('purchased-list').innerHTML = filteredPurchased.map((p, i) => `
-                <div class="expense-card-item" style="border-left:4px solid #78909C; padding:8px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#999; margin-bottom:4px;">
-                        <span>${p.d||''}</span>
-                        <span class="cat-badge" style="font-size:1rem;">${p.cat||'🛍️'}</span>
-                    </div>
-                    <div style="display:flex; gap:5px; align-items:center;">
-                        <input class="ex-input-clean ex-name" value="${p.n}" style="flex:1; padding:6px;" onchange="purchased[${i}].n=this.value;saveAll()">
-                        <select class="ex-currency-sm" style="width:40px; border:none; background:#eee; border-radius:4px;" onchange="purchased[${i}].c=this.value;saveAll()">
-                            <option value="JPY" ${p.c!=='TWD'?'selected':''}>¥</option>
-                            <option value="TWD" ${p.c==='TWD'?'selected':''}>$</option>
-                        </select>
-                        <input type="number" class="ex-input-clean ex-amount" value="${p.v}" style="width:60px; padding:6px; text-align:right;" inputmode="decimal" onchange="purchased[${i}].v=this.value;saveAll()">
-                        <span class="delete-btn" style="font-size:1.2rem;" onclick="purchased.splice(${i},1);saveAll()">×</span>
-                    </div>
-                </div>
-            `).join('');
-
-            let totalJpy=0, totalTwd=0; 
-            window.purchased.forEach(p => { if(p.c === 'TWD') totalTwd += Number(p.v); else totalJpy += Number(p.v); });
-            document.getElementById('purchased-total-jpy').innerText = totalJpy.toLocaleString(); document.getElementById('purchased-total-twd').innerText = totalTwd.toLocaleString(); 
-            let bal = window.members.reduce((a,c)=>a+Number(c.v),0) - window.expenses.reduce((a,c)=>a+Number(c.v),0); 
-            document.getElementById('balance-val').innerText = bal.toLocaleString(); document.getElementById('balance-val-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); 
-        };
-        
-        window.renderPrivate = () => { 
-            const filter = window.expenseFilter;
-            const filteredPrivate = window.privateExpenses.filter(e => !filter || (e.n && e.n.toLowerCase().includes(filter)));
-            document.getElementById('private-expense-list').innerHTML = filteredPrivate.map((e, i) => `
-                <div class="expense-card-item" style="border-left:4px solid var(--private-gold); padding:8px;">
-                    <div class="expense-date-row">
-                        <input type="date" class="expense-date-input" value="${e.d||''}" onchange="privateExpenses[${i}].d=this.value;savePrivate()">
-                    </div>
-                    <div class="expense-main-row">
-                        <span class="ex-cat">${e.cat||'📦'}</span>
-                        <input class="ex-input-clean ex-name" value="${e.n}" onchange="privateExpenses[${i}].n=this.value;savePrivate()">
-                        <input type="number" class="ex-input-clean ex-amount" value="${e.v}" inputmode="decimal" onchange="privateExpenses[${i}].v=this.value;savePrivate()">
-                        <span class="delete-btn" onclick="privateExpenses.splice(${i},1);savePrivate()">×</span>
-                    </div>
-                </div>
-            `).join(''); 
-            
-            let total = window.privateExpenses.reduce((a, c) => a + Number(c.v), 0); 
-            document.getElementById('private-total').innerText = total.toLocaleString(); document.getElementById('private-total-twd').innerText = Math.round(total * window.currentRate).toLocaleString(); let bal = window.privateBudget - total; document.getElementById('private-balance').innerText = `¥ ${bal.toLocaleString()}`; document.getElementById('private-balance-twd').innerText = Math.round(bal * window.currentRate).toLocaleString(); document.getElementById('budget-percent').innerText = window.privateBudget > 0 ? Math.round(total / window.privateBudget * 100) + '%' : '0%'; 
-        };
-        
-        window.toggleChartType = () => { window.chartMode = (window.chartMode === 'account') ? 'category' : 'account'; updateChart(); };
-
-        window.updateChart = () => {
-            const ctx = document.getElementById('expenseChart');
-            if(!ctx) return;
-            let data = [], labels = [], bgColors = [];
-            if (window.chartMode === 'category') {
-                const cats = {};
-                const allExp = [...window.expenses, ...window.purchased]; 
-                allExp.forEach(e => {
-                    const c = e.cat || '📦';
-                    const val = (e.c === 'TWD') ? Number(e.v)/window.currentRate : Number(e.v);
-                    cats[c] = (cats[c] || 0) + val;
-                });
-                labels = Object.keys(cats); data = Object.values(cats); bgColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
-            } else {
-                let pub = window.expenses.reduce((a, c) => a + Number(c.v), 0);
-                let shop = 0; window.purchased.forEach(p => shop += (p.c === 'TWD' ? Number(p.v)/window.currentRate : Number(p.v)));
-                labels = ['公款', '購物']; data = [pub, shop]; bgColors = ['#8D9977', '#78909C'];
-            }
-            if(window.myExpenseChart) window.myExpenseChart.destroy();
-            window.myExpenseChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
-        };
-
-        window.exportToExcel = () => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.expenses), "公款"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.purchased), "已購"); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.privateExpenses), "私帳"); XLSX.writeFile(wb, "福岡行旅.xlsx"); };
-    };
-    
-    // 初始化執行 (延遲 100ms 確保 DOM 就緒)
-    setTimeout(window.initApp, 100);
-</script>
-</body>
-</html>
+                <select id
