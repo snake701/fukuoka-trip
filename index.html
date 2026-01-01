@@ -12,10 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="福岡行旅">
     
-    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=63.1">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=63.1">
+    <link rel="icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=64.0">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/snake701/fukuoka-trip/b3d6b612b66d9679c335b0ee4640ecf404310718/icon-512.png?v=64.0">
     
-    <title>福岡行旅 2026 (v63.1)</title>
+    <title>福岡行旅 2026 (v64.0)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const CURRENT_VERSION = 'v63.1'; 
+        const CURRENT_VERSION = 'v64.0'; 
         const GITHUB_SOURCE_URL = "https://raw.githubusercontent.com/snake701/fukuoka-trip/main/index.html";
         const TRIP_START_DATE = "2026-10-03";
         const CHECK_INTERVAL_MS = 10 * 60 * 1000;
@@ -195,8 +195,25 @@
             }
         }
 
+        // 啟動 Splash 移除計時器 (保險絲)
+        function removeSplash() {
+             const splash = document.getElementById('splash-screen');
+             if(splash) { 
+                 splash.style.opacity = '0'; 
+                 setTimeout(() => { splash.style.visibility = 'hidden'; }, 500); 
+             }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
-            if(window.initApp) window.initApp();
+            try {
+                if(window.initApp) window.initApp();
+            } catch(e) {
+                console.error("Init Error:", e);
+                // 發生錯誤也要移除 Splash，不然會卡死
+                removeSplash();
+                alert("系統初始化失敗，請檢查網路連線。");
+            }
+            
             loadDarkMode();
             updateCountdown();
             
@@ -223,6 +240,9 @@
                     toast.className = "show";
                     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
                 }
+                
+                // 強制在 8 秒後移除 Splash (如果 initApp 沒成功)
+                setTimeout(removeSplash, 8000);
             }, 1000);
         });
     </script>
@@ -257,6 +277,16 @@
         body { display: flex; flex-direction: column; }
 
         input, select, textarea { font-size: 16px !important; }
+
+        /* Splash Screen (恢復) */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #fdfbf7 0%, #f3e7e9 100%); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        body.dark-mode #splash-screen { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); }
+        .plane-icon { font-size: 4rem; animation: flyIn 1s ease-out forwards; }
+        .splash-title { margin-top: 15px; font-family: 'Noto Serif TC', serif; font-size: 1.8rem; letter-spacing: 2px; color: #5D4037; animation: fadeIn 1.5s ease-out; font-weight: bold; }
+        .spinner { margin-top: 20px; width: 30px; height: 30px; border: 3px solid rgba(93, 64, 55, 0.2); border-radius: 50%; border-top-color: var(--wood-dark); animation: spin 1s ease-in-out infinite; }
+        @keyframes flyIn { 0% { transform: translate(-30px, 20px) rotate(-10deg); opacity: 0; } 100% { transform: translate(0, 0) rotate(0deg); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 深色模式懸浮按鈕 */
         #dark-mode-float-btn {
@@ -393,54 +423,6 @@
         .itinerary-title { font-size: 1.1rem; font-weight: bold; margin: 10px 0 5px 38px; line-height: 1.4; word-break: break-word; }
         .itinerary-content { margin-left: 38px; }
 
-        .tool-label { font-size: 0.9rem; color: #555; font-weight: bold; margin: 12px 0 6px; display: block; }
-        body.dark-mode .tool-label { color: #aaa; }
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .link-btn { background: white; border: 1px solid #ddd; padding: 16px; text-align: center; border-radius: 10px; text-decoration: none; color: var(--wood-dark); font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.03); }
-        body.dark-mode .link-btn { background: #333; border-color: #444; color: #ddd; }
-        .link-btn.emergency { background: #ffebee; border-color: #ef9a9a; color: #c62828; }
-        body.dark-mode .link-btn.emergency { background: #5a2a2a; border-color: #7f3e3e; color: #ff9999; }
-        .footer-info { text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 50px; padding-bottom: 30px; }
-        .ex-tool { border: 2px solid var(--accent-blue) !important; background: #f0f4f7 !important; padding: 20px !important; }
-        body.dark-mode .ex-tool { background: #2c3e50 !important; border-color: #4a6fa5 !important; }
-        .chart-container { position: relative; height: 240px; width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
-
-        /* Weather Styles */
-        .weather-container-wrapper { position: relative; max-width: 800px; margin: 0 auto; padding: 0 35px; }
-        .weather-scroll-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(93, 64, 55, 0.9); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; z-index: 10; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
-        .weather-btn-left { left: 0; } .weather-btn-right { right: 0; }
-        #weather-title { font-weight: bold; color: var(--wood-dark); margin-bottom: 5px; font-size: 0.9rem; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        #refresh-geo-btn { background: #fff; border: 1px solid #ccc; border-radius: 20px; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        body.dark-mode #refresh-geo-btn { background: #444; border-color: #666; color: #ccc; }
-        #weather-scroll { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scrollbar-width: none; }
-        .weather-card { min-width: 90px; background: rgba(255,255,255,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.8rem; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .weather-card img { width: 50px; height: 50px; margin: 0 auto; display: block; }
-        
-        .station-tags { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; -webkit-overflow-scrolling: touch; }
-        .station-tag { 
-            background: #fff; padding: 6px 12px; border-radius: 20px; 
-            font-size: 0.85rem; cursor: pointer; white-space: nowrap; 
-            color: #555; border: 1px solid #ddd; transition: all 0.2s;
-        }
-        body.dark-mode .station-tag { background: #444; color: #ccc; border-color: #555; }
-        .station-tag:active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-        
-        .transport-input { transition: all 0.3s; border: 1px solid #ccc; }
-        .active-field { 
-            border: 2px solid var(--wood-dark) !important; 
-            background-color: #fffde7 !important; 
-            box-shadow: 0 0 5px rgba(93, 64, 55, 0.2);
-        }
-        body.dark-mode .active-field { background-color: #4a4a3a !important; border-color: #e6c15c !important; }
-
-        .tax-result-box { margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px; border:1px solid #eee; text-align:center; }
-        
-        /* Accordion Style */
-        details summary { cursor: pointer; outline: none; font-weight: bold; color: var(--wood-dark); padding: 5px; list-style: none; }
-        details summary::-webkit-details-marker { display: none; }
-        details[open] summary { margin-bottom: 10px; }
-        body.dark-mode details summary { color: #ddd; }
-
         .search-bar-container { margin-bottom: 10px; display: flex; align-items: center; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
         body.dark-mode .search-bar-container { background: #444; border-color: #555; }
         .search-input-wide { border: none; background: transparent; width: 100%; font-size: 0.95rem; outline: none; }
@@ -451,7 +433,11 @@
 
 <button id="dark-mode-float-btn" onclick="toggleDarkMode()">🌙</button>
 
-<div id="splash-screen"></div>
+<div id="splash-screen">
+    <div class="plane-icon">✈️</div>
+    <div class="splash-title">福岡行旅 2026</div>
+    <div class="spinner"></div>
+</div>
 
 <div id="update-modal">
     <div class="update-content">
@@ -859,16 +845,20 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     window.initApp = function() {
-        console.log("🚀 福岡行旅 App - Version 63.0 Started");
+        console.log("🚀 福岡行旅 App - Version 64.0 Started");
         
         const verDisplay = document.getElementById('disp-version');
         if(verDisplay) verDisplay.innerText = CURRENT_VERSION;
         
         // 移除 Splash
-        const splash = document.getElementById('splash-screen');
-        if(splash) splash.style.display = 'none';
+        const removeSplash = () => {
+             const splash = document.getElementById('splash-screen');
+             if(splash) { 
+                 splash.style.opacity = '0'; 
+                 setTimeout(() => { splash.style.visibility = 'hidden'; }, 500); 
+             }
+        };
 
-        // 檢查更新
         setTimeout(checkAppUpdate, 1000);
         setInterval(scheduleSmartCheck, 60000); 
 
@@ -894,7 +884,7 @@
             app = initializeApp(firebaseConfig);
             db = getDatabase(app);
             publicRef = ref(db, 'fukuoka_trip_final_v17/public');
-        } catch(e) { console.error("Firebase init failed", e); }
+        } catch(e) { console.error("Firebase init failed", e); alert("連線錯誤: " + e.message); removeSplash(); }
 
         window.currentDay = parseInt(localStorage.getItem('lastDay')) || 1;
         window.tripData = {}; window.members = []; window.expenses = []; 
@@ -955,9 +945,14 @@
                     
                     refreshUI();
                     window.getGeoWeather();
+                    removeSplash(); // 成功載入後移除
                 } else { 
                     window.forceResetAction();
                 }
+            }, (error) => {
+                console.error(error);
+                removeSplash(); // 讀取失敗也要移除
+                alert("無法讀取資料庫，請檢查網路。");
             });
         }
 
